@@ -1,0 +1,400 @@
+/**
+ * Supabase 資料庫型別（手寫，對應 supabase/migrations/0001_init.sql）。
+ * 形狀符合 @supabase/supabase-js 的 Database 泛型，讓 client.from() 得到型別安全查詢。
+ * enum 從 shared/types 複用，避免重複定義（DRY）。
+ *
+ * schema 變更時，這裡與 0001_init.sql 必須同步更新。
+ */
+import type {
+  CaseCategory,
+  QuoteStatus,
+  RevisionChannel,
+  SessionStatus,
+} from "@/shared/types/domain.types";
+
+/** JSONB 欄位型別 */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export type Database = {
+  public: {
+    Tables: {
+      sessions: {
+        Row: {
+          id: string;
+          category: CaseCategory;
+          contact_email: string | null;
+          status: SessionStatus;
+          current_step: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          category: CaseCategory;
+          contact_email?: string | null;
+          status?: SessionStatus;
+          current_step?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          category?: CaseCategory;
+          contact_email?: string | null;
+          status?: SessionStatus;
+          current_step?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      raw_inputs: {
+        Row: {
+          id: string;
+          session_id: string;
+          raw_text: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          raw_text: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          raw_text?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      extracted_fields: {
+        Row: {
+          id: string;
+          session_id: string;
+          field_name: string;
+          value: string | null;
+          confidence: number | null;
+          source_span: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          field_name: string;
+          value?: string | null;
+          confidence?: number | null;
+          source_span?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          field_name?: string;
+          value?: string | null;
+          confidence?: number | null;
+          source_span?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      clarification_turns: {
+        Row: {
+          id: string;
+          session_id: string;
+          round: number;
+          question: string;
+          answer: string | null;
+          triggered_field: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          round: number;
+          question: string;
+          answer?: string | null;
+          triggered_field: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          round?: number;
+          question?: string;
+          answer?: string | null;
+          triggered_field?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      rate_card_base: {
+        Row: {
+          id: string;
+          category: CaseCategory;
+          subtype: string;
+          unit: string;
+          base_price: number | null;
+        };
+        Insert: {
+          id?: string;
+          category: CaseCategory;
+          subtype: string;
+          unit: string;
+          base_price?: number | null;
+        };
+        Update: {
+          id?: string;
+          category?: CaseCategory;
+          subtype?: string;
+          unit?: string;
+          base_price?: number | null;
+        };
+        Relationships: [];
+      };
+      rate_card_modifiers: {
+        Row: {
+          id: string;
+          category: CaseCategory | null;
+          modifier_name: string;
+          trigger_condition: string;
+          range_min: number | null;
+          range_max: number | null;
+        };
+        Insert: {
+          id?: string;
+          category?: CaseCategory | null;
+          modifier_name: string;
+          trigger_condition: string;
+          range_min?: number | null;
+          range_max?: number | null;
+        };
+        Update: {
+          id?: string;
+          category?: CaseCategory | null;
+          modifier_name?: string;
+          trigger_condition?: string;
+          range_min?: number | null;
+          range_max?: number | null;
+        };
+        Relationships: [];
+      };
+      price_line_items: {
+        Row: {
+          id: string;
+          session_id: string;
+          item_name: string;
+          amount: number;
+          rule_id: string | null;
+          modifier_id: string | null;
+          agent_reasoning: string | null;
+          confidence: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          item_name: string;
+          amount: number;
+          rule_id?: string | null;
+          modifier_id?: string | null;
+          agent_reasoning?: string | null;
+          confidence?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          item_name?: string;
+          amount?: number;
+          rule_id?: string | null;
+          modifier_id?: string | null;
+          agent_reasoning?: string | null;
+          confidence?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      quotes: {
+        Row: {
+          id: string;
+          session_id: string;
+          quote_code: string;
+          final_amount: number | null;
+          status: QuoteStatus;
+          pdf_url: string | null;
+          created_at: string;
+          sent_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          quote_code: string;
+          final_amount?: number | null;
+          status?: QuoteStatus;
+          pdf_url?: string | null;
+          created_at?: string;
+          sent_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          quote_code?: string;
+          final_amount?: number | null;
+          status?: QuoteStatus;
+          pdf_url?: string | null;
+          created_at?: string;
+          sent_at?: string | null;
+        };
+        Relationships: [];
+      };
+      revision_turns: {
+        Row: {
+          id: string;
+          session_id: string;
+          round: number;
+          channel: RevisionChannel;
+          raw_message: string | null;
+          parsed_action: Json | null;
+          applied_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          round: number;
+          channel: RevisionChannel;
+          raw_message?: string | null;
+          parsed_action?: Json | null;
+          applied_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          round?: number;
+          channel?: RevisionChannel;
+          raw_message?: string | null;
+          parsed_action?: Json | null;
+          applied_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      line_binding: {
+        Row: {
+          id: string;
+          freelancer_line_user_id: string;
+          active_session_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          freelancer_line_user_id: string;
+          active_session_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          freelancer_line_user_id?: string;
+          active_session_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      eval_runs: {
+        Row: {
+          id: string;
+          run_id: string;
+          dataset_version: string;
+          metric_name: string;
+          value: number | null;
+          model_version: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          run_id: string;
+          dataset_version: string;
+          metric_name: string;
+          value?: number | null;
+          model_version?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          run_id?: string;
+          dataset_version?: string;
+          metric_name?: string;
+          value?: number | null;
+          model_version?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      cost_logs: {
+        Row: {
+          id: string;
+          session_id: string | null;
+          agent_name: string;
+          model: string;
+          input_tokens: number;
+          output_tokens: number;
+          cost_usd: number;
+          latency_ms: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id?: string | null;
+          agent_name: string;
+          model: string;
+          input_tokens: number;
+          output_tokens: number;
+          cost_usd: number;
+          latency_ms?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string | null;
+          agent_name?: string;
+          model?: string;
+          input_tokens?: number;
+          output_tokens?: number;
+          cost_usd?: number;
+          latency_ms?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Record<never, never>;
+    Functions: Record<never, never>;
+    Enums: {
+      case_category: CaseCategory;
+      session_status: SessionStatus;
+      quote_status: QuoteStatus;
+      revision_channel: RevisionChannel;
+    };
+    CompositeTypes: Record<never, never>;
+  };
+};
+
+/** 便捷別名：取某張表的 Row / Insert / Update 型別 */
+export type Tables<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Row"];
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Insert"];
+export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Update"];
