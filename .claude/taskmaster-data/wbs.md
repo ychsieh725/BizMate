@@ -1,7 +1,7 @@
 # WBS - BizMate
 
 **建立日期:** 2026-07-04
-**最後更新:** 2026-07-04
+**最後更新:** 2026-07-04（2.1 完成）
 **開發模式:** MVP 分階段（P0 → P1 → P2 → P3）
 **專案描述:** 自動化報價系統。客戶透過 Web Wizard 以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，經接案者透過 LINE Bot 人工終審後，以 Email 寄送最終報價單。
 **技術棧:** Next.js + Vercel Serverless / Supabase(Postgres) / Gemini API / LINE Messaging API / Gmail SMTP
@@ -17,7 +17,7 @@
 | 1.1 | 專案初始化（git + 目錄結構） | ✅ 完成 | 高 | - | 0.5h | 自動完成 |
 | 1.2 | 需求分析（PRD/SRS/SAD/SDS 消化） | ✅ 完成 | 高 | - | 1h | 自動完成 |
 | **2. 基礎設施（P0 前置）** | | | | | | |
-| 2.1 | Next.js 專案骨架 + TypeScript + Tailwind + 目錄結構 | ⏳ 待處理 | 高 | 1.2 | 2h | SDS §2；多小檔案組織 |
+| 2.1 | Next.js 專案骨架 + TypeScript + Tailwind + 目錄結構 | ✅ 完成 | 高 | 1.2 | 2h | Next16/React19/TW4；build·tsc·lint 全綠 |
 | 2.2 | Supabase 專案建立 + schema migration（12 張表 + enum + index） | ⏳ 待處理 | 高 | 2.1 | 3h | SDS §3 全部 DDL |
 | 2.3 | 環境變數管理 + 啟動時驗證（schema-based） | ⏳ 待處理 | 高 | 2.1 | 1h | SDS §15；security.md 秘密管理 |
 | 2.4 | Supabase client 封裝（Repository Pattern） | ⏳ 待處理 | 高 | 2.2 | 2h | patterns.md Repository |
@@ -67,7 +67,7 @@
 
 | 里程碑 | 目標 | 包含任務 | 狀態 |
 |--------|------|----------|------|
-| M0: 基礎設施就緒 | Next.js + Supabase + client 封裝可運行 | 2.1-2.7 | ⏳ 待處理 |
+| M0: 基礎設施就緒 | Next.js + Supabase + client 封裝可運行 | 2.1-2.7 | 🔄 進行中（2.1✅） |
 | M1: P0 Happy Path | 完整走完「選項目→描述→deterministic 報價」 | 3.1-3.7 | ⏳ 待處理 |
 | M2: P1 核心價值 | 多 Agent + bounded autonomy + LINE 終審 + Email 全通 | 4.1-4.11 | ⏳ 待處理 |
 | M3: P2 Eval 可視化 | Golden set + Eval dashboard 可展示 | 5.1-5.3 | ⏳ 待處理 |
