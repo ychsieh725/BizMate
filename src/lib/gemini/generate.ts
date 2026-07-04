@@ -46,12 +46,16 @@ function extractUsage(
  *
  * 失敗（含逾時、malformed 輸出）重試 1 次並指數退避；仍失敗拋 GeminiError。
  */
-export async function generateStructured<T>(params: {
+export type GenerateStructuredParams<T> = {
   tier: ModelTier;
   prompt: string;
   schema: z.ZodType<T>;
   systemInstruction?: string;
-}): Promise<GenerateStructuredResult<T>> {
+};
+
+export async function generateStructured<T>(
+  params: GenerateStructuredParams<T>,
+): Promise<GenerateStructuredResult<T>> {
   const { tier, prompt, schema, systemInstruction } = params;
   const model = MODEL_TIERS[tier];
   const jsonSchema = z.toJSONSchema(schema);

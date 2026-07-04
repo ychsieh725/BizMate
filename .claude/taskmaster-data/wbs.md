@@ -1,7 +1,7 @@
 # WBS - BizMate
 
 **建立日期:** 2026-07-04
-**最後更新:** 2026-07-04（2.1 / 2.2 / 2.3 / 2.4 / 2.5 完成）
+**最後更新:** 2026-07-04（2.1–2.6 完成）
 **開發模式:** MVP 分階段（P0 → P1 → P2 → P3）
 **專案描述:** 自動化報價系統。客戶透過 Web Wizard 以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，經接案者透過 LINE Bot 人工終審後，以 Email 寄送最終報價單。
 **技術棧:** Next.js + Vercel Serverless / Supabase(Postgres) / Gemini API / LINE Messaging API / Gmail SMTP
@@ -22,7 +22,7 @@
 | 2.3 | 環境變數管理 + 啟動時驗證（schema-based） | ✅ 完成 | 高 | 2.1 | 1h | zod fail-fast；空字串→未設定；requireEnv |
 | 2.4 | Supabase client 封裝（Repository Pattern） | ✅ 完成 | 高 | 2.2 | 2h | 泛型 BaseRepository + 手寫 DB 型別；E2E CRUD 驗收 |
 | 2.5 | Gemini client 封裝（structured output + usageMetadata + 重試） | ✅ 完成 | 高 | 2.3 | 3h | @google/genai 2.5系列；zod schema 三用；實測呼叫通過 |
-| 2.6 | Cost Logger（cross-cutting，每次 LLM 呼叫寫 cost_logs） | ⏳ 待處理 | 高 | 2.5 | 1.5h | FR-FO-1、NFR-4 |
+| 2.6 | Cost Logger（cross-cutting，每次 LLM 呼叫寫 cost_logs） | ✅ 完成 | 高 | 2.5 | 1.5h | MODEL_PRICING + generateStructuredAndLog；實測寫入正確 |
 | 2.7 | Rate card 種子資料（demo 示意數字，避免報價空白） | ⏳ 待處理 | 中 | 2.2 | 1h | SAD R-5；附錄 A |
 | **3. P0：Happy Path（Wizard + Parser + deterministic 報價）** | | | | | | |
 | 3.1 | Orchestrator 狀態機（9 狀態 + 轉移表） | ⏳ 待處理 | 高 | 2.4 | 3h | SDS §4；ADR-1 |
