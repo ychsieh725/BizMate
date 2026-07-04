@@ -1,7 +1,7 @@
 # BizMate — Supabase 連接指南與踩坑紀錄
 
 **日期**：2026-07-04
-**對應任務**：WBS 2.2（schema migration）、2.3（環境變數驗證）
+**對應任務**：WBS 2.2（schema migration）、2.3（環境變數驗證）、2.4（Repository 層）
 **適用**：Next.js 16 + pnpm 11 + Node 24 + Supabase（Postgres）
 **目的**：記錄 BizMate 連接 Supabase 的完整流程，以及實作中實際遇到的問題與解法，供日後重建環境或他人參考。
 
@@ -117,9 +117,47 @@ pnpm db:verify
 - **現象**：目錄名 `BizMate` 含大寫，`create-next-app` 因 npm 命名限制中止。
 - **解法**：在暫存目錄用小寫名 `bizmate` 建立，再把產物搬進專案根，`package.json` 的 `name` 維持小寫。
 
+### 坑 7：supabase-js 泛型表名下型別無法 narrow（Repository 實作時遇到）
+- **現象**：想寫一個泛型 `BaseRepository<T extends TableName>` 統一 CRUD，但 `client.from(this.table)` 的 `this.table` 是泛型 `T` 時，supabase-js 高度條件式的表格型別會失效——`.eq("id", id)` 報 `"id"` 不可指派、`.select()` 結果推不出正確 Row 型別（一堆 `SelectQueryError`）。
+- **解法**：基底內部改用**未參數化的 client 視圖**操作，型別安全改由**對外方法簽章**保證：
+  ```ts
+  // 內部：未參數化 client（借用 library 預設泛型，非 any）
+  private get raw(): SupabaseClient {
+    return this.client as unknown as SupabaseClient;
+  }
+  // 對外：仍完全型別安全
+  async findById(id: string): Promise<Tables<T> | null> {
+    const { data, error } = await this.raw.from(this.table).select("*").eq("id", id).maybeSingle();
+    if (error) throw new RepositoryError(this.table, "findById", error.message);
+    return (data as Tables<T> | null) ?? null;
+  }
+  ```
+- **教訓**：泛型包裝 supabase-js 時，把「型別 narrow 失效」侷限在基底內部一個 `raw` getter，呼叫端維持強型別，避免 `any` 外溢。
+
+### 坑 8（正向確認）：tsx 能解析 `@/` 別名
+- **背景**：驗證腳本（`scripts/*.ts`）用 tsx 執行，原本擔心 tsx 不解析 tsconfig 的 `paths`（`@/*` → `./src/*`），得改用相對路徑。
+- **實測**：tsx v4 會讀 tsconfig 並解析 `@/` 別名，腳本可直接 `import ... from "@/..."`，不需相對路徑。程式碼內外一致用 `@/` 即可。
+
 ---
 
-## 6. 重建環境的最短路徑
+## 6. Repository 層（資料存取抽象，任務 2.4）
+
+在 client 之上封裝 Repository Pattern，業務邏輯只依賴抽象、不散落 supabase-js 呼叫。
+
+| 檔案 | 職責 |
+|---|---|
+| `src/lib/supabase/database.types.ts` | 手寫 12 張表的 Row/Insert/Update 型別（對應 0001_init.sql，enum 從 `shared/types` 複用），符合 supabase-js `Database` 泛型形狀 → 型別安全查詢 |
+| `src/lib/supabase/client.ts` | 伺服器端 `service_role` 單例（`persistSession:false`），繞過 RLS、不進客戶端 bundle |
+| `src/lib/supabase/repository.ts` | 泛型 `BaseRepository`（`findAll/findById/create/update/delete`）+ `RepositoryError`（帶表名/操作/原始訊息） |
+| `src/domains/.../repositories/*.ts` | 具體 repository，繼承泛型基底並加領域專屬查詢（如 `sessionsRepository.findByStatus`） |
+
+**設計前提**：12 張表都有 UUID 主鍵 `id`，故 by-id 操作對全表通用。
+
+**驗證**：`pnpm verify:repo` 對真實 DB 跑一輪完整 CRUD（create→findById→update→findByStatus→delete），`try/finally` 保證測試資料一定清除。手寫型別的好處是 schema 已固定、離線可靠；代價是 schema 變更時要與 `0001_init.sql` 同步更新。
+
+---
+
+## 7. 重建環境的最短路徑
 
 ```bash
 # 1. 安裝依賴
@@ -131,8 +169,11 @@ cp .env.example .env.local
 
 # 3. 在 Supabase SQL Editor 執行 supabase/migrations/0001_init.sql
 
-# 4. 驗證
-pnpm db:verify   # 應輸出 12/12 張表可存取
+# 4. 驗證連線與 schema
+pnpm db:verify     # 應輸出 12/12 張表可存取
+
+# 5. 驗證 Repository 層（真實 DB CRUD，會自動清理測試資料）
+pnpm verify:repo   # 應輸出 Repository 層驗收通過
 ```
 
 ---
