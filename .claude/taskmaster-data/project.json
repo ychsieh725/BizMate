@@ -1,0 +1,23 @@
+{
+  "name": "BizMate",
+  "created": "2026-07-04",
+  "mode": "MVP",
+  "language": "TypeScript",
+  "stack": {
+    "frontend": "Next.js",
+    "backend": "Next.js API Routes (Vercel Serverless)",
+    "database": "Supabase (Postgres)",
+    "llm": "Gemini API",
+    "messaging": "LINE Messaging API",
+    "email": "Gmail SMTP (Nodemailer)"
+  },
+  "docs": {
+    "prd": "documents/BizMate_PRD_v0.2.md",
+    "srs": "documents/BizMate_SRS_v0.1.md",
+    "sad": "documents/BizMate_SAD_v0.1.md",
+    "sds": "documents/BizMate_SDS_v0.2.md"
+  },
+  "suggestDensity": "medium",
+  "milestones": ["M0", "M1", "M2", "M3", "M4", "M5"],
+  "wbsFile": ".claude/taskmaster-data/wbs.md"
+}
