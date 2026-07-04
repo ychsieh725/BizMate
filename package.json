@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "db:verify": "tsx --env-file=.env.local scripts/verify-db.ts",
-    "verify:repo": "tsx --env-file=.env.local scripts/verify-repo.ts"
+    "verify:repo": "tsx --env-file=.env.local scripts/verify-repo.ts",
+    "verify:gemini": "tsx --env-file=.env.local scripts/verify-gemini.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.10.0",
     "@supabase/supabase-js": "^2.110.0",
     "next": "16.2.10",
     "react": "19.2.4",
