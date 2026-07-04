@@ -8,7 +8,8 @@ export type ModelTier = "light" | "reasoning";
 
 export const MODEL_TIERS: Record<ModelTier, string> = {
   // 抽取 / 反問 / 修改解析（Intake、Clarification、LINE Revision）
-  light: "gemini-2.5-flash-lite",
+  // 選 3.1 Flash-Lite：免費層 RPD 500（2.5 僅 20），對 eval 批次至關重要
+  light: "gemini-3.1-flash-lite",
   // 報價推理（Pricing Reasoning Agent）
   reasoning: "gemini-2.5-flash",
 };
