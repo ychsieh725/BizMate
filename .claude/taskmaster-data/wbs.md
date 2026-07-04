@@ -1,7 +1,7 @@
 # WBS - BizMate
 
 **建立日期:** 2026-07-04
-**最後更新:** 2026-07-04（2.1 完成）
+**最後更新:** 2026-07-04（2.1 / 2.2 / 2.3 完成）
 **開發模式:** MVP 分階段（P0 → P1 → P2 → P3）
 **專案描述:** 自動化報價系統。客戶透過 Web Wizard 以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，經接案者透過 LINE Bot 人工終審後，以 Email 寄送最終報價單。
 **技術棧:** Next.js + Vercel Serverless / Supabase(Postgres) / Gemini API / LINE Messaging API / Gmail SMTP
@@ -18,8 +18,8 @@
 | 1.2 | 需求分析（PRD/SRS/SAD/SDS 消化） | ✅ 完成 | 高 | - | 1h | 自動完成 |
 | **2. 基礎設施（P0 前置）** | | | | | | |
 | 2.1 | Next.js 專案骨架 + TypeScript + Tailwind + 目錄結構 | ✅ 完成 | 高 | 1.2 | 2h | Next16/React19/TW4；build·tsc·lint 全綠 |
-| 2.2 | Supabase 專案建立 + schema migration（12 張表 + enum + index） | ⏳ 待處理 | 高 | 2.1 | 3h | SDS §3 全部 DDL |
-| 2.3 | 環境變數管理 + 啟動時驗證（schema-based） | ⏳ 待處理 | 高 | 2.1 | 1h | SDS §15；security.md 秘密管理 |
+| 2.2 | Supabase 專案建立 + schema migration（12 張表 + enum + index） | ✅ 完成 | 高 | 2.1 | 3h | 12/12 表驗收通過；RLS + service_role 授權 |
+| 2.3 | 環境變數管理 + 啟動時驗證（schema-based） | ✅ 完成 | 高 | 2.1 | 1h | zod fail-fast；空字串→未設定；requireEnv |
 | 2.4 | Supabase client 封裝（Repository Pattern） | ⏳ 待處理 | 高 | 2.2 | 2h | patterns.md Repository |
 | 2.5 | Gemini client 封裝（structured output + usageMetadata + 重試） | ⏳ 待處理 | 高 | 2.3 | 3h | SDS §6、§12；FR-FO-1 |
 | 2.6 | Cost Logger（cross-cutting，每次 LLM 呼叫寫 cost_logs） | ⏳ 待處理 | 高 | 2.5 | 1.5h | FR-FO-1、NFR-4 |
