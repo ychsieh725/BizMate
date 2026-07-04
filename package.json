@@ -9,7 +9,8 @@
     "lint": "eslint",
     "db:verify": "tsx --env-file=.env.local scripts/verify-db.ts",
     "verify:repo": "tsx --env-file=.env.local scripts/verify-repo.ts",
-    "verify:gemini": "tsx --env-file=.env.local scripts/verify-gemini.ts"
+    "verify:gemini": "tsx --env-file=.env.local scripts/verify-gemini.ts",
+    "verify:cost": "tsx --env-file=.env.local scripts/verify-cost.ts"
   },
   "dependencies": {
     "@google/genai": "^2.10.0",

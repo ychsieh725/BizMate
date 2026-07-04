@@ -13,3 +13,22 @@ export const MODEL_TIERS: Record<ModelTier, string> = {
   // 報價推理（Pricing Reasoning Agent）
   reasoning: "gemini-2.5-flash",
 };
+
+/** 單一模型的 token 單價（USD / 每百萬 tokens） */
+export type ModelPricing = {
+  inputPerMillion: number;
+  outputPerMillion: number;
+};
+
+/**
+ * 模型定價表（SDS §11：MODEL_PRICING 設定外置，非寫死在成本計算邏輯）。
+ * 數值為 text 用途的官方標準定價（來源：ai.google.dev/gemini-api/docs/pricing，2026-07 查）。
+ * Gemini 定價會調整，變更時只改這裡。
+ *
+ * ⚠️ 連動點：MODEL_TIERS 換用新模型時，務必在此補上該模型的單價，
+ *    否則 computeCostUsd 找不到定價會以 0 計算成本（見 finops/costLogger.ts）。
+ */
+export const MODEL_PRICING: Record<string, ModelPricing> = {
+  "gemini-3.1-flash-lite": { inputPerMillion: 0.25, outputPerMillion: 1.5 },
+  "gemini-2.5-flash": { inputPerMillion: 0.3, outputPerMillion: 2.5 },
+};
