@@ -1,0 +1,64 @@
+import { z } from "zod";
+
+/**
+ * 環境變數驗證（SDS §15、security.md「啟動時驗證必要秘密存在」）。
+ *
+ * 僅供伺服器端使用：這些皆為機密，命名不含 NEXT_PUBLIC_ 前綴，
+ * Next.js 不會打包進客戶端 bundle。
+ *
+ * 分階段策略（對應 MVP P0→P2）：
+ * - 核心（現在就需要）：Supabase 兩項，缺少即在啟動時 fail-fast。
+ * - 功能性（後續任務啟用）：設為 optional；在真正使用的程式點以
+ *   requireEnv() 明確報錯，避免現階段開發被尚未用到的變數卡住。
+ */
+/**
+ * 選填變數包裝：.env 檔的空白值會以空字串 "" 載入（而非 undefined），
+ * 故先把 "" 視為未設定，再套用內層驗證。避免「留空的未來變數」誤觸驗證。
+ */
+function optional<T extends z.ZodTypeAny>(schema: T) {
+  return z.preprocess((value) => (value === "" ? undefined : value), schema.optional());
+}
+
+const envSchema = z.object({
+  // 核心
+  SUPABASE_URL: z.string().url("必須是合法的 URL"),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "不可為空"),
+  // 功能性（啟用時由 requireEnv 把關；現階段留空不報錯）
+  GEMINI_API_KEY: optional(z.string().min(1)),
+  LINE_CHANNEL_ACCESS_TOKEN: optional(z.string().min(1)),
+  LINE_CHANNEL_SECRET: optional(z.string().min(1)),
+  GMAIL_USER: optional(z.string().email()),
+  GMAIL_APP_PASSWORD: optional(z.string().min(1)),
+  ADMIN_SECRET: optional(z.string().min(1)),
+});
+
+type Env = z.infer<typeof envSchema>;
+
+function loadEnv(): Env {
+  const parsed = envSchema.safeParse(process.env);
+  if (!parsed.success) {
+    const issues = parsed.error.issues
+      .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
+      .join("\n");
+    throw new Error(
+      `環境變數驗證失敗：\n${issues}\n請檢查 .env.local（可參考 .env.example）`,
+    );
+  }
+  return parsed.data;
+}
+
+export const env: Env = loadEnv();
+
+/**
+ * 取用「宣告為 optional 但當前功能實際需要」的環境變數。
+ * 缺少時拋出明確錯誤，指出是哪個變數、該去哪補。
+ */
+export function requireEnv<K extends keyof Env>(key: K): NonNullable<Env[K]> {
+  const value = env[key];
+  if (value == null || value === "") {
+    throw new Error(
+      `環境變數 ${String(key)} 未設定，但目前功能需要它。請於 .env.local 補上。`,
+    );
+  }
+  return value as NonNullable<Env[K]>;
+}
