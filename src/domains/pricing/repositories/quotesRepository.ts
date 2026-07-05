@@ -1,12 +1,12 @@
-import { getSupabaseClient } from "@/lib/supabase/client.ts";
-import { RepositoryError } from "@/lib/supabase/repository.ts";
+import { BaseRepository, RepositoryError } from "@/lib/supabase/repository.ts";
 
 /**
- * quotes 表查詢（供 quote_code 流水號產生，3.4）。
+ * quotes 表 repository。繼承標準 CRUD（create 用於報價寫入），
+ * 額外提供 quote_code 流水號所需的前綴計數。
  */
-export class QuotesRepository {
-  private get client() {
-    return getSupabaseClient();
+export class QuotesRepository extends BaseRepository<"quotes"> {
+  constructor() {
+    super("quotes");
   }
 
   /**
@@ -24,5 +24,6 @@ export class QuotesRepository {
     return count ?? 0;
   }
 }
+
 
 export const quotesRepository = new QuotesRepository();
