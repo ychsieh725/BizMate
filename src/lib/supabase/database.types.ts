@@ -381,9 +381,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      rate_limits: {
+        Row: {
+          bucket_key: string;
+          window_start: string;
+          count: number;
+        };
+        Insert: {
+          bucket_key: string;
+          window_start: string;
+          count?: number;
+        };
+        Update: {
+          bucket_key?: string;
+          window_start?: string;
+          count?: number;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      increment_rate_limit: {
+        Args: {
+          p_bucket_key: string;
+          p_window_start: string;
+          p_limit: number;
+        };
+        Returns: boolean;
+      };
+    };
     Enums: {
       case_category: CaseCategory;
       session_status: SessionStatus;

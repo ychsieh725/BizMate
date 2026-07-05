@@ -1,7 +1,7 @@
 # WBS - BizMate
 
 **建立日期:** 2026-07-04
-**最後更新:** 2026-07-05（M1：3.1~3.5 ✅；POST /describe 端到端串接完成並併入 main(8940120)，170 測試綠、verify:describe 實測通過。剩 3.6·3.7）
+**最後更新:** 2026-07-05（🎉 M1 里程碑達成：3.1~3.7 全完成。Web Wizard 前端 + 輸入驗證 + rate limiting 收官，195 測試綠、build 綠、verify:ratelimit 實測擋人。P0 Happy Path 從瀏覽器可端到端跑完）
 **開發模式:** MVP 分階段（P0 → P1 → P2 → P3）
 **專案描述:** 自動化報價系統。客戶透過 Web Wizard 以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，經接案者透過 LINE Bot 人工終審後，以 Email 寄送最終報價單。
 **技術棧:** Next.js + Vercel Serverless / Supabase(Postgres) / Gemini API / LINE Messaging API / Gmail SMTP
@@ -30,8 +30,8 @@
 | 3.3 | Intake Parser Agent（結構化抽取 + confidence + source_span） | ✅ 完成 | 高 | 2.5,3.1 | 3h | SDS §6.1；FR-PA-1~2；依 category 切換欄位；missing 程式端 deterministic 算；真實 Gemini 實測通過。POST /describe 已於 8940120 端到端串接（Parser+報價鏈+持久化，齊全出報價／缺欄位轉 awaiting_clarification／out_of_scope 轉人工） |
 | 3.4 | Quote Formatter（deterministic 模板 + quote_code 產生器） | ✅ 完成 | 高 | 3.1 | 2h | SDS §6.4；FR-PR-1；quote_code {類型首字}-{年月}{流水}；真實資料實測 |
 | 3.5 | 基礎費率查表（deterministic，rule_id 可回溯） | ✅ 完成 | 高 | 2.4 | 2h | FR-PR-1、FR-PR-4；基礎費+固定倍率modifier；區間留4.3；out_of_scope；23 測試 |
-| 3.6 | Web Wizard 前端（Step 1-4 UI + 狀態輪詢 + a11y/ARIA） | ⏳ 待處理 | 高 | 3.2 | 5h | FR-CW-1~4；coding-style |
-| 3.7 | 輸入驗證 + rate limiting（公開端點防濫用） | ⏳ 待處理 | 高 | 3.2 | 1.5h | NFR-7、SDS §13.3 |
+| 3.6 | Web Wizard 前端（Step 1-4 UI + 狀態輪詢 + a11y/ARIA） | ✅ 完成 | 高 | 3.2 | 5h | FR-CW-1~4；四步驟狀態機+wizardApi 邊界封裝（9測）；ARIA/a11y；build 綠、/wizard 實測 render |
+| 3.7 | 輸入驗證 + rate limiting（公開端點防濫用） | ✅ 完成 | 高 | 3.2 | 1.5h | NFR-7、SDS §13.3；raw_text max2000/email max254；Supabase durable 表+原子RPC 固定視窗+fail-open；verify:ratelimit 實測擋人。選型見 documents/RateLimit技術選型 |
 | **4. P1：多 Agent + Bounded Autonomy + LINE 終審 + Email** | | | | | | |
 | 4.1 | Clarification Agent（單題反問 + 優先序 + 輪數上限） | ⏳ 待處理 | 高 | 3.3 | 2.5h | SDS §6.2；FR-CL-1~2 |
 | 4.2 | 反問 API：POST /answer + 保守估價 fallback | ⏳ 待處理 | 高 | 4.1 | 2h | FR-CL-3；SDS §5.1 |
@@ -68,7 +68,7 @@
 | 里程碑 | 目標 | 包含任務 | 狀態 |
 |--------|------|----------|------|
 | M0: 基礎設施就緒 | Next.js + Supabase + client 封裝可運行 | 2.1-2.7 | ✅ 完成 |
-| M1: P0 Happy Path | 完整走完「選項目→描述→deterministic 報價」 | 3.1-3.7 | ⏳ 待處理 |
+| M1: P0 Happy Path | 完整走完「選項目→描述→deterministic 報價」 | 3.1-3.7 | ✅ 完成 |
 | M2: P1 核心價值 | 多 Agent + bounded autonomy + LINE 終審 + Email 全通 | 4.1-4.11 | ⏳ 待處理 |
 | M3: P2 Eval 可視化 | Golden set + Eval dashboard 可展示 | 5.1-5.3 | ⏳ 待處理 |
 | M4: P3 FinOps 可視化 | 成本追蹤 + FinOps dashboard 可展示 | 6.1-6.3 | ⏳ 待處理 |

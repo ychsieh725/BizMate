@@ -15,10 +15,25 @@ export const createSessionBodySchema = z.object({
 /** session id 路徑參數：必須是合法 UUID（DB 主鍵格式）。 */
 export const sessionIdSchema = z.string().uuid();
 
+/**
+ * raw_text 長度上限（NFR-7）：口語需求描述綽綽有餘，同時擋下惡意超大 payload
+ * 灌爆 Gemini token 與 DB。
+ */
+export const RAW_TEXT_MAX_LENGTH = 2000;
+
+/** email 長度上限：RFC 5321 的位址上限。 */
+export const CONTACT_EMAIL_MAX_LENGTH = 254;
+
 /** POST /describe 主體：口語描述 + 聯絡 email（FR-CW-2 AC：email 格式驗證）。 */
 export const describeBodySchema = z.object({
-  raw_text: z.string().min(1, "描述不可為空"),
-  contact_email: z.string().email("email 格式不正確"),
+  raw_text: z
+    .string()
+    .min(1, "描述不可為空")
+    .max(RAW_TEXT_MAX_LENGTH, `描述長度不可超過 ${RAW_TEXT_MAX_LENGTH} 字`),
+  contact_email: z
+    .string()
+    .max(CONTACT_EMAIL_MAX_LENGTH, "email 長度過長")
+    .email("email 格式不正確"),
 });
 
 /** 把 zod 錯誤壓成單行、面向使用者的訊息。 */
