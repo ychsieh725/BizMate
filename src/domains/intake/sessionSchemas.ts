@@ -36,6 +36,14 @@ export const describeBodySchema = z.object({
     .email("email 格式不正確"),
 });
 
+/** POST /answer 主體：客戶對反問的自然語言回答（FR-CL-1）。 */
+export const answerBodySchema = z.object({
+  answer: z
+    .string()
+    .min(1, "回答不可為空")
+    .max(RAW_TEXT_MAX_LENGTH, `回答長度不可超過 ${RAW_TEXT_MAX_LENGTH} 字`),
+});
+
 /** 把 zod 錯誤壓成單行、面向使用者的訊息。 */
 export function formatZodError(error: z.ZodError): string {
   return error.issues

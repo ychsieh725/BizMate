@@ -238,6 +238,7 @@ export type Database = {
           pdf_url: string | null;
           created_at: string;
           sent_at: string | null;
+          is_conservative: boolean;
         };
         Insert: {
           id?: string;
@@ -248,6 +249,7 @@ export type Database = {
           pdf_url?: string | null;
           created_at?: string;
           sent_at?: string | null;
+          is_conservative?: boolean;
         };
         Update: {
           id?: string;
@@ -258,6 +260,7 @@ export type Database = {
           pdf_url?: string | null;
           created_at?: string;
           sent_at?: string | null;
+          is_conservative?: boolean;
         };
         Relationships: [];
       };

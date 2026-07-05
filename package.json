@@ -19,6 +19,7 @@
     "verify:parser": "tsx --env-file=.env.local scripts/verify-parser.ts",
     "verify:ratelimit": "tsx --env-file=.env.local scripts/verify-rate-limit.ts",
     "verify:clarification": "tsx --env-file=.env.local scripts/verify-clarification.ts",
+    "verify:answer": "tsx --env-file=.env.local scripts/verify-answer.ts",
     "seed:rate-card": "tsx --env-file=.env.local scripts/seed-rate-card.ts",
     "backfill:rate-card-includes": "tsx --env-file=.env.local scripts/backfill-rate-card-includes.ts"
   },

@@ -1,15 +1,15 @@
 import { apiOk, apiFail } from "@/lib/api/response.ts";
-import { handleDescribe } from "@/orchestrator/describeFlow.ts";
+import { handleAnswer } from "@/orchestrator/answerFlow.ts";
 import { serializeFlowOutcome } from "@/orchestrator/flowOutcome.ts";
 import {
-  describeBodySchema,
+  answerBodySchema,
   sessionIdSchema,
   formatZodError,
 } from "@/domains/intake/sessionSchemas.ts";
 
 /**
- * POST /api/sessions/{id}/describe — Wizard Step 2 送出描述（SDS §5.1、FR-CW-2）。
- * 觸發 Parser 抽取；齊全則計價出報價、缺欄位則轉等待反問。
+ * POST /api/sessions/{id}/answer — Wizard Step 3 回答反問（SDS §5.1、FR-CL-1）。
+ * 填入答案 → 以「原始描述 + 累積問答」重新解析 → 再問一輪 / 出報價 / 保守估算。
  */
 export async function POST(
   request: Request,
@@ -28,31 +28,33 @@ export async function POST(
     return apiFail("請求主體必須是合法的 JSON", 400);
   }
 
-  const parsed = describeBodySchema.safeParse(body);
+  const parsed = answerBodySchema.safeParse(body);
   if (!parsed.success) {
     return apiFail(formatZodError(parsed.error), 400);
   }
 
   try {
-    const result = await handleDescribe({
+    const result = await handleAnswer({
       sessionId: idParsed.data,
-      rawText: parsed.data.raw_text,
-      contactEmail: parsed.data.contact_email,
+      answer: parsed.data.answer,
     });
 
     if (!result.ok) {
       if (result.error === "not_found") {
         return apiFail("找不到指定的 session", 404);
       }
+      if (result.error === "no_pending_question") {
+        return apiFail("目前沒有待回答的問題", 409);
+      }
       return apiFail(
-        `session 目前狀態為 ${result.currentStatus}，無法再次送出描述`,
+        `session 目前狀態為 ${result.currentStatus}，無法回答反問`,
         409,
       );
     }
 
     return apiOk(serializeFlowOutcome(result.outcome));
   } catch (error) {
-    console.error("[POST /api/sessions/:id/describe] 失敗：", error);
+    console.error("[POST /api/sessions/:id/answer] 失敗：", error);
     return apiFail("系統忙碌，請稍後再試", 500);
   }
 }

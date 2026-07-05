@@ -34,7 +34,7 @@
 | 3.7 | 輸入驗證 + rate limiting（公開端點防濫用） | ✅ 完成 | 高 | 3.2 | 1.5h | NFR-7、SDS §13.3；raw_text max2000/email max254；Supabase durable 表+原子RPC 固定視窗+fail-open；verify:ratelimit 實測擋人。選型見 documents/RateLimit技術選型 |
 | **4. P1：多 Agent + Bounded Autonomy + LINE 終審 + Email** | | | | | | |
 | 4.1 | Clarification Agent（單題反問 + 優先序 + 輪數上限） | ✅ 完成 | 高 | 3.3 | 2.5h | SDS §6.2；FR-CL-1~2；target_field 程式端選(AC 由設計保證)、LLM 只生成問句；全域優先序常數 subtype>quantity>...>三欄；輪數上限=3；verify:clarification 真實 Gemini 通過。/answer 串接留 4.2 |
-| 4.2 | 反問 API：POST /answer + 保守估價 fallback | ⏳ 待處理 | 高 | 4.1 | 2h | FR-CL-3；SDS §5.1 |
+| 4.2 | 反問 API：POST /answer + 保守估價 fallback | ✅ 完成 | 高 | 4.1 | 2h | FR-CL-3；SDS §5.1；resolveAfterParse 共用分支(describe/answer)；answer→重新解析(原描述+累積問答)；輪數用盡→保守估算(quotes.is_conservative,migration 0004)；221 測試綠；verify:answer 端到端反問迴圈通過 |
 | 4.3 | Pricing Reasoning Agent（區間內加成判斷） | ⏳ 待處理 | 高 | 3.5 | 3h | SDS §6.3；FR-PR-2 |
 | 4.4 | 程式層區間驗證（超界拒寫 + out_of_scope 轉人工） | ⏳ 待處理 | 高 | 4.3 | 2h | FR-PR-2 AC、FR-PR-3；NFR-8 |
 | 4.5 | 預算護欄（呼叫貴模型前檢查累積成本，記錄不阻擋） | ⏳ 待處理 | 中 | 2.6,4.3 | 1.5h | FR-FO-4；SDS §11 |
