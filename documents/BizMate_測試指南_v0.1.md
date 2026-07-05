@@ -55,7 +55,7 @@ pnpm test:coverage   # 跑測試 + 覆蓋率報告（含 80% 門檻把關）
 
 ---
 
-## 5. 撰寫慣例（從 3.1 萃取的可複用模式）
+## 5. 撰寫慣例（從 3.1／3.2 萃取的可複用模式）
 
 ### 5.1 Table-driven 測試
 
@@ -81,6 +81,29 @@ it.each(EXPECTED_TRANSITIONS)("%s + %s → %s", (from, event, expected) => {
 ### 5.4 Result 型別而非 throw
 
 錯誤路徑用 `{ ok: false, error }` 回傳，測試可直接斷言結果物件，不必包 `expect().toThrow()`。
+
+### 5.5 測試 Next API route handler（3.2）
+
+route handler 是標準函式，可直接 import 呼叫、不需啟真伺服器：
+
+```ts
+// 用 vi.mock 換掉 service 層，route 測試只驗「驗證→分流→回應碼」
+vi.mock("@/domains/intake/sessionService.ts", () => ({ createSession: vi.fn() }));
+
+const res = await POST(new Request("http://localhost/api/sessions", {
+  method: "POST",
+  body: JSON.stringify({ category: "illustration" }),
+}));
+expect(res.status).toBe(201);
+expect(await res.json()).toEqual({ success: true, data: {/*…*/}, error: null });
+```
+
+要點：
+- **薄 route、厚 service**：把業務邏輯放 service 純函式（見 5.3），route 只留「驗證＋信封」，
+  route 測試就只需覆蓋各回應碼分支（200/201/400/404/500）。
+- **動態路徑參數**是 Promise：`GET(req, { params: Promise.resolve({ id }) })`（Next 15+ 慣例）。
+- **500 分支斷言錯誤訊息不洩漏內部細節**（如 `expect(json.error).not.toContain("DB ...")`），
+  把「不洩漏」變成可回歸的測試，而非口頭約定。
 
 ---
 
@@ -137,6 +160,15 @@ include: ["src/orchestrator/**/*.ts"]
 跑測試時 Vite 會提示：「vite-tsconfig-paths 已可用原生 `resolve.tsconfigPaths: true`
 取代」。目前**仍用外掛**（能正常運作），未來可評估移除外掛、改用 Vite 原生設定以少一個依賴。
 屬非阻塞的可選簡化，不急。
+
+### 7.6 測試用的假 UUID 被 `z.string().uuid()` 擋下（3.2）
+
+`GET /status` 的路徑參數以 `z.string().uuid()` 驗證。測試原本用 `1111...1111`
+當作合法 session id，卻一律回 400——因為 **zod 的 `.uuid()` 嚴格檢查 RFC 4122
+的版本位與變體位**，全 `1` 的字串變體位不合法。這其實證明驗證有效（真實 DB 的
+`gen_random_uuid()` 產生的都是合法 v4）。
+**解法**：測試固定值要用合法 v4 UUID，例如 `550e8400-e29b-41d4-a716-446655440000`
+（版本位 `4`、變體位 `8`）。**教訓**：造假測試資料時，若該欄位有格式驗證，假資料也必須通過驗證，否則測到的是驗證分支而非目標行為。
 
 ---
 
