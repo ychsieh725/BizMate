@@ -11,7 +11,8 @@
     "verify:repo": "tsx --env-file=.env.local scripts/verify-repo.ts",
     "verify:gemini": "tsx --env-file=.env.local scripts/verify-gemini.ts",
     "verify:cost": "tsx --env-file=.env.local scripts/verify-cost.ts",
-    "seed:rate-card": "tsx --env-file=.env.local scripts/seed-rate-card.ts"
+    "seed:rate-card": "tsx --env-file=.env.local scripts/seed-rate-card.ts",
+    "backfill:rate-card-includes": "tsx --env-file=.env.local scripts/backfill-rate-card-includes.ts"
   },
   "dependencies": {
     "@google/genai": "^2.10.0",

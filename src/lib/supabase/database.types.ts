@@ -142,6 +142,7 @@ export type Database = {
           subtype: string;
           unit: string;
           base_price: number | null;
+          includes: string | null;
         };
         Insert: {
           id?: string;
@@ -149,6 +150,7 @@ export type Database = {
           subtype: string;
           unit: string;
           base_price?: number | null;
+          includes?: string | null;
         };
         Update: {
           id?: string;
@@ -156,6 +158,7 @@ export type Database = {
           subtype?: string;
           unit?: string;
           base_price?: number | null;
+          includes?: string | null;
         };
         Relationships: [];
       };
