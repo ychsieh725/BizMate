@@ -25,6 +25,8 @@ export default defineConfig({
         "src/domains/intake/parserFields.ts",
         "src/lib/api/**/*.ts",
         "src/app/api/**/route.ts",
+        "src/domains/pricing/basePricing.ts",
+        "src/domains/pricing/quoteFormatter.ts",
       ],
       exclude: ["src/**/*.{test,spec}.ts", "src/**/*.types.ts"],
       thresholds: {
