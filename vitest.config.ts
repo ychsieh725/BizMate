@@ -17,7 +17,13 @@ export default defineConfig({
       reporter: ["text", "html"],
       // 門檻只套用在已納入測試的模組（白名單）。M0 既有模組的測試由 7.1
       // 貫穿任務陸續補上，屆時把對應路徑加入此清單，門檻即開始把關該模組。
-      include: ["src/orchestrator/**/*.ts"],
+      include: [
+        "src/orchestrator/**/*.ts",
+        "src/domains/intake/sessionService.ts",
+        "src/domains/intake/sessionSchemas.ts",
+        "src/lib/api/**/*.ts",
+        "src/app/api/**/route.ts",
+      ],
       exclude: ["src/**/*.{test,spec}.ts", "src/**/*.types.ts"],
       thresholds: {
         lines: 80,
