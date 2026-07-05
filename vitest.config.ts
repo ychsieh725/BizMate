@@ -23,6 +23,8 @@ export default defineConfig({
         "src/domains/intake/sessionSchemas.ts",
         "src/domains/intake/parserAgent.ts",
         "src/domains/intake/parserFields.ts",
+        "src/domains/intake/clarificationAgent.ts",
+        "src/domains/intake/clarificationFields.ts",
         "src/lib/api/**/*.ts",
         "src/lib/rateLimit/**/*.ts",
         "src/app/api/**/route.ts",
