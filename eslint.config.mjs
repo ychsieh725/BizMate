@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 測試覆蓋率報告產出（v8 HTML 資產，非原始碼）
+    "coverage/**",
     // 非應用程式碼：harness 設定、規格文件、工作流模板
     ".claude/**",
     "documents/**",
