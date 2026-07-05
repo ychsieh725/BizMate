@@ -21,6 +21,8 @@ export default defineConfig({
         "src/orchestrator/**/*.ts",
         "src/domains/intake/sessionService.ts",
         "src/domains/intake/sessionSchemas.ts",
+        "src/domains/intake/parserAgent.ts",
+        "src/domains/intake/parserFields.ts",
         "src/lib/api/**/*.ts",
         "src/app/api/**/route.ts",
       ],
