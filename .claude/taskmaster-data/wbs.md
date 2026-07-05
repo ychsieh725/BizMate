@@ -1,7 +1,7 @@
 # WBS - BizMate
 
 **建立日期:** 2026-07-04
-**最後更新:** 2026-07-05（M1：3.1·3.2·3.3·3.4·3.5 ✅；報價鏈完成，/describe 可端到端串接）
+**最後更新:** 2026-07-05（M1：3.1~3.5 ✅；POST /describe 端到端串接完成並併入 main(8940120)，170 測試綠、verify:describe 實測通過。剩 3.6·3.7）
 **開發模式:** MVP 分階段（P0 → P1 → P2 → P3）
 **專案描述:** 自動化報價系統。客戶透過 Web Wizard 以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，經接案者透過 LINE Bot 人工終審後，以 Email 寄送最終報價單。
 **技術棧:** Next.js + Vercel Serverless / Supabase(Postgres) / Gemini API / LINE Messaging API / Gmail SMTP
@@ -27,7 +27,7 @@
 | **3. P0：Happy Path（Wizard + Parser + deterministic 報價）** | | | | | | |
 | 3.1 | Orchestrator 狀態機（9 狀態 + 轉移表） | ✅ 完成 | 高 | 2.4 | 3h | SDS §4；轉移表查表法；純函式 + Result；107 測試 100% 覆蓋 |
 | 3.2 | Wizard API：POST /sessions、GET /status | ✅ 完成 | 高 | 3.1 | 2.5h | SDS §5.1；FR-CW-1,4；薄 route+service 分層+信封+zod；20 測試。/describe 因需 Parser 移 3.3 |
-| 3.3 | Intake Parser Agent（結構化抽取 + confidence + source_span） | ✅ 完成 | 高 | 2.5,3.1 | 3h | SDS §6.1；FR-PA-1~2；依 category 切換欄位；missing 程式端 deterministic 算；真實 Gemini 實測通過。POST /describe 待 pricing 鏈（3.4/3.5）就緒後串接 |
+| 3.3 | Intake Parser Agent（結構化抽取 + confidence + source_span） | ✅ 完成 | 高 | 2.5,3.1 | 3h | SDS §6.1；FR-PA-1~2；依 category 切換欄位；missing 程式端 deterministic 算；真實 Gemini 實測通過。POST /describe 已於 8940120 端到端串接（Parser+報價鏈+持久化，齊全出報價／缺欄位轉 awaiting_clarification／out_of_scope 轉人工） |
 | 3.4 | Quote Formatter（deterministic 模板 + quote_code 產生器） | ✅ 完成 | 高 | 3.1 | 2h | SDS §6.4；FR-PR-1；quote_code {類型首字}-{年月}{流水}；真實資料實測 |
 | 3.5 | 基礎費率查表（deterministic，rule_id 可回溯） | ✅ 完成 | 高 | 2.4 | 2h | FR-PR-1、FR-PR-4；基礎費+固定倍率modifier；區間留4.3；out_of_scope；23 測試 |
 | 3.6 | Web Wizard 前端（Step 1-4 UI + 狀態輪詢 + a11y/ARIA） | ⏳ 待處理 | 高 | 3.2 | 5h | FR-CW-1~4；coding-style |
