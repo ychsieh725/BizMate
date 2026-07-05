@@ -5,10 +5,18 @@ vi.mock("@/domains/intake/sessionService.ts", () => ({
   getSessionStatus: vi.fn(),
 }));
 
+vi.mock("@/lib/rateLimit/rateLimit.ts", () => ({
+  checkRateLimit: vi.fn(),
+  getClientIp: () => "test-ip",
+  SESSION_CREATE_RULE: { limit: 10, windowMs: 3_600_000 },
+}));
+
 import { createSession } from "@/domains/intake/sessionService.ts";
+import { checkRateLimit } from "@/lib/rateLimit/rateLimit.ts";
 import { POST } from "@/app/api/sessions/route.ts";
 
 const mockCreateSession = vi.mocked(createSession);
+const mockCheckRateLimit = vi.mocked(checkRateLimit);
 
 function postRequest(body: unknown, raw = false): Request {
   return new Request("http://localhost/api/sessions", {
@@ -20,6 +28,7 @@ function postRequest(body: unknown, raw = false): Request {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockCheckRateLimit.mockResolvedValue({ allowed: true });
 });
 
 describe("POST /api/sessions", () => {
@@ -56,6 +65,17 @@ describe("POST /api/sessions", () => {
   it("category 非合法列舉 → 400", async () => {
     const res = await POST(postRequest({ category: "cooking" }));
     expect(res.status).toBe(400);
+    expect(mockCreateSession).not.toHaveBeenCalled();
+  });
+
+  it("超過 rate limit → 429 且不建立 session", async () => {
+    mockCheckRateLimit.mockResolvedValue({ allowed: false });
+
+    const res = await POST(postRequest({ category: "illustration" }));
+    const json = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(json.success).toBe(false);
     expect(mockCreateSession).not.toHaveBeenCalled();
   });
 
