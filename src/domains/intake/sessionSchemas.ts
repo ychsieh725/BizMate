@@ -15,6 +15,12 @@ export const createSessionBodySchema = z.object({
 /** session id 路徑參數：必須是合法 UUID（DB 主鍵格式）。 */
 export const sessionIdSchema = z.string().uuid();
 
+/** POST /describe 主體：口語描述 + 聯絡 email（FR-CW-2 AC：email 格式驗證）。 */
+export const describeBodySchema = z.object({
+  raw_text: z.string().min(1, "描述不可為空"),
+  contact_email: z.string().email("email 格式不正確"),
+});
+
 /** 把 zod 錯誤壓成單行、面向使用者的訊息。 */
 export function formatZodError(error: z.ZodError): string {
   return error.issues
