@@ -4,20 +4,22 @@
   "mode": "MVP",
   "language": "TypeScript",
   "stack": {
-    "frontend": "Next.js",
+    "frontend": "Next.js 16 (App Router)",
     "backend": "Next.js API Routes (Vercel Serverless)",
-    "database": "Supabase (Postgres)",
+    "database": "Supabase (Postgres, multi-tenant RLS)",
+    "auth": "Supabase Auth (@supabase/ssr)",
     "llm": "Gemini API",
-    "messaging": "LINE Messaging API",
-    "email": "Gmail SMTP (Nodemailer)"
+    "email": "Resend (HTTP API)"
   },
   "docs": {
+    "plan": "documents/BizMate_多租戶重構計畫_v1.0.md",
     "prd": "documents/BizMate_PRD_v0.2.md",
     "srs": "documents/BizMate_SRS_v0.1.md",
     "sad": "documents/BizMate_SAD_v0.1.md",
-    "sds": "documents/BizMate_SDS_v0.2.md"
+    "sds": "documents/BizMate_SDS_v0.2.md",
+    "note": "2026-07-07 轉型多租戶 SaaS：plan 為最新權威；PRD/SDS 的單一使用者假設與 LINE/Gmail 章節作廢"
   },
   "suggestDensity": "medium",
-  "milestones": ["M0", "M1", "M2", "M3", "M4", "M5"],
+  "milestones": ["M0", "M1", "MT-M1", "MT-M2", "MT-M3", "MT-M4", "MT-M5", "MT-M6"],
   "wbsFile": ".claude/taskmaster-data/wbs.md"
 }
