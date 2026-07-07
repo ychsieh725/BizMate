@@ -34,6 +34,7 @@ function fakeSession(
 ): Tables<"sessions"> {
   return {
     id: "s1",
+    merchant_id: "99999999-9999-9999-9999-999999999999",
     category,
     contact_email: null,
     status,
@@ -55,7 +56,7 @@ beforeEach(() => {
     missingRequiredFields: [],
   });
   mockResolve.mockResolvedValue({
-    status: "awaiting_freelancer",
+    status: "awaiting_review",
     quoteCode: "I-2607001",
     outOfScope: false,
     conservative: false,
@@ -72,12 +73,12 @@ describe("handleDescribe — session 前置檢查", () => {
   });
 
   it("session 非 created（已描述過）→ conflict，不解析", async () => {
-    mockFindById.mockResolvedValue(fakeSession("awaiting_freelancer"));
+    mockFindById.mockResolvedValue(fakeSession("awaiting_review"));
     const result = await handleDescribe(CALL);
     expect(result).toMatchObject({
       ok: false,
       error: "conflict",
-      currentStatus: "awaiting_freelancer",
+      currentStatus: "awaiting_review",
     });
     expect(mockParse).not.toHaveBeenCalled();
   });
@@ -111,7 +112,7 @@ describe("handleDescribe — 主流程", () => {
     expect(result).toEqual({
       ok: true,
       outcome: {
-        status: "awaiting_freelancer",
+        status: "awaiting_review",
         quoteCode: "I-2607001",
         outOfScope: false,
         conservative: false,

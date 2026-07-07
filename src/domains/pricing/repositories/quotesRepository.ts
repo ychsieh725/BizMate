@@ -10,13 +10,15 @@ export class QuotesRepository extends BaseRepository<"quotes"> {
   }
 
   /**
-   * 計算 quote_code 以指定前綴（如 "G-2607"）開頭的既有筆數，
-   * 作為當月當類型的流水號基數。唯一性最終由 DB 的 quote_code UNIQUE 兜底。
+   * 計算該商家 quote_code 以指定前綴（如 "G-2607"）開頭的既有筆數，
+   * 作為當月當類型的流水號基數。流水號範圍是「商家」——
+   * 唯一性最終由 DB 的 UNIQUE (merchant_id, quote_code) 兜底。
    */
-  async countByCodePrefix(prefix: string): Promise<number> {
+  async countByCodePrefix(merchantId: string, prefix: string): Promise<number> {
     const { count, error } = await this.client
       .from("quotes")
       .select("*", { count: "exact", head: true })
+      .eq("merchant_id", merchantId)
       .like("quote_code", `${prefix}%`);
     if (error) {
       throw new RepositoryError("quotes", "countByCodePrefix", error.message);

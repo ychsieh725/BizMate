@@ -12,12 +12,17 @@ export interface CreatedSession {
 
 /**
  * 建立新 session（Wizard Step 1）。
+ * merchantId 由 route 從分享連結 slug 解析而得，掛在 session 上供下游流程讀取。
  * status 與 current_step 交由 DB default（created / 1）填入，不在此硬編碼。
  */
 export async function createSession(
   category: CaseCategory,
+  merchantId: string,
 ): Promise<CreatedSession> {
-  const session = await sessionsRepository.create({ category });
+  const session = await sessionsRepository.create({
+    category,
+    merchant_id: merchantId,
+  });
   return { sessionId: session.id, status: session.status };
 }
 

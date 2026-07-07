@@ -12,6 +12,7 @@ import type { CaseCategory } from "@/shared/types/domain.types";
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { generateClarificationQuestion } from "@/domains/intake/clarificationAgent.ts";
 import { selectNextField } from "@/domains/intake/clarificationFields.ts";
+import { ensureDevMerchant } from "./dev-merchant.ts";
 
 const SAMPLES: { category: CaseCategory; targetField: string }[] = [
   { category: "graphic_design", targetField: "subtype" },
@@ -33,7 +34,8 @@ async function main(): Promise<void> {
   }
 
   // 2. 對真實 Gemini 生成反問問題
-  const session = await sessionsRepository.create({ category: "illustration" });
+  const merchantId = await ensureDevMerchant();
+  const session = await sessionsRepository.create({ category: "illustration", merchant_id: merchantId });
   console.log("\n──────── generateClarificationQuestion（真實 Gemini）────────");
   for (const { category, targetField } of SAMPLES) {
     const result = await generateClarificationQuestion({

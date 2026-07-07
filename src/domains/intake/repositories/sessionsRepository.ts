@@ -14,7 +14,7 @@ export class SessionsRepository extends BaseRepository<"sessions"> {
     super("sessions");
   }
 
-  /** 找出特定狀態的所有 session（例如撈出所有 awaiting_freelancer 待確認報價） */
+  /** 找出特定狀態的所有 session（例如撈出所有 awaiting_review 待確認報價） */
   async findByStatus(status: SessionStatus): Promise<Tables<"sessions">[]> {
     const { data, error } = await this.client
       .from("sessions")

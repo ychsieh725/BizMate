@@ -14,10 +14,11 @@ import type { CaseCategory } from "@/shared/types/domain.types";
 import { createSession } from "@/domains/intake/sessionService.ts";
 import { handleDescribe } from "@/orchestrator/describeFlow.ts";
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
+import { ensureDevMerchant } from "./dev-merchant.ts";
 
 const SAMPLES: { label: string; category: CaseCategory; rawText: string }[] = [
   {
-    label: "齊全描述（預期：出報價 → awaiting_freelancer）",
+    label: "齊全描述（預期：出報價 → awaiting_review）",
     category: "illustration",
     rawText:
       "幫我畫 1 個角色設計，精緻上色，需要高解析度印刷檔，商業使用，三天內交件，含 2 次修改",
@@ -30,11 +31,12 @@ const SAMPLES: { label: string; category: CaseCategory; rawText: string }[] = [
 ];
 
 async function main(): Promise<void> {
+  const merchantId = await ensureDevMerchant();
   for (const { label, category, rawText } of SAMPLES) {
     console.log(`\n──────── ${label} ────────`);
     console.log(`描述：${rawText}`);
 
-    const { sessionId } = await createSession(category);
+    const { sessionId } = await createSession(category, merchantId);
     const result = await handleDescribe({
       sessionId,
       rawText,

@@ -60,13 +60,14 @@ async function request<TData>(
   return { ok: true, data: envelope.data };
 }
 
-/** Step 1：建立 session。 */
+/** Step 1：建立 session（slug 指向報價歸屬的商家，來自分享連結路徑）。 */
 export async function createSession(
   category: SelectedCategory,
+  slug: string,
 ): Promise<ApiResult<CreatedSession>> {
   const result = await request<CreatedSessionData>(API_ROUTES.sessions, {
     method: "POST",
-    body: JSON.stringify({ category }),
+    body: JSON.stringify({ category, slug }),
   });
   if (!result.ok) return result;
   return {

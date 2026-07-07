@@ -9,8 +9,10 @@ import {
 } from "@/orchestrator/stateMachine.ts";
 
 /**
- * 期望的合法轉移清單，直接依 SDS §4.2 手寫，**獨立於** transitions.ts。
+ * 期望的合法轉移清單，手寫且**獨立於** transitions.ts。
  * 作為第二事實來源：若實作的轉移表被改錯，這裡能抓到偏差。
+ * 多租戶重構後：awaiting_review 取代 awaiting_freelancer/revising，
+ * 後台終審以單一 quote_confirmed 事件進 confirmed。
  */
 const EXPECTED_TRANSITIONS: ReadonlyArray<
   [SessionStatus, SessionEvent, SessionStatus]
@@ -22,11 +24,9 @@ const EXPECTED_TRANSITIONS: ReadonlyArray<
   ["awaiting_clarification", "answer_submitted", "parsing"],
   ["awaiting_clarification", "clarification_exhausted", "pricing"],
   ["awaiting_clarification", "timeout", "abandoned"],
-  ["pricing", "pricing_done", "awaiting_freelancer"],
-  ["awaiting_freelancer", "line_received", "revising"],
-  ["awaiting_freelancer", "timeout", "abandoned"],
-  ["revising", "revision_applied", "awaiting_freelancer"],
-  ["revising", "revision_confirmed", "confirmed"],
+  ["pricing", "pricing_done", "awaiting_review"],
+  ["awaiting_review", "quote_confirmed", "confirmed"],
+  ["awaiting_review", "timeout", "abandoned"],
   ["confirmed", "email_sent", "sent"],
 ];
 
@@ -35,8 +35,7 @@ const ALL_STATES: readonly SessionStatus[] = [
   "parsing",
   "awaiting_clarification",
   "pricing",
-  "awaiting_freelancer",
-  "revising",
+  "awaiting_review",
   "confirmed",
   "sent",
   "abandoned",
@@ -49,9 +48,7 @@ const ALL_EVENTS: readonly SessionEvent[] = [
   "answer_submitted",
   "clarification_exhausted",
   "pricing_done",
-  "line_received",
-  "revision_applied",
-  "revision_confirmed",
+  "quote_confirmed",
   "email_sent",
   "timeout",
 ];
@@ -134,8 +131,8 @@ describe("availableEvents", () => {
     expect([...availableEvents("created")].sort()).toEqual(
       ["describe_submitted", "timeout"].sort(),
     );
-    expect([...availableEvents("revising")].sort()).toEqual(
-      ["revision_applied", "revision_confirmed"].sort(),
+    expect([...availableEvents("awaiting_review")].sort()).toEqual(
+      ["quote_confirmed", "timeout"].sort(),
     );
   });
 

@@ -2,14 +2,19 @@ import { z } from "zod";
 import type { CaseCategory } from "@/shared/types/domain.types";
 import { CASE_CATEGORIES } from "@/shared/constants/categories.ts";
 
+/** 商家公開 slug 的格式（與 merchants.public_slug 的 DB CHECK 一致）。 */
+export const MERCHANT_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{2,31}$/;
+
 /**
  * Wizard API 的請求邊界驗證（coding-style「在系統邊界驗證」）。
  * category 清單從單一事實來源 CASE_CATEGORIES 衍生，不重複列舉。
+ * slug 指向報價歸屬的商家（分享連結 /q/{slug} 的路徑段），route 端據此解析 tenant。
  */
 export const createSessionBodySchema = z.object({
   category: z.enum(
     CASE_CATEGORIES as readonly [CaseCategory, ...CaseCategory[]],
   ),
+  slug: z.string().regex(MERCHANT_SLUG_PATTERN, "slug 格式不正確"),
 });
 
 /** session id 路徑參數：必須是合法 UUID（DB 主鍵格式）。 */

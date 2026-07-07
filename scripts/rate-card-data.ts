@@ -1,15 +1,15 @@
 /**
- * Rate Card 種子資料（純資料模組，無副作用）。
+ * Rate Card 範本資料（純資料模組，無副作用）。
  *
- * 數字為 **示意值（demo，幣別 TWD）**，依 PRD 附錄 A 建立完整定價結構。
- * seed 與 backfill 腳本都引用此檔，確保單一事實來源、避免兩份資料漂移。
- * 你之後可在 Supabase Studio 直接改成真實費率（ADR-3：改表即生效）。
+ * 數字為 **建議預設值（幣別 TWD）**，依 PRD 附錄 A 建立完整定價結構。
+ * 多租戶重構後灌入 rate_card_template_* 全域範本表；新商家 onboarding 時
+ * 整份複製到自己名下，之後在後台自行調整（改表即生效）。
  */
 import type { TablesInsert } from "@/lib/supabase/database.types.ts";
 
-// ── rate_card_base：各案件類型的子類型與基礎單價（附錄 A.2–A.4）──
+// ── rate_card_template_base：各案件類型的子類型與基礎單價（附錄 A.2–A.4）──
 // includes 為該基礎價的基本服務內容（自然語言，供報價單顯示與 Agent 判斷內含範圍）。
-export const BASE_ROWS: TablesInsert<"rate_card_base">[] = [
+export const BASE_ROWS: TablesInsert<"rate_card_template_base">[] = [
   // 平面設計
   { category: "graphic_design", subtype: "LOGO設計", unit: "每款", base_price: 8000, includes: "2款初稿提案、2次修改、交付JPG/PNG成品檔" },
   { category: "graphic_design", subtype: "海報文宣", unit: "每張", base_price: 5000, includes: "1款版面設計、2次修改、交付印刷用JPG/PDF" },
@@ -28,10 +28,10 @@ export const BASE_ROWS: TablesInsert<"rate_card_base">[] = [
   { category: "web_design", subtype: "UI-UX設計稿", unit: "每頁面", base_price: 5000, includes: "單一頁面UI設計、2次修改、交付Figma設計檔" },
 ];
 
-// ── rate_card_modifiers：加成係數（附錄 A.1 共用 + A.2–A.4 各類型）──
+// ── rate_card_template_modifiers：加成係數（附錄 A.1 共用 + A.2–A.4 各類型）──
 // range 為倍率（0.30 = +30%）。deterministic 項目 min=max（固定倍率）；
 // Pricing Agent 可判斷的項目給區間（第 6.3 章 bounded autonomy 的邊界來源）。
-export const MODIFIER_ROWS: TablesInsert<"rate_card_modifiers">[] = [
+export const MODIFIER_ROWS: TablesInsert<"rate_card_template_modifiers">[] = [
   // A.1 跨類型共用（category = null）
   { category: null, modifier_name: "商業使用加成", trigger_condition: "授權範圍=商業使用", range_min: 0.3, range_max: 0.3 },
   { category: null, modifier_name: "獨家買斷加成", trigger_condition: "授權範圍=獨家買斷", range_min: 1.0, range_max: 1.0 },

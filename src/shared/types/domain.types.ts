@@ -6,23 +6,33 @@
 /** 案件類型（對應 DB enum case_category、PRD 附錄 A 三大類） */
 export type CaseCategory = "graphic_design" | "illustration" | "web_design";
 
-/** Session 狀態機的九個狀態（對應 DB enum session_status、SDS §4.1） */
+/**
+ * Session 狀態機的八個狀態（對應 DB enum session_status）。
+ * 多租戶重構後終審通路為網頁後台：舊 awaiting_freelancer 更名 awaiting_review，
+ * LINE 時代的 revising 已淘汰（後台在 awaiting_review 下直接調整金額）。
+ */
 export type SessionStatus =
   | "created"
   | "parsing"
   | "awaiting_clarification"
   | "pricing"
-  | "awaiting_freelancer"
-  | "revising"
+  | "awaiting_review"
   | "confirmed"
   | "sent"
   | "abandoned";
 
-/** 報價狀態（對應 DB enum quote_status、SDS §3.4） */
-export type QuoteStatus = "draft" | "awaiting_freelancer" | "confirmed" | "sent";
+/** 報價狀態（對應 DB enum quote_status） */
+export type QuoteStatus = "draft" | "awaiting_review" | "confirmed" | "sent";
 
-/** LINE 修改來源通道（對應 DB enum revision_channel、SDS §3.4） */
-export type RevisionChannel = "line_text" | "line_postback";
+/** 商家（tenant 根，1:1 對應 auth.users；public_slug 即專屬報價連結 /q/{slug}） */
+export type Merchant = {
+  id: string;
+  display_name: string;
+  public_slug: string;
+  contact_email: string;
+  created_at: string;
+  updated_at: string;
+};
 
 /** API 統一回應信封（patterns.md「一致的信封格式」） */
 export type ApiResponse<TData> = {

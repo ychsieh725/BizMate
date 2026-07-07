@@ -9,7 +9,7 @@ import type { SessionEvent } from "@/orchestrator/events.ts";
  * 終態（sent、abandoned）無出邊，故不列於表中。
  *
  * `timeout` 的「任一等待狀態 → abandoned」不寫成特例判斷，而是在三個等待狀態
- * （created、awaiting_clarification、awaiting_freelancer）各自明確列出，
+ * （created、awaiting_clarification、awaiting_review）各自明確列出，
  * 讓「哪些狀態可逾時」由資料本身表達，而非藏在程式邏輯裡。
  */
 export const TRANSITIONS: Readonly<
@@ -29,15 +29,11 @@ export const TRANSITIONS: Readonly<
     timeout: "abandoned",
   },
   pricing: {
-    pricing_done: "awaiting_freelancer",
+    pricing_done: "awaiting_review",
   },
-  awaiting_freelancer: {
-    line_received: "revising",
+  awaiting_review: {
+    quote_confirmed: "confirmed",
     timeout: "abandoned",
-  },
-  revising: {
-    revision_applied: "awaiting_freelancer",
-    revision_confirmed: "confirmed",
   },
   confirmed: {
     email_sent: "sent",

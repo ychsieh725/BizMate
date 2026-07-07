@@ -86,6 +86,7 @@ export async function handleAnswer(params: {
   const completedRounds = await clarificationTurnsRepository.countAnswered(sessionId);
   const outcome = await resolveAfterParse({
     sessionId,
+    merchantId: session.merchant_id,
     category: session.category,
     fields: parsed.fields,
     missingFields: parsed.missingRequiredFields,

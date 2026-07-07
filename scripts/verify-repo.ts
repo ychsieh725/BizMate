@@ -6,6 +6,7 @@
  * 全鏈路可用。測試資料在結束時一定刪除（try/finally），不留髒資料。
  */
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
+import { ensureDevMerchant } from "./dev-merchant.ts";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -14,11 +15,12 @@ function assert(condition: boolean, message: string): void {
 }
 
 async function main(): Promise<void> {
+  const merchantId = await ensureDevMerchant();
   let createdId: string | null = null;
 
   try {
     // 1. create
-    const created = await sessionsRepository.create({ category: "illustration" });
+    const created = await sessionsRepository.create({ category: "illustration", merchant_id: merchantId });
     createdId = created.id;
     assert(created.category === "illustration", "create 後 category 應為 illustration");
     assert(created.status === "created", "新 session 預設狀態應為 created");

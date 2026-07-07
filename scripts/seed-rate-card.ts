@@ -1,28 +1,27 @@
 /**
- * Rate Card 種子資料（任務 2.7）。
- * 執行：pnpm seed:rate-card
+ * 多租戶種子腳本。執行：pnpm seed:rate-card
  *
- * 依 PRD 附錄 A 建立完整定價結構，數字為 **示意值（demo，幣別 TWD）**，
- * 讓報價流程能跑、demo 有說服力。你之後可在 Supabase Studio 直接改成真實
- * 費率（ADR-3：改表即生效，不需重新部署）。
- *
- * 冪等：只有在資料表為空時才灌入，避免覆蓋你已編輯的費率。
+ * 做三件事（皆冪等，可重複執行）：
+ * 1. 灌入 rate_card_template_* 全域範本（表非空則跳過）
+ * 2. 建立 dev 商家（auth user dev@bizmate.local + merchants 列，slug=dev）
+ *    —— M1 尚無註冊流程，本機驗證 /q/dev 全流程用
+ * 3. 把範本複製到 dev 商家名下（已有價目表則跳過）
  */
 import { BaseRepository } from "@/lib/supabase/repository.ts";
+import { copyTemplateRateCard } from "@/domains/merchant/onboardingService.ts";
 import { BASE_ROWS, MODIFIER_ROWS } from "./rate-card-data.ts";
+import { DEV_MERCHANT, ensureDevMerchant } from "./dev-merchant.ts";
 
-async function main(): Promise<void> {
-  const baseRepo = new BaseRepository("rate_card_base");
-  const modifierRepo = new BaseRepository("rate_card_modifiers");
+async function seedTemplates(): Promise<void> {
+  const baseRepo = new BaseRepository("rate_card_template_base");
+  const modifierRepo = new BaseRepository("rate_card_template_modifiers");
 
   const existingBase = await baseRepo.findAll();
   const existingModifiers = await modifierRepo.findAll();
-
   if (existingBase.length > 0 || existingModifiers.length > 0) {
     console.log(
-      `⏭️ 已有資料（base=${existingBase.length}, modifiers=${existingModifiers.length}），跳過灌入以保護既有編輯。`,
+      `⏭️ 範本已有資料（base=${existingBase.length}, modifiers=${existingModifiers.length}），跳過灌入。`,
     );
-    console.log("   如需重灌，請先在 Supabase Studio 清空這兩張表。");
     return;
   }
 
@@ -32,11 +31,24 @@ async function main(): Promise<void> {
   for (const row of MODIFIER_ROWS) {
     await modifierRepo.create(row);
   }
-
   console.log(
-    `🎉 種子完成：rate_card_base ${BASE_ROWS.length} 筆、rate_card_modifiers ${MODIFIER_ROWS.length} 筆（TWD 示意值）。`,
+    `✅ 範本完成：template_base ${BASE_ROWS.length} 筆、template_modifiers ${MODIFIER_ROWS.length} 筆（TWD 建議值）。`,
   );
-  console.log("   請至 Supabase Studio 依你的真實費率調整（改表即生效，不需重新部署）。");
+}
+
+async function main(): Promise<void> {
+  await seedTemplates();
+  const merchantId = await ensureDevMerchant();
+  console.log(`✅ dev 商家就緒：/q/${DEV_MERCHANT.slug}（merchant_id=${merchantId}）`);
+
+  const { baseCount, modifierCount } = await copyTemplateRateCard(merchantId);
+  if (baseCount === 0 && modifierCount === 0) {
+    console.log("⏭️ dev 商家已有價目表，跳過複製以保護既有編輯。");
+  } else {
+    console.log(`✅ 已複製範本到 dev 商家：base ${baseCount} 筆、modifiers ${modifierCount} 筆。`);
+  }
+
+  console.log("🎉 種子完成。本機開發可直接開 http://localhost:3000/q/dev 跑報價全流程。");
 }
 
 main().catch((error: unknown) => {

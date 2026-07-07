@@ -12,13 +12,32 @@ import {
  */
 
 describe("createSessionBodySchema", () => {
-  it("接受合法 category", () => {
-    expect(createSessionBodySchema.safeParse({ category: "graphic_design" }).success).toBe(true);
+  it("接受合法 category + slug", () => {
+    expect(
+      createSessionBodySchema.safeParse({ category: "graphic_design", slug: "dev" }).success,
+    ).toBe(true);
   });
 
   it("拒絕未知 category", () => {
-    expect(createSessionBodySchema.safeParse({ category: "unknown" }).success).toBe(false);
+    expect(
+      createSessionBodySchema.safeParse({ category: "unknown", slug: "dev" }).success,
+    ).toBe(false);
   });
+
+  it("拒絕缺 slug", () => {
+    expect(
+      createSessionBodySchema.safeParse({ category: "graphic_design" }).success,
+    ).toBe(false);
+  });
+
+  it.each(["A", "-abc", "a b", "x", "a".repeat(33)])(
+    "拒絕不合法 slug：%s",
+    (slug) => {
+      expect(
+        createSessionBodySchema.safeParse({ category: "graphic_design", slug }).success,
+      ).toBe(false);
+    },
+  );
 });
 
 describe("describeBodySchema — raw_text 邊界", () => {

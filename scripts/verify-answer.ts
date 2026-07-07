@@ -6,13 +6,14 @@
  * describe → answer 迴圈，對真實 Gemini + Supabase 跑一輪完整反問：
  * 故意給模糊描述 → 觸發反問 → 依序回答 → 看續問 / 出報價 / 保守估算。
  *
- * 前置：需先套用 migration 0004_quote_is_conservative.sql。
+ * 前置：需先套用多租戶 migrations 並跑過 pnpm seed:rate-card。
  * 會建立測試 session 與相關資料，驗收後可自行於 Supabase Studio 清除。
  */
 import { createSession } from "@/domains/intake/sessionService.ts";
 import { handleDescribe } from "@/orchestrator/describeFlow.ts";
 import { handleAnswer } from "@/orchestrator/answerFlow.ts";
 import type { FlowOutcome } from "@/orchestrator/flowOutcome.ts";
+import { ensureDevMerchant } from "./dev-merchant.ts";
 
 /** 依序回答反問的預備答案（涵蓋常見缺漏欄位）。 */
 const ANSWERS = ["角色設計一張", "商業使用", "兩週內完成", "含兩次修改"];
@@ -32,7 +33,8 @@ function printOutcome(label: string, outcome: FlowOutcome): void {
 }
 
 async function main(): Promise<void> {
-  const { sessionId } = await createSession("illustration");
+  const merchantId = await ensureDevMerchant();
+  const { sessionId } = await createSession("illustration", merchantId);
   console.log("session:", sessionId);
 
   let result = await handleDescribe({

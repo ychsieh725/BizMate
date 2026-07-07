@@ -55,7 +55,7 @@ describe("POST /api/sessions/{id}/describe — 編排結果對映", () => {
   });
 
   it("conflict → 409", async () => {
-    mockHandle.mockResolvedValue({ ok: false, error: "conflict", currentStatus: "awaiting_freelancer" });
+    mockHandle.mockResolvedValue({ ok: false, error: "conflict", currentStatus: "awaiting_review" });
     const res = await post(VALID_UUID, VALID_BODY);
     expect(res.status).toBe(409);
   });
@@ -63,13 +63,13 @@ describe("POST /api/sessions/{id}/describe — 編排結果對映", () => {
   it("齊全 → 200 + quote_code + out_of_scope（snake_case）", async () => {
     mockHandle.mockResolvedValue({
       ok: true,
-      outcome: { status: "awaiting_freelancer", quoteCode: "I-2607001", outOfScope: false },
+      outcome: { status: "awaiting_review", quoteCode: "I-2607001", outOfScope: false },
     });
     const res = await post(VALID_UUID, VALID_BODY);
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.data).toEqual({
-      status: "awaiting_freelancer",
+      status: "awaiting_review",
       quote_code: "I-2607001",
       out_of_scope: false,
     });

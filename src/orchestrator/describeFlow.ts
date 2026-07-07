@@ -67,6 +67,7 @@ export async function handleDescribe(params: {
 
   const outcome = await resolveAfterParse({
     sessionId,
+    merchantId: session.merchant_id,
     category: session.category,
     fields: parsed.fields,
     missingFields: parsed.missingRequiredFields,

@@ -41,6 +41,7 @@ const mockResolve = vi.mocked(resolveAfterParse);
 function fakeSession(status: SessionStatus, category: CaseCategory = "illustration"): Tables<"sessions"> {
   return {
     id: "s1",
+    merchant_id: "99999999-9999-9999-9999-999999999999",
     category,
     contact_email: "c@example.com",
     status,
@@ -61,7 +62,7 @@ beforeEach(() => {
     missingRequiredFields: [],
   });
   mockCountAnswered.mockResolvedValue(1);
-  mockResolve.mockResolvedValue({ status: "awaiting_freelancer", quoteCode: "I-2607005", conservative: false });
+  mockResolve.mockResolvedValue({ status: "awaiting_review", quoteCode: "I-2607005", conservative: false });
 });
 
 describe("handleAnswer — 前置檢查", () => {
@@ -145,7 +146,7 @@ describe("handleAnswer — 主流程", () => {
     const result = await handleAnswer(CALL);
     expect(result).toEqual({
       ok: true,
-      outcome: { status: "awaiting_freelancer", quoteCode: "I-2607005", conservative: false },
+      outcome: { status: "awaiting_review", quoteCode: "I-2607005", conservative: false },
     });
   });
 });
