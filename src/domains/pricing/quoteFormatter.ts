@@ -22,16 +22,18 @@ export function quoteCodePrefix(category: CaseCategory, now: Date): string {
 }
 
 /**
- * 配發唯一 quote_code（3.4、FR-LN-2）。
- * 流水號 = 當月當類型既有筆數 + 1；最終唯一性由 DB 的 quote_code UNIQUE 兜底。
+ * 配發商家內唯一的 quote_code（3.4、FR-LN-2）。
+ * 流水號 = 該商家當月當類型既有筆數 + 1；
+ * 最終唯一性由 DB 的 UNIQUE (merchant_id, quote_code) 兜底。
  * now 可注入以利測試。
  */
 export async function generateQuoteCode(
+  merchantId: string,
   category: CaseCategory,
   now: Date = new Date(),
 ): Promise<string> {
   const prefix = quoteCodePrefix(category, now);
-  const count = await quotesRepository.countByCodePrefix(prefix);
+  const count = await quotesRepository.countByCodePrefix(merchantId, prefix);
   const serial = String(count + 1).padStart(3, "0");
   return `${prefix}${serial}`;
 }

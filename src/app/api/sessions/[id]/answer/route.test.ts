@@ -60,7 +60,7 @@ describe("POST /api/sessions/[id]/answer", () => {
     mockHandleAnswer.mockResolvedValue({
       ok: false,
       error: "conflict",
-      currentStatus: "awaiting_freelancer",
+      currentStatus: "awaiting_review",
     });
     const res = await POST(postRequest({ answer: "商業使用" }), params());
     expect(res.status).toBe(409);
@@ -92,7 +92,7 @@ describe("POST /api/sessions/[id]/answer", () => {
     mockHandleAnswer.mockResolvedValue({
       ok: true,
       outcome: {
-        status: "awaiting_freelancer",
+        status: "awaiting_review",
         quoteCode: "I-2607007",
         outOfScope: false,
         conservative: true,
@@ -104,7 +104,7 @@ describe("POST /api/sessions/[id]/answer", () => {
 
     expect(res.status).toBe(200);
     expect(json.data).toMatchObject({
-      status: "awaiting_freelancer",
+      status: "awaiting_review",
       quote_code: "I-2607007",
       conservative: true,
     });

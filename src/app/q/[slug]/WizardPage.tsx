@@ -15,8 +15,16 @@ import { StepResult } from "./components/StepResult.tsx";
  * Wizard 容器（任務 3.6）：編排 Step 1-4 的狀態流轉（FR-CW-1~4）。
  * 唯一持有跨步驟狀態的地方；各 Step 元件無狀態、只回呼容器。
  * API 呼叫全走 wizardApi（不 throw），失敗以 serverError 回饋、不中斷流程。
+ * slug/merchantName 由 server component（page.tsx）解析後注入——
+ * 建 session 一律帶 slug，報價歸屬該商家。
  */
-export default function WizardPage() {
+export function WizardPage({
+  slug,
+  merchantName,
+}: {
+  slug: string;
+  merchantName: string;
+}) {
   const [step, setStep] = useState<WizardStep>("category");
   const [category, setCategory] = useState<CaseCategory | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -27,7 +35,7 @@ export default function WizardPage() {
   async function startSession(selected: CaseCategory): Promise<void> {
     setServerError("");
     setCategory(selected);
-    const result = await createSession(selected);
+    const result = await createSession(selected, slug);
     if (!result.ok) {
       setServerError(result.error);
       setStep("category");
@@ -67,6 +75,9 @@ export default function WizardPage() {
 
   return (
     <main className="mx-auto flex min-h-full max-w-2xl flex-col justify-center gap-6 px-6 py-16">
+      <header className="text-sm font-medium text-zinc-500">
+        {merchantName} 的自動報價
+      </header>
       {step === "category" && (
         <>
           <StepCategory onSelect={startSession} />

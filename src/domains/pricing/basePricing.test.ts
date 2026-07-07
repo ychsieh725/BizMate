@@ -14,9 +14,12 @@ import {
 const mockFindBase = vi.mocked(rateCardRepository.findBase);
 const mockFindModifiers = vi.mocked(rateCardRepository.findModifiers);
 
+const MERCHANT_ID = "99999999-9999-9999-9999-999999999999";
+
 function baseRow(overrides: Partial<Tables<"rate_card_base">> = {}): Tables<"rate_card_base"> {
   return {
     id: "base-1",
+    merchant_id: MERCHANT_ID,
     category: "illustration",
     subtype: "角色設計",
     unit: "每角色",
@@ -29,6 +32,7 @@ function baseRow(overrides: Partial<Tables<"rate_card_base">> = {}): Tables<"rat
 function modRow(overrides: Partial<Tables<"rate_card_modifiers">>): Tables<"rate_card_modifiers"> {
   return {
     id: "mod-1",
+    merchant_id: MERCHANT_ID,
     category: null,
     modifier_name: "商業使用加成",
     trigger_condition: "授權範圍=商業使用",
@@ -60,7 +64,7 @@ describe("computeBasePricing — 基礎費", () => {
   it("base_price × 數量，帶 ruleId 可回溯", async () => {
     mockFindBase.mockResolvedValue(baseRow({ id: "base-42", base_price: 4000 }));
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "單張插畫" },
       quantity: { value: "3" },
     });
@@ -77,7 +81,7 @@ describe("computeBasePricing — 基礎費", () => {
   it("數量缺漏或非正整數 → 視為 1", async () => {
     mockFindBase.mockResolvedValue(baseRow({ base_price: 5000 }));
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "單張插畫" },
     });
 
@@ -89,7 +93,7 @@ describe("computeBasePricing — 基礎費", () => {
       baseRow({ category: "web_design", subtype: "多頁式網站", base_price: 8000 }),
     );
 
-    const result = await computeBasePricing("web_design", {
+    const result = await computeBasePricing(MERCHANT_ID, "web_design", {
       subtype: { value: "多頁式網站" },
       page_count: { value: "5" },
     });
@@ -102,7 +106,7 @@ describe("computeBasePricing — out_of_scope", () => {
   it("查無 subtype → outOfScope，不虛構金額", async () => {
     mockFindBase.mockResolvedValue(null);
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "不存在的類型" },
     });
 
@@ -110,14 +114,14 @@ describe("computeBasePricing — out_of_scope", () => {
   });
 
   it("subtype 缺漏 → 不查表、outOfScope", async () => {
-    const result = await computeBasePricing("illustration", {});
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {});
     expect(result.outOfScope).toBe(true);
     expect(mockFindBase).not.toHaveBeenCalled();
   });
 
   it("base_price 為 null → outOfScope", async () => {
     mockFindBase.mockResolvedValue(baseRow({ base_price: null }));
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "角色設計" },
     });
     expect(result.outOfScope).toBe(true);
@@ -131,7 +135,7 @@ describe("computeBasePricing — 固定倍率 modifiers", () => {
       modRow({ id: "m-commercial", range_min: 0.3, range_max: 0.3 }),
     ]);
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "角色設計" },
       license_scope: { value: "商用" },
     });
@@ -149,7 +153,7 @@ describe("computeBasePricing — 固定倍率 modifiers", () => {
     mockFindBase.mockResolvedValue(baseRow({ base_price: 6000 }));
     mockFindModifiers.mockResolvedValue([modRow({ range_min: 0.3, range_max: 0.3 })]);
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "角色設計" },
       license_scope: { value: "個人使用" },
     });
@@ -170,7 +174,7 @@ describe("computeBasePricing — 固定倍率 modifiers", () => {
       }),
     ]);
 
-    const result = await computeBasePricing("graphic_design", {
+    const result = await computeBasePricing(MERCHANT_ID, "graphic_design", {
       subtype: { value: "LOGO設計" },
       license_scope: { value: "商用" },
     });
@@ -184,7 +188,7 @@ describe("computeBasePricing — 固定倍率 modifiers", () => {
       modRow({ range_min: null, range_max: null }),
     ]);
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "角色設計" },
       license_scope: { value: "商用" },
     });
@@ -204,7 +208,7 @@ describe("computeBasePricing — 固定倍率 modifiers", () => {
       }),
     ]);
 
-    const result = await computeBasePricing("illustration", {
+    const result = await computeBasePricing(MERCHANT_ID, "illustration", {
       subtype: { value: "角色設計" },
       license_scope: { value: "商用" },
     });

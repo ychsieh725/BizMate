@@ -23,7 +23,7 @@ beforeEach(() => {
 
 describe("GET /api/sessions/{id}/status", () => {
   it("存在的 session → 200 + status", async () => {
-    mockGetStatus.mockResolvedValue("awaiting_freelancer");
+    mockGetStatus.mockResolvedValue("awaiting_review");
 
     const res = await getWith(VALID_UUID);
     const json = await res.json();
@@ -31,7 +31,7 @@ describe("GET /api/sessions/{id}/status", () => {
     expect(res.status).toBe(200);
     expect(json).toEqual({
       success: true,
-      data: { status: "awaiting_freelancer" },
+      data: { status: "awaiting_review" },
       error: null,
     });
     expect(mockGetStatus).toHaveBeenCalledWith(VALID_UUID);

@@ -15,6 +15,7 @@ import {
   generateQuoteCode,
   formatQuotePreview,
 } from "@/domains/pricing/quoteFormatter.ts";
+import { ensureDevMerchant } from "./dev-merchant.ts";
 
 const SAMPLES: {
   label: string;
@@ -56,9 +57,10 @@ const SAMPLES: {
 ];
 
 async function main(): Promise<void> {
+  const merchantId = await ensureDevMerchant();
   for (const { label, category, fields } of SAMPLES) {
-    const pricing = await computeBasePricing(category, fields);
-    const code = await generateQuoteCode(category);
+    const pricing = await computeBasePricing(merchantId, category, fields);
+    const code = await generateQuoteCode(merchantId, category);
     const preview = formatQuotePreview(category, pricing, code);
 
     console.log(`\n──────── ${label} ────────`);

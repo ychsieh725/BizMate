@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories";
 
 /**
  * BizMate 首頁佔位。
- * P0（任務 3.6）會替換為正式的 Wizard Step 1 案件類型選擇畫面。
- * 此版僅提供可運行、可導覽的骨架入口，不含業務邏輯。
+ * 多租戶重構後報價入口是各商家的專屬連結 /q/{slug}，首頁不再直連 wizard；
+ * M2 起將加上註冊/登入導流（landing 正式版在 M6）。
  */
 export default function Home() {
   return (
@@ -17,7 +16,7 @@ export default function Home() {
           把口語需求，變成有依據的正式報價單
         </h1>
         <p className="text-zinc-600 dark:text-zinc-400">
-          多 Agent 解析、可追溯定價、接案者 LINE 人工終審。
+          註冊帳號、管理你的服務與價格，把專屬連結傳給客戶自動報價。
         </p>
       </header>
 
@@ -37,12 +36,9 @@ export default function Home() {
         </ul>
       </section>
 
-      <Link
-        href="/wizard"
-        className="inline-flex h-12 w-fit items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:opacity-90"
-      >
-        開始報價（P0 建置中）
-      </Link>
+      <p className="text-sm text-zinc-500">
+        已有商家連結？直接開啟 <code className="rounded bg-black/[.05] px-1.5 py-0.5 dark:bg-white/[.1]">/q/商家代號</code> 即可開始報價。
+      </p>
     </main>
   );
 }

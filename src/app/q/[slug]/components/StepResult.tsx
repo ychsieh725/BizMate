@@ -24,8 +24,7 @@ const STATUS_LABELS: Record<SessionStatus, string> = {
   parsing: "解析需求中…",
   awaiting_clarification: "等待補充資訊",
   pricing: "計算報價中…",
-  awaiting_freelancer: "等待接案者確認中",
-  revising: "接案者調整報價中…",
+  awaiting_review: "等待商家確認中",
   confirmed: "報價已確認，準備寄送",
   sent: "報價單已寄出，請查收 email",
   abandoned: "此報價已取消",
@@ -81,7 +80,7 @@ export function StepResult({
           <p aria-live="polite" className="text-sm text-zinc-600 dark:text-zinc-400">
             目前狀態：<span className="font-medium text-foreground">{STATUS_LABELS[liveStatus]}</span>
             <br />
-            接案者確認後，報價單將以 email 寄送給你。
+            商家確認後，報價單將以 email 寄送給你。
           </p>
         </div>
       )}

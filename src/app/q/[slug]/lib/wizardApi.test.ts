@@ -27,7 +27,7 @@ afterEach(() => {
 });
 
 describe("createSession", () => {
-  it("送出 category 並回傳 camelCase 的 sessionId/status", async () => {
+  it("送出 category + slug 並回傳 camelCase 的 sessionId/status", async () => {
     mockFetchOnce(
       {
         success: true,
@@ -37,13 +37,13 @@ describe("createSession", () => {
       201,
     );
 
-    const result = await createSession("graphic_design");
+    const result = await createSession("graphic_design", "dev");
 
     expect(fetch).toHaveBeenCalledWith(
       "/api/sessions",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ category: "graphic_design" }),
+        body: JSON.stringify({ category: "graphic_design", slug: "dev" }),
       }),
     );
     expect(result).toEqual({
@@ -58,7 +58,7 @@ describe("createSession", () => {
       400,
     );
 
-    const result = await createSession("graphic_design");
+    const result = await createSession("graphic_design", "dev");
 
     expect(result).toEqual({
       ok: false,
@@ -70,7 +70,7 @@ describe("createSession", () => {
   it("fetch 拋錯（網路失敗）時回傳友善錯誤而非 throw", async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new Error("network down"));
 
-    const result = await createSession("illustration");
+    const result = await createSession("illustration", "dev");
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -84,7 +84,7 @@ describe("submitDescribe", () => {
   it("送出 raw_text/contact_email 並轉換 quote_code 結果", async () => {
     mockFetchOnce({
       success: true,
-      data: { status: "awaiting_freelancer", quote_code: "I-2607001" },
+      data: { status: "awaiting_review", quote_code: "I-2607001" },
       error: null,
     });
 
@@ -105,7 +105,7 @@ describe("submitDescribe", () => {
     );
     expect(result).toEqual({
       ok: true,
-      data: { status: "awaiting_freelancer", quoteCode: "I-2607001" },
+      data: { status: "awaiting_review", quoteCode: "I-2607001" },
     });
   });
 
@@ -136,7 +136,7 @@ describe("submitDescribe", () => {
   it("轉換 out_of_scope 結果", async () => {
     mockFetchOnce({
       success: true,
-      data: { status: "awaiting_freelancer", out_of_scope: true },
+      data: { status: "awaiting_review", out_of_scope: true },
       error: null,
     });
 
@@ -147,7 +147,7 @@ describe("submitDescribe", () => {
 
     expect(result).toEqual({
       ok: true,
-      data: { status: "awaiting_freelancer", outOfScope: true },
+      data: { status: "awaiting_review", outOfScope: true },
     });
   });
 
@@ -156,7 +156,7 @@ describe("submitDescribe", () => {
       {
         success: false,
         data: null,
-        error: "session 目前狀態為 awaiting_freelancer，無法再次送出描述",
+        error: "session 目前狀態為 awaiting_review，無法再次送出描述",
       },
       409,
     );
@@ -175,7 +175,7 @@ describe("fetchStatus", () => {
   it("回傳目前 status", async () => {
     mockFetchOnce({
       success: true,
-      data: { status: "awaiting_freelancer" },
+      data: { status: "awaiting_review" },
       error: null,
     });
 
@@ -187,7 +187,7 @@ describe("fetchStatus", () => {
     );
     expect(result).toEqual({
       ok: true,
-      data: { status: "awaiting_freelancer" },
+      data: { status: "awaiting_review" },
     });
   });
 

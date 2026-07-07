@@ -1,5 +1,6 @@
 import { apiOk, apiFail } from "@/lib/api/response.ts";
 import { createSession } from "@/domains/intake/sessionService.ts";
+import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
 import {
   createSessionBodySchema,
   formatZodError,
@@ -11,8 +12,10 @@ import {
 } from "@/lib/rateLimit/rateLimit.ts";
 
 /**
- * POST /api/sessions — Wizard Step 1 建立 session（SDS §5.1、FR-CW-1）。
+ * POST /api/sessions — Wizard Step 1 建立 session（FR-CW-1）。
  * 公開端點：以同一 IP 每小時上限限流，防灌爆與耗盡 Gemini 額度（NFR-7）。
+ * 多租戶入口：body 必帶商家 slug（來自分享連結 /q/{slug}），
+ * 查無此商家即 404——這是匿名客戶端取得 tenant context 的唯一途徑。
  */
 export async function POST(request: Request): Promise<Response> {
   const { allowed } = await checkRateLimit(
@@ -36,7 +39,15 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const { sessionId, status } = await createSession(parsed.data.category);
+    const merchant = await merchantsRepository.findBySlug(parsed.data.slug);
+    if (merchant == null) {
+      return apiFail("查無此報價連結", 404);
+    }
+
+    const { sessionId, status } = await createSession(
+      parsed.data.category,
+      merchant.id,
+    );
     return apiOk({ session_id: sessionId, status }, 201);
   } catch (error) {
     console.error("[POST /api/sessions] createSession 失敗：", error);

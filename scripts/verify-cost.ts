@@ -12,6 +12,7 @@ import {
   computeCostUsd,
   generateStructuredAndLog,
 } from "@/domains/finops/costLogger.ts";
+import { ensureDevMerchant } from "./dev-merchant.ts";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {
@@ -20,7 +21,8 @@ function assert(condition: boolean, message: string): void {
 }
 
 async function main(): Promise<void> {
-  const session = await sessionsRepository.create({ category: "illustration" });
+  const merchantId = await ensureDevMerchant();
+  const session = await sessionsRepository.create({ category: "illustration", merchant_id: merchantId });
   const logIds: string[] = [];
 
   try {

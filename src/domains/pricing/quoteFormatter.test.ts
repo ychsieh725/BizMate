@@ -35,18 +35,24 @@ describe("quoteCodePrefix", () => {
 });
 
 describe("generateQuoteCode", () => {
-  it("流水號 = 當月既有筆數 + 1，補到三位", async () => {
+  const MERCHANT_ID = "99999999-9999-9999-9999-999999999999";
+
+  it("流水號 = 該商家當月既有筆數 + 1，補到三位", async () => {
     mockCount.mockResolvedValue(0);
-    expect(await generateQuoteCode("graphic_design", new Date(2026, 6, 5))).toBe("G-2607001");
+    expect(
+      await generateQuoteCode(MERCHANT_ID, "graphic_design", new Date(2026, 6, 5)),
+    ).toBe("G-2607001");
 
     mockCount.mockResolvedValue(41);
-    expect(await generateQuoteCode("graphic_design", new Date(2026, 6, 5))).toBe("G-2607042");
+    expect(
+      await generateQuoteCode(MERCHANT_ID, "graphic_design", new Date(2026, 6, 5)),
+    ).toBe("G-2607042");
   });
 
-  it("以正確前綴查詢流水號基數", async () => {
+  it("以商家 + 正確前綴查詢流水號基數", async () => {
     mockCount.mockResolvedValue(0);
-    await generateQuoteCode("web_design", new Date(2026, 6, 5));
-    expect(mockCount).toHaveBeenCalledWith("W-2607");
+    await generateQuoteCode(MERCHANT_ID, "web_design", new Date(2026, 6, 5));
+    expect(mockCount).toHaveBeenCalledWith(MERCHANT_ID, "W-2607");
   });
 });
 

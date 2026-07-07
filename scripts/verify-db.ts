@@ -9,18 +9,20 @@ import { createClient } from "@supabase/supabase-js";
 import { env } from "../src/lib/env.ts";
 
 const EXPECTED_TABLES = [
+  "merchants",
   "sessions",
   "raw_inputs",
   "extracted_fields",
   "clarification_turns",
   "rate_card_base",
   "rate_card_modifiers",
+  "rate_card_template_base",
+  "rate_card_template_modifiers",
   "price_line_items",
   "quotes",
-  "revision_turns",
-  "line_binding",
   "eval_runs",
   "cost_logs",
+  "rate_limits",
 ] as const;
 
 async function main(): Promise<void> {

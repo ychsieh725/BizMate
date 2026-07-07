@@ -8,7 +8,6 @@
 import type {
   CaseCategory,
   QuoteStatus,
-  RevisionChannel,
   SessionStatus,
 } from "@/shared/types/domain.types";
 
@@ -24,9 +23,37 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      merchants: {
+        Row: {
+          id: string;
+          display_name: string;
+          public_slug: string;
+          contact_email: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          display_name: string;
+          public_slug: string;
+          contact_email: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          display_name?: string;
+          public_slug?: string;
+          contact_email?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       sessions: {
         Row: {
           id: string;
+          merchant_id: string;
           category: CaseCategory;
           contact_email: string | null;
           status: SessionStatus;
@@ -36,6 +63,7 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          merchant_id: string;
           category: CaseCategory;
           contact_email?: string | null;
           status?: SessionStatus;
@@ -45,6 +73,7 @@ export type Database = {
         };
         Update: {
           id?: string;
+          merchant_id?: string;
           category?: CaseCategory;
           contact_email?: string | null;
           status?: SessionStatus;
@@ -138,6 +167,66 @@ export type Database = {
       rate_card_base: {
         Row: {
           id: string;
+          merchant_id: string;
+          category: CaseCategory;
+          subtype: string;
+          unit: string;
+          base_price: number | null;
+          includes: string | null;
+        };
+        Insert: {
+          id?: string;
+          merchant_id: string;
+          category: CaseCategory;
+          subtype: string;
+          unit: string;
+          base_price?: number | null;
+          includes?: string | null;
+        };
+        Update: {
+          id?: string;
+          merchant_id?: string;
+          category?: CaseCategory;
+          subtype?: string;
+          unit?: string;
+          base_price?: number | null;
+          includes?: string | null;
+        };
+        Relationships: [];
+      };
+      rate_card_modifiers: {
+        Row: {
+          id: string;
+          merchant_id: string;
+          category: CaseCategory | null;
+          modifier_name: string;
+          trigger_condition: string;
+          range_min: number | null;
+          range_max: number | null;
+        };
+        Insert: {
+          id?: string;
+          merchant_id: string;
+          category?: CaseCategory | null;
+          modifier_name: string;
+          trigger_condition: string;
+          range_min?: number | null;
+          range_max?: number | null;
+        };
+        Update: {
+          id?: string;
+          merchant_id?: string;
+          category?: CaseCategory | null;
+          modifier_name?: string;
+          trigger_condition?: string;
+          range_min?: number | null;
+          range_max?: number | null;
+        };
+        Relationships: [];
+      };
+      rate_card_template_base: {
+        Row: {
+          id: string;
           category: CaseCategory;
           subtype: string;
           unit: string;
@@ -162,7 +251,7 @@ export type Database = {
         };
         Relationships: [];
       };
-      rate_card_modifiers: {
+      rate_card_template_modifiers: {
         Row: {
           id: string;
           category: CaseCategory | null;
@@ -232,6 +321,7 @@ export type Database = {
         Row: {
           id: string;
           session_id: string;
+          merchant_id: string;
           quote_code: string;
           final_amount: number | null;
           status: QuoteStatus;
@@ -243,6 +333,7 @@ export type Database = {
         Insert: {
           id?: string;
           session_id: string;
+          merchant_id: string;
           quote_code: string;
           final_amount?: number | null;
           status?: QuoteStatus;
@@ -254,6 +345,7 @@ export type Database = {
         Update: {
           id?: string;
           session_id?: string;
+          merchant_id?: string;
           quote_code?: string;
           final_amount?: number | null;
           status?: QuoteStatus;
@@ -261,60 +353,6 @@ export type Database = {
           created_at?: string;
           sent_at?: string | null;
           is_conservative?: boolean;
-        };
-        Relationships: [];
-      };
-      revision_turns: {
-        Row: {
-          id: string;
-          session_id: string;
-          round: number;
-          channel: RevisionChannel;
-          raw_message: string | null;
-          parsed_action: Json | null;
-          applied_at: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          session_id: string;
-          round: number;
-          channel: RevisionChannel;
-          raw_message?: string | null;
-          parsed_action?: Json | null;
-          applied_at?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          session_id?: string;
-          round?: number;
-          channel?: RevisionChannel;
-          raw_message?: string | null;
-          parsed_action?: Json | null;
-          applied_at?: string | null;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      line_binding: {
-        Row: {
-          id: string;
-          freelancer_line_user_id: string;
-          active_session_id: string | null;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          freelancer_line_user_id: string;
-          active_session_id?: string | null;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          freelancer_line_user_id?: string;
-          active_session_id?: string | null;
-          updated_at?: string;
         };
         Relationships: [];
       };
@@ -418,7 +456,6 @@ export type Database = {
       case_category: CaseCategory;
       session_status: SessionStatus;
       quote_status: QuoteStatus;
-      revision_channel: RevisionChannel;
     };
     CompositeTypes: Record<never, never>;
   };

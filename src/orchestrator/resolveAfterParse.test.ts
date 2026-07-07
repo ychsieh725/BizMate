@@ -35,7 +35,13 @@ const mockPricing = vi.mocked(computeBasePricing);
 const mockQuoteCode = vi.mocked(generateQuoteCode);
 const mockQuoteCreate = vi.mocked(quotesRepository.create);
 
-const BASE = { sessionId: "sid-1", category: "illustration" as const, fields: {} };
+const MERCHANT_ID = "99999999-9999-9999-9999-999999999999";
+const BASE = {
+  sessionId: "sid-1",
+  merchantId: MERCHANT_ID,
+  category: "illustration" as const,
+  fields: {},
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -53,12 +59,17 @@ describe("resolveAfterParse", () => {
     });
 
     expect(mockGenerateQuestion).not.toHaveBeenCalled();
-    expect(mockPricing).toHaveBeenCalledOnce();
+    expect(mockPricing).toHaveBeenCalledWith(MERCHANT_ID, "illustration", {});
     expect(mockQuoteCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ is_conservative: false, final_amount: 5000 }),
+      expect.objectContaining({
+        is_conservative: false,
+        final_amount: 5000,
+        merchant_id: MERCHANT_ID,
+        status: "awaiting_review",
+      }),
     );
     expect(outcome).toEqual({
-      status: "awaiting_freelancer",
+      status: "awaiting_review",
       quoteCode: "I-2607009",
       outOfScope: false,
       conservative: false,
@@ -105,9 +116,39 @@ describe("resolveAfterParse", () => {
     expect(mockQuoteCreate).toHaveBeenCalledWith(
       expect.objectContaining({ is_conservative: true }),
     );
-    expect(outcome.status).toBe("awaiting_freelancer");
+    expect(outcome.status).toBe("awaiting_review");
     expect(outcome.conservative).toBe(true);
     expect(outcome.quoteCode).toBe("I-2607009");
+  });
+
+  it("quote_code 撞唯一約束 → 重新取號重試一次", async () => {
+    mockQuoteCode.mockResolvedValueOnce("I-2607009").mockResolvedValueOnce("I-2607010");
+    mockQuoteCreate
+      .mockRejectedValueOnce(
+        new Error('duplicate key value violates unique constraint "quotes_merchant_id_quote_code_key"'),
+      )
+      .mockResolvedValueOnce({ id: "q-1" } as never);
+
+    const outcome = await resolveAfterParse({
+      ...BASE,
+      missingFields: [],
+      completedRounds: 0,
+    });
+
+    expect(mockQuoteCreate).toHaveBeenCalledTimes(2);
+    expect(mockQuoteCreate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ quote_code: "I-2607010" }),
+    );
+    expect(outcome.quoteCode).toBe("I-2607010");
+  });
+
+  it("quote 寫入失敗且非唯一約束 → 原樣拋出", async () => {
+    mockQuoteCreate.mockRejectedValueOnce(new Error("connection refused"));
+
+    await expect(
+      resolveAfterParse({ ...BASE, missingFields: [], completedRounds: 0 }),
+    ).rejects.toThrow("connection refused");
+    expect(mockQuoteCreate).toHaveBeenCalledTimes(1);
   });
 
   it("保守估算時 out_of_scope（缺 subtype）→ final_amount 為 null", async () => {

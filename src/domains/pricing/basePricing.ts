@@ -57,12 +57,13 @@ function isModifierTriggered(
  * 查無子類型 → outOfScope（FR-PR-3）。每個項目帶 ruleId/modifierId 可回溯。
  */
 export async function computeBasePricing(
+  merchantId: string,
   category: CaseCategory,
   fields: ExtractedValues,
 ): Promise<PricingResult> {
   const subtype = fields.subtype?.value ?? null;
   const base = subtype
-    ? await rateCardRepository.findBase(category, subtype)
+    ? await rateCardRepository.findBase(merchantId, category, subtype)
     : null;
 
   if (base == null || base.base_price == null) {
@@ -81,7 +82,7 @@ export async function computeBasePricing(
     },
   ];
 
-  const modifiers = await rateCardRepository.findModifiers(category);
+  const modifiers = await rateCardRepository.findModifiers(merchantId, category);
   for (const modifier of modifiers) {
     const { range_min, range_max } = modifier;
     if (range_min == null || range_max == null) continue;
