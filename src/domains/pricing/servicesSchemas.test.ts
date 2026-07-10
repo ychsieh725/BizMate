@@ -123,7 +123,7 @@ describe("updateServiceBodySchema", () => {
 describe("serviceIdSchema", () => {
   it("合法 UUID → 通過", () => {
     expect(
-      serviceIdSchema.safeParse("99999999-9999-9999-9999-999999999999")
+      serviceIdSchema.safeParse("550e8400-e29b-41d4-a716-446655440000")
         .success,
     ).toBe(true);
   });

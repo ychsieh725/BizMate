@@ -29,5 +29,5 @@ export const updateServiceBodySchema = z.object({
 });
 export type UpdateServiceBody = z.infer<typeof updateServiceBodySchema>;
 
-/** 服務項目 id 路徑參數：必須是合法 UUID（DB 主鍵格式）。 */
-export const serviceIdSchema = z.string().guid();
+/** 服務項目 id 路徑參數：必須是合法 UUID（DB 主鍵格式，同 sessionIdSchema 慣例）。 */
+export const serviceIdSchema = z.string().uuid();
