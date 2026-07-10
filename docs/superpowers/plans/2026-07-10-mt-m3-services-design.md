@@ -97,10 +97,32 @@ COMMIT;
       .maybeSingle();
 ```
 
-- [ ] **Step 5：執行既有測試，確認 basePricing.test.ts 無需改動仍全過**
+- [ ] **Step 5：執行既有測試，確認 basePricing.test.ts 無需改動仍全過（runtime 行為層面）**
 
 Run: `pnpm test -- basePricing`
 Expected: PASS（8 個測試，mock 在 `rateCardRepository.findBase` 函式層級，`.eq` 呼叫鏈的實作細節不影響 mock 呼叫）
+
+- [ ] **Step 5.5：修正 `basePricing.test.ts` 的 `baseRow()` 工廠函式（型別層面的必要連帶修改）**
+
+`is_active` 變成 Row 型別的必填欄位後，`basePricing.test.ts:19-30` 的 `baseRow()` 直接建構完整 `Tables<"rate_card_base">` 物件字面值，會被 tsc 檢查出缺少該欄位（TS2322）。這不是行為變更，純粹補齊型別欄位：
+
+修改 `src/domains/pricing/basePricing.test.ts` 的 `baseRow()` 預設物件（第 19-30 行附近），加入 `is_active: true`：
+
+```typescript
+function baseRow(overrides: Partial<Tables<"rate_card_base">> = {}): Tables<"rate_card_base"> {
+  return {
+    id: "base-1",
+    merchant_id: MERCHANT_ID,
+    category: "illustration",
+    subtype: "角色設計",
+    unit: "每角色",
+    base_price: 6000,
+    includes: null,
+    is_active: true,
+    ...overrides,
+  };
+}
+```
 
 - [ ] **Step 6：型別檢查 + 全量測試**
 
@@ -110,7 +132,7 @@ Expected: 型別檢查通過；261 個既有測試全過
 - [ ] **Step 7：Commit**
 
 ```bash
-git add supabase/migrations/0004_rate_card_soft_delete.sql src/lib/supabase/database.types.ts src/domains/pricing/repositories/rateCardRepository.ts
+git add supabase/migrations/0004_rate_card_soft_delete.sql src/lib/supabase/database.types.ts src/domains/pricing/repositories/rateCardRepository.ts src/domains/pricing/basePricing.test.ts
 git commit -m "feat(pricing): rate_card_base 加 is_active 軟刪除欄位
 
 為什麼：商家需要能下架服務項目，但 price_line_items.rule_id 對
@@ -319,6 +341,14 @@ export const serviceIdSchema = z.string().uuid();
 
 Run: `pnpm test -- servicesSchemas`
 Expected: PASS（15 個測試）
+
+- [ ] **Step 4.5：修正發現的問題——`serviceIdSchema` 改回嚴格 `.uuid()`，測試 fixture 改用合規 UUID**
+
+執行過程中發現：本 repo 是 zod 4.4.3，`.uuid()` 會嚴格檢查 version/variant bits。既有慣例 `sessionIdSchema`（`src/domains/intake/sessionSchemas.ts:21`）用的正是嚴格 `.uuid()`，其測試 fixture 用真正合規的 UUID `550e8400-e29b-41d4-a716-446655440000`（見 `src/app/api/sessions/[id]/status/route.test.ts:11`）。上面 Step 1/3 若直接照抄用 `99999999-9999-9999-9999-999999999999`（version nibble=9，不合規）當「合法 UUID」測試值，會與嚴格 `.uuid()` 矛盾。
+
+**修正（非放寬驗證）：** `serviceIdSchema` 維持 `z.string().uuid()`（與 `sessionIdSchema` 一致，不要改成 `.guid()`），把 Step 1 測試中「合法 UUID → 通過」案例的字串改成 `550e8400-e29b-41d4-a716-446655440000`。
+
+同樣道理適用於 **Task 5** 的 `[id]/route.test.ts`：該檔案的 `ITEM_ID`/`OTHER_MERCHANT_ID` 常數會真的流經 route handler 內未 mock 的 `serviceIdSchema.safeParse(id)`，若沿用 `77777777-.../88888888-...` 這類重複數字 fixture 會被嚴格 `.uuid()` 擋下，導致「更新成功 → 200」等案例誤回 400。撰寫 Task 5 時，`ITEM_ID`/`OTHER_MERCHANT_ID` 也必須改用合規 UUID，例如 `ITEM_ID = "550e8400-e29b-41d4-a716-446655440000"`、`OTHER_MERCHANT_ID = "6ba7b810-9dad-41d1-80b4-00c04fd430c8"`（`MERCHANT_ID` 本身不流經任何 zod `.uuid()` 檢查，維持原本的 `99999999-...` 不受影響）。
 
 - [ ] **Step 5：Commit**
 
@@ -718,8 +748,8 @@ const mockFindById = vi.mocked(servicesRepository.findById);
 const mockUpdate = vi.mocked(servicesRepository.update);
 
 const MERCHANT_ID = "99999999-9999-9999-9999-999999999999";
-const OTHER_MERCHANT_ID = "88888888-8888-8888-8888-888888888888";
-const ITEM_ID = "77777777-7777-7777-7777-777777777777";
+const OTHER_MERCHANT_ID = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
+const ITEM_ID = "550e8400-e29b-41d4-a716-446655440000";
 
 const ITEM: Tables<"rate_card_base"> = {
   id: ITEM_ID,
