@@ -24,6 +24,7 @@ export class RateCardRepository {
       .eq("merchant_id", merchantId)
       .eq("category", category)
       .eq("subtype", subtype)
+      .eq("is_active", true)
       .maybeSingle();
     if (error) {
       throw new RepositoryError("rate_card_base", "findBase", error.message);
