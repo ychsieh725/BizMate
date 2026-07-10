@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories.ts";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 
@@ -25,10 +25,16 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
   const [savingId, setSavingId] = useState<string | null>(null);
   const [errorById, setErrorById] = useState<Record<string, string>>({});
 
-  useEffect(() => {
+  // router.refresh()（NewServiceForm 新增成功後）會讓 page.tsx 重新查詢並傳入新的
+  // initialItems 參照。依 React 官方建議的「render 期間調整 state」模式同步，
+  // 不用 useEffect（避免 react-hooks/set-state-in-effect：見
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes）。
+  const [prevInitialItems, setPrevInitialItems] = useState(initialItems);
+  if (initialItems !== prevInitialItems) {
+    setPrevInitialItems(initialItems);
     setItems(initialItems);
     setDrafts(toDraftMap(initialItems));
-  }, [initialItems]);
+  }
 
   async function refetch(): Promise<void> {
     const res = await fetch("/api/dashboard/services");
