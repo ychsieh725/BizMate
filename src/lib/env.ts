@@ -23,6 +23,9 @@ const envSchema = z.object({
   // 核心
   SUPABASE_URL: z.string().url("必須是合法的 URL"),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, "不可為空"),
+  // 核心（5.2 起）：@supabase/ssr 用，client 端可見（anon key 本就設計為可公開）
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url("必須是合法的 URL"),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, "不可為空"),
   // 功能性（啟用時由 requireEnv 把關；現階段留空不報錯）
   GEMINI_API_KEY: optional(z.string().min(1)),
   LINE_CHANNEL_ACCESS_TOKEN: optional(z.string().min(1)),
