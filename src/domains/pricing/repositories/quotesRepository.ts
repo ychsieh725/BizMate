@@ -1,4 +1,5 @@
 import { BaseRepository, RepositoryError } from "@/lib/supabase/repository.ts";
+import type { QuoteStatus } from "@/shared/types/domain.types";
 
 /**
  * quotes 表 repository。繼承標準 CRUD（create 用於報價寫入），
@@ -22,6 +23,19 @@ export class QuotesRepository extends BaseRepository<"quotes"> {
       .like("quote_code", `${prefix}%`);
     if (error) {
       throw new RepositoryError("quotes", "countByCodePrefix", error.message);
+    }
+    return count ?? 0;
+  }
+
+  /** 計算該商家指定狀態的報價筆數（/dashboard 待審數用）。 */
+  async countByStatus(merchantId: string, status: QuoteStatus): Promise<number> {
+    const { count, error } = await this.client
+      .from("quotes")
+      .select("*", { count: "exact", head: true })
+      .eq("merchant_id", merchantId)
+      .eq("status", status);
+    if (error) {
+      throw new RepositoryError("quotes", "countByStatus", error.message);
     }
     return count ?? 0;
   }
