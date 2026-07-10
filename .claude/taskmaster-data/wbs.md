@@ -1,7 +1,7 @@
 # WBS - BizMate
 
 **建立日期:** 2026-07-04
-**最後更新:** 2026-07-07（🔄 專案方向轉型：單一接案者 demo → 多使用者 SaaS。MT-M1 已完成併入 main（779741d）：DB 重寫多租戶 schema、merchantId 全鏈貫穿、wizard 搬 /q/{slug}，205 測試綠 + 全 verify 實測通過。LINE 終審鏈（原 4.6–4.11）作廢，改網頁後台終審）
+**最後更新:** 2026-07-10（MT-M2a 已完成併入 main：@supabase/ssr + middleware（改名 proxy.ts 對齊 Next 16）保護 /dashboard、/onboarding；/login /signup Server Action 頁面；/dashboard placeholder + 登出。231 測試綠，並以 curl 模擬瀏覽器對真實 Supabase 專案驗證路由重導與登入/註冊失敗路徑。上一版：2026-07-07 專案方向轉型：單一接案者 demo → 多使用者 SaaS。MT-M1 已完成併入 main（779741d）：DB 重寫多租戶 schema、merchantId 全鏈貫穿、wizard 搬 /q/{slug}，205 測試綠 + 全 verify 實測通過。LINE 終審鏈（原 4.6–4.11）作廢，改網頁後台終審）
 **開發模式:** MVP 分階段（多租戶重構 MT-M2 → MT-M6，之後進階功能）
 **專案描述:** 多租戶自動化報價 SaaS。使用者（接案者/商家）註冊登入、管理自己的服務項目與價格，取得專屬分享連結 /q/{slug} 傳給客戶；客戶以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，商家於網頁後台終審後以 Email 寄送最終報價單。
 **技術棧:** Next.js 16 + Vercel Serverless / Supabase(Postgres + Auth) / Gemini API / Resend(Email)
@@ -43,7 +43,7 @@
 | 4.8 | ~~Email Dispatcher（Nodemailer + Gmail SMTP）~~ | ⏭️ 作廢 | - | - | - | 改用 Resend HTTP API（→ 5.8）；Gmail 綁單一帳號=單使用者思維 |
 | **5. 多租戶 SaaS 重構（MT-M1 ~ MT-M6，計畫見 documents/BizMate_多租戶重構計畫_v1.0.md）** | | | | | | |
 | 5.1 | MT-M1：DB 重寫多租戶 schema + merchantId 全鏈貫穿 | ✅ 完成 | 高 | 3.x | 3d | merge 779741d：merchants + 範本表、狀態機 8 態、/q/[slug]、seed dev 商家；205 測試綠、db:verify 14/14、verify:describe/answer/pricing 實測通過 |
-| 5.2 | MT-M2a：認證基建（@supabase/ssr + middleware + 註冊/登入頁） | ⏳ 待處理 | 高 | 5.1 | 4h | 計畫 §2；serverClient/browserClient、middleware 保護 /dashboard/**、/login /signup 頁；env 加 NEXT_PUBLIC_SUPABASE_URL/ANON_KEY |
+| 5.2 | MT-M2a：認證基建（@supabase/ssr + middleware + 註冊/登入頁） | ✅ 完成 | 高 | 5.1 | 4h | 計畫 §2；serverClient + middlewareClient、middleware（Next 16 改名 proxy.ts）保護 /dashboard/**、/onboarding、/login /signup 頁（Server Action）；env 加 NEXT_PUBLIC_SUPABASE_URL/ANON_KEY；browserClient 依 YAGNI 未建（用到再補）；231 測試綠，curl 模擬瀏覽器對真實 Supabase 驗證通過 |
 | 5.3 | MT-M2b：onboarding（slug 生成 + 建 merchant + 複製範本） | ⏳ 待處理 | 高 | 5.2 | 3h | POST /api/dashboard/onboarding（冪等）；重用 onboardingService.copyTemplateRateCard；slug 自動生成+碰撞重試；middleware 導無 merchant 者去 /onboarding |
 | 5.4 | MT-M2c：requireMerchant 守門 + RLS owner policies + dashboard 骨架 | ⏳ 待處理 | 高 | 5.3 | 4h | lib/auth/requireMerchant（無 cookie 401/無 merchant 403）；migration 0003 owner policies（auth.uid()=merchant_id）；/dashboard 首頁：待審數 + 分享連結一鍵複製；verify-auth.ts（RLS 隔離實測） |
 | 5.5 | MT-M3：服務項目管理（services CRUD API + UI） | ⏳ 待處理 | 高 | 5.4 | 1.5d | GET/POST /api/dashboard/services、PATCH/DELETE /[id]；inline 編輯 base_price/includes；modifiers 先唯讀；測試重點：跨租戶隔離（B 取 A 資源→404） |
@@ -80,7 +80,7 @@
 | M1: P0 Happy Path | 完整走完「選項目→描述→deterministic 報價」 | 3.1-3.7 | ✅ 完成 |
 | P1 前段 | 反問迴圈 + 保守估價 | 4.1-4.2 | ✅ 完成 |
 | **MT-M1: 多租戶地基** | DB 重寫 + merchantId 貫穿 + /q/{slug} 入口 | 5.1 | ✅ 完成（779741d） |
-| **MT-M2: 註冊登入可用** | 註冊→自帶範本價目表→拿到分享連結→無痕視窗完成一筆報價 | 5.2-5.4 | ⏳ **下一個** |
+| **MT-M2: 註冊登入可用** | 註冊→自帶範本價目表→拿到分享連結→無痕視窗完成一筆報價 | 5.2-5.4 | 🔄 進行中（5.2 完成，**5.3 下一個**） |
 | MT-M3: 服務自管 | 改價後新報價即反映；跨租戶隔離驗證 | 5.5 | ⏳ 待處理 |
 | MT-M4: 後台終審 | 客戶送單→後台看到→調金額→確認 | 5.6-5.7 | ⏳ 待處理 |
 | MT-M5: 報價寄達 | 確認→客戶信箱收到報價信→quote 進終態 sent | 5.8 | ⏳ 待處理 |
