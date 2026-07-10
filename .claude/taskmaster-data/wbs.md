@@ -44,7 +44,7 @@
 | **5. 多租戶 SaaS 重構（MT-M1 ~ MT-M6，計畫見 documents/BizMate_多租戶重構計畫_v1.0.md）** | | | | | | |
 | 5.1 | MT-M1：DB 重寫多租戶 schema + merchantId 全鏈貫穿 | ✅ 完成 | 高 | 3.x | 3d | merge 779741d：merchants + 範本表、狀態機 8 態、/q/[slug]、seed dev 商家；205 測試綠、db:verify 14/14、verify:describe/answer/pricing 實測通過 |
 | 5.2 | MT-M2a：認證基建（@supabase/ssr + middleware + 註冊/登入頁） | ✅ 完成 | 高 | 5.1 | 4h | 計畫 §2；serverClient + middlewareClient、middleware（Next 16 改名 proxy.ts）保護 /dashboard/**、/onboarding、/login /signup 頁（Server Action）；env 加 NEXT_PUBLIC_SUPABASE_URL/ANON_KEY；browserClient 依 YAGNI 未建（用到再補）；231 測試綠，curl 模擬瀏覽器對真實 Supabase 驗證通過 |
-| 5.3 | MT-M2b：onboarding（slug 生成 + 建 merchant + 複製範本） | ⏳ 待處理 | 高 | 5.2 | 3h | POST /api/dashboard/onboarding（冪等）；重用 onboardingService.copyTemplateRateCard；slug 自動生成+碰撞重試；middleware 導無 merchant 者去 /onboarding |
+| 5.3 | MT-M2b：onboarding（slug 生成 + 建 merchant + 複製範本） | 🔄 進行中 | 高 | 5.2 | 3h | POST /api/dashboard/onboarding（冪等）；重用 onboardingService.copyTemplateRateCard；slug 自動生成+碰撞重試；middleware 導無 merchant 者去 /onboarding |
 | 5.4 | MT-M2c：requireMerchant 守門 + RLS owner policies + dashboard 骨架 | ⏳ 待處理 | 高 | 5.3 | 4h | lib/auth/requireMerchant（無 cookie 401/無 merchant 403）；migration 0003 owner policies（auth.uid()=merchant_id）；/dashboard 首頁：待審數 + 分享連結一鍵複製；verify-auth.ts（RLS 隔離實測） |
 | 5.5 | MT-M3：服務項目管理（services CRUD API + UI） | ⏳ 待處理 | 高 | 5.4 | 1.5d | GET/POST /api/dashboard/services、PATCH/DELETE /[id]；inline 編輯 base_price/includes；modifiers 先唯讀；測試重點：跨租戶隔離（B 取 A 資源→404） |
 | 5.6 | MT-M4a：報價列表 + 詳情（quotes API + UI） | ⏳ 待處理 | 高 | 5.4 | 1d | GET /api/dashboard/quotes?status=、GET /[id]（line items + 抽取欄位 + 澄清歷程 + 原始描述）；保守估算標示 |

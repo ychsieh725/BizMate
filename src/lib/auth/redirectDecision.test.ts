@@ -37,4 +37,28 @@ describe("decideRedirect", () => {
   it("已登入訪問公開頁 /q/dev 不重導", () => {
     expect(decideRedirect("/q/dev", true)).toBeNull();
   });
+
+  it("已登入、無 merchant 訪問 /dashboard 導向 /onboarding", () => {
+    expect(decideRedirect("/dashboard", true, false)).toBe("/onboarding");
+  });
+
+  it("已登入、無 merchant 訪問 /onboarding 不重導", () => {
+    expect(decideRedirect("/onboarding", true, false)).toBeNull();
+  });
+
+  it("已登入、有 merchant 訪問 /onboarding 導向 /dashboard", () => {
+    expect(decideRedirect("/onboarding", true, true)).toBe("/dashboard");
+  });
+
+  it("已登入、有 merchant 訪問 /dashboard 不重導（顯式傳入）", () => {
+    expect(decideRedirect("/dashboard", true, true)).toBeNull();
+  });
+
+  it("已登入、無 merchant 訪問 /login 導向 /onboarding", () => {
+    expect(decideRedirect("/login", true, false)).toBe("/onboarding");
+  });
+
+  it("已登入、無 merchant 訪問 /signup 導向 /onboarding", () => {
+    expect(decideRedirect("/signup", true, false)).toBe("/onboarding");
+  });
 });
