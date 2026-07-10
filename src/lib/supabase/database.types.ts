@@ -173,6 +173,7 @@ export type Database = {
           unit: string;
           base_price: number | null;
           includes: string | null;
+          is_active: boolean;
         };
         Insert: {
           id?: string;
@@ -182,6 +183,7 @@ export type Database = {
           unit: string;
           base_price?: number | null;
           includes?: string | null;
+          is_active?: boolean;
         };
         Update: {
           id?: string;
@@ -191,6 +193,7 @@ export type Database = {
           unit?: string;
           base_price?: number | null;
           includes?: string | null;
+          is_active?: boolean;
         };
         Relationships: [];
       };

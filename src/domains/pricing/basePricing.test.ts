@@ -25,6 +25,7 @@ function baseRow(overrides: Partial<Tables<"rate_card_base">> = {}): Tables<"rat
     unit: "每角色",
     base_price: 6000,
     includes: null,
+    is_active: true,
     ...overrides,
   };
 }
