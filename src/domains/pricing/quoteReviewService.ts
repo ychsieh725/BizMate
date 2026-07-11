@@ -68,7 +68,10 @@ export async function getQuoteDetail(
       quoteReviewRepository.findRawInputs(sessionId),
     ]);
 
-  if (session === null) {
+  // quotes.session_id 與 quotes.merchant_id 是兩個獨立 FK，DB 沒有 composite FK
+  // 保證「該 session 屬於該 merchant」——維繫這個等式的是另一個模組的 insert
+  // （resolveAfterParse）。在此複查，讓不變式由本模組自證，而非依賴跨模組約定。
+  if (session === null || session.merchant_id !== merchantId) {
     return null;
   }
 

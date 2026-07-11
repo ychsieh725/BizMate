@@ -146,6 +146,22 @@ describe("getQuoteDetail", () => {
     }
   });
 
+  it("session 屬於其他商家（quotes 的兩個 FK 錯配）→ null", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue({
+      ...SESSION_A,
+      merchant_id: MERCHANT_B,
+    });
+    repo.findLineItems.mockResolvedValue([]);
+    repo.findExtractedFields.mockResolvedValue([]);
+    repo.findClarifications.mockResolvedValue([]);
+    repo.findRawInputs.mockResolvedValue([]);
+
+    const detail = await getQuoteDetail(QUOTE_ID, MERCHANT_A);
+
+    expect(detail).toBeNull();
+  });
+
   it("session 遺失（資料不一致）→ null", async () => {
     repo.findById.mockResolvedValue(QUOTE_A);
     repo.findSessionById.mockResolvedValue(null);
