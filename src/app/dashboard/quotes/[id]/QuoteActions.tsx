@@ -87,6 +87,10 @@ export function QuoteActions({
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             disabled={busy}
+            min={1}
+            step={1}
+            aria-invalid={error !== ""}
+            aria-describedby={error !== "" ? "quote-amount-error" : undefined}
             className="w-40 rounded border px-2 py-1 disabled:opacity-50"
           />
         </label>
@@ -113,7 +117,7 @@ export function QuoteActions({
       </p>
 
       {error !== "" && (
-        <p role="alert" className="text-sm text-red-600">
+        <p id="quote-amount-error" role="alert" className="text-sm text-red-600">
           {error}
         </p>
       )}
