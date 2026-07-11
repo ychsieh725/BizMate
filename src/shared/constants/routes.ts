@@ -26,4 +26,5 @@ export const API_ROUTES = {
   status: (id: string) => `/api/sessions/${id}/status`,
   dashboardQuotes: "/api/dashboard/quotes",
   dashboardQuote: (id: string) => `/api/dashboard/quotes/${id}`,
+  dashboardQuoteConfirm: (id: string) => `/api/dashboard/quotes/${id}/confirm`,
 } as const;

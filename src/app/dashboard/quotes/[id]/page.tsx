@@ -8,6 +8,7 @@ import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories.ts";
 import { fieldLabel } from "@/shared/constants/fieldLabels.ts";
 import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 import { formatAmount, formatDateTime } from "../formatters.ts";
+import { QuoteActions } from "./QuoteActions.tsx";
 
 export default async function QuoteDetailPage({
   params,
@@ -74,6 +75,10 @@ export default async function QuoteDetailPage({
           <dd>{formatDateTime(quote.created_at)}</dd>
         </dl>
       </section>
+
+      {quote.status === "awaiting_review" && (
+        <QuoteActions quoteId={quote.id} initialAmount={quote.final_amount} />
+      )}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium">費用明細</h2>

@@ -454,6 +454,24 @@ export type Database = {
         };
         Returns: boolean;
       };
+      confirm_quote: {
+        Args: {
+          p_quote_id: string;
+          p_merchant_id: string;
+          p_from_status: string;
+          p_to_status: string;
+        };
+        Returns: boolean;
+      };
+      adjust_quote_amount: {
+        Args: {
+          p_quote_id: string;
+          p_merchant_id: string;
+          p_new_amount: number;
+          p_from_status: string;
+        };
+        Returns: boolean;
+      };
     };
     Enums: {
       case_category: CaseCategory;
