@@ -66,8 +66,7 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
           className="rounded border px-3 py-2 disabled:opacity-50"
         />
         <p id="slug-preview" className="text-xs text-gray-500">
-          目前連結：{typeof window !== "undefined" ? window.location.origin : ""}
-          {PAGE_ROUTES.quoteWizard(savedSlug)}
+          目前連結：{PAGE_ROUTES.quoteWizard(savedSlug)}
         </p>
       </div>
 
