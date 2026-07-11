@@ -454,12 +454,13 @@ export type Database = {
         };
         Returns: boolean;
       };
-      confirm_quote: {
+      advance_quote_status: {
         Args: {
           p_quote_id: string;
           p_merchant_id: string;
           p_from_status: string;
           p_to_status: string;
+          p_set_sent_at: boolean;
         };
         Returns: boolean;
       };

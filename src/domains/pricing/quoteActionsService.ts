@@ -1,7 +1,7 @@
 import { transition } from "@/orchestrator/stateMachine.ts";
 import { quoteReviewRepository } from "./repositories/quoteReviewRepository.ts";
 import {
-  callConfirmQuote,
+  callAdvanceQuoteStatus,
   callAdjustQuoteAmount,
 } from "./repositories/quoteActionsRepository.ts";
 import type { QuoteActionResult } from "./quoteActionsSchemas.ts";
@@ -91,11 +91,12 @@ export async function confirmQuote(params: {
     return { ok: false, reason: "conflict" };
   }
 
-  const applied = await callConfirmQuote({
+  const applied = await callAdvanceQuoteStatus({
     quoteId,
     merchantId,
     fromStatus: session.status,
     toStatus: next.state,
+    setSentAt: false,
   });
   if (!applied) {
     return { ok: false, reason: "conflict" };

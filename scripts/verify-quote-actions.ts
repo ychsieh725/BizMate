@@ -315,11 +315,12 @@ async function main(): Promise<void> {
     // 條件因此一次都沒被真的觸發過。那是防禦縱深的第二道防線，必須獨立驗證。
 
     // ⑥ CAS：對已 confirmed 的報價傳過期的 from_status → 0 列 → FALSE
-    const { data: staleCas, error: staleError } = await admin.rpc("confirm_quote", {
+    const { data: staleCas, error: staleError } = await admin.rpc("advance_quote_status", {
       p_quote_id: merchantA.quoteId,
       p_merchant_id: merchantA.merchantId,
       p_from_status: "awaiting_review", // 實際已是 confirmed
       p_to_status: "confirmed",
+      p_set_sent_at: false,
     });
     assert(staleError === null, `CAS 探測不該報錯：${staleError?.message}`);
     assert(staleCas === false, "過期的 from_status 必須讓 CAS 回 FALSE");
@@ -342,8 +343,8 @@ async function main(): Promise<void> {
     console.log("✅ 直接打 RPC：CAS 與 WHERE merchant_id 第二道防線皆生效");
 
     // ⑧ Rollback：人為造出「quote 待審、session 已確認」的不一致狀態，
-    //    confirm_quote 會先成功更新 quotes（1 列）、再對 sessions 拿到 0 列 →
-    //    RAISE EXCEPTION → 整個 function 回滾。
+    //    advance_quote_status 會先成功更新 quotes（1 列）、再對 sessions 拿到
+    //    0 列 → RAISE EXCEPTION → 整個 function 回滾。
     //    驗收核心：quotes.status 必須仍是 awaiting_review，不可留下半套資料。
     await admin
       .from("quotes")
@@ -351,15 +352,16 @@ async function main(): Promise<void> {
       .eq("id", merchantA.quoteId);
     // sessions 維持 confirmed（上一步 ④ 已推進），刻意不還原 → 製造不一致
 
-    const { error: rollbackError } = await admin.rpc("confirm_quote", {
+    const { error: rollbackError } = await admin.rpc("advance_quote_status", {
       p_quote_id: merchantA.quoteId,
       p_merchant_id: merchantA.merchantId,
       p_from_status: "awaiting_review",
       p_to_status: "confirmed",
+      p_set_sent_at: false,
     });
     assert(
       rollbackError !== null,
-      "兩表狀態不同步時，confirm_quote 必須拋例外（而非靜默留下半套資料）",
+      "兩表狀態不同步時，advance_quote_status 必須拋例外（而非靜默留下半套資料）",
     );
 
     const { data: afterRollback } = await admin
