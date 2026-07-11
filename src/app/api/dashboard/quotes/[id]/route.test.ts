@@ -9,12 +9,19 @@ vi.mock("@/domains/pricing/quoteReviewService.ts", () => ({
   getQuoteDetail: vi.fn(),
 }));
 
+vi.mock("@/domains/pricing/quoteActionsService.ts", () => ({
+  adjustQuoteAmount: vi.fn(),
+  confirmQuote: vi.fn(),
+}));
+
 import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
 import { getQuoteDetail } from "@/domains/pricing/quoteReviewService.ts";
-import { GET } from "./route.ts";
+import { adjustQuoteAmount } from "@/domains/pricing/quoteActionsService.ts";
+import { GET, PATCH } from "./route.ts";
 
 const mockRequireMerchant = vi.mocked(requireMerchant);
 const mockGetQuoteDetail = vi.mocked(getQuoteDetail);
+const mockAdjustQuoteAmount = vi.mocked(adjustQuoteAmount);
 
 const MERCHANT_ID = "99999999-9999-9999-9999-999999999999";
 // zod 4 的 .uuid() 嚴格檢查 RFC 4122 variant/version bits——
@@ -57,6 +64,16 @@ function getRequest(): Request {
 
 function routeParams(id: string): { params: Promise<{ id: string }> } {
   return { params: Promise.resolve({ id }) };
+}
+
+const UPDATED_QUOTE = { ...DETAIL.quote, final_amount: 9000 };
+
+function patchRequest(body: unknown, raw = false): Request {
+  return new Request(`http://localhost/api/dashboard/quotes/${QUOTE_ID}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: raw ? (body as string) : JSON.stringify(body),
+  });
 }
 
 beforeEach(() => {
@@ -117,6 +134,95 @@ describe("GET /api/dashboard/quotes/[id]", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
 
     const res = await GET(getRequest(), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(500);
+  });
+});
+
+describe("PATCH /api/dashboard/quotes/[id]", () => {
+  it("未登入 → 401", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: false, status: 401 });
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(401);
+    expect(mockAdjustQuoteAmount).not.toHaveBeenCalled();
+  });
+
+  it("已登入無 merchant → 403", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: false, status: 403 });
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(403);
+  });
+
+  it("id 非 UUID → 400", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams("bad-id"));
+
+    expect(res.status).toBe(400);
+    expect(mockAdjustQuoteAmount).not.toHaveBeenCalled();
+  });
+
+  it("body 非合法 JSON → 400", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+
+    const res = await PATCH(patchRequest("{not json", true), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(400);
+  });
+
+  it("金額非正數 → 400", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+
+    const res = await PATCH(patchRequest({ final_amount: -1 }), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(400);
+    expect(mockAdjustQuoteAmount).not.toHaveBeenCalled();
+  });
+
+  it("跨租戶或不存在 → 404", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockAdjustQuoteAmount.mockResolvedValue({ ok: false, reason: "not_found" });
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(404);
+  });
+
+  it("報價已確認/已寄出 → 409", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockAdjustQuoteAmount.mockResolvedValue({ ok: false, reason: "conflict" });
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
+
+    expect(res.status).toBe(409);
+  });
+
+  it("成功 → 200，回傳更新後的報價", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockAdjustQuoteAmount.mockResolvedValue({ ok: true, quote: UPDATED_QUOTE });
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(json.data.quote).toEqual(UPDATED_QUOTE);
+    expect(mockAdjustQuoteAmount).toHaveBeenCalledWith({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_ID,
+      finalAmount: 9000,
+    });
+  });
+
+  it("service 拋錯 → 500", async () => {
+    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockAdjustQuoteAmount.mockRejectedValue(new Error("db down"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
 
     expect(res.status).toBe(500);
   });
