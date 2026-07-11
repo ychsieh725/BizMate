@@ -40,6 +40,9 @@ export default async function DashboardPage() {
       <Link href="/dashboard/services" className="text-sm underline">
         管理服務項目
       </Link>
+      <Link href={PAGE_ROUTES.dashboardSettings} className="text-sm underline">
+        帳號設定
+      </Link>
       <form action={logoutAction}>
         <button type="submit" className="rounded border px-4 py-2">
           登出
