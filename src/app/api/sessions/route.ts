@@ -13,16 +13,18 @@ import {
 
 /**
  * POST /api/sessions — Wizard Step 1 建立 session（FR-CW-1）。
- * 公開端點：以同一 IP 每小時上限限流，防灌爆與耗盡 Gemini 額度（NFR-7）。
+ * 公開端點：雙桶限流防灌爆與耗盡 Gemini 額度（NFR-7、5.9 補洞）——
+ * IP 桶防同一來源打多個商家，slug 桶防同一商家被大量不同來源灌爆
+ * （只有 IP 桶時，殭屍網路/共用 NAT 可繞過）。任一桶超限即擋。
  * 多租戶入口：body 必帶商家 slug（來自分享連結 /q/{slug}），
  * 查無此商家即 404——這是匿名客戶端取得 tenant context 的唯一途徑。
  */
 export async function POST(request: Request): Promise<Response> {
-  const { allowed } = await checkRateLimit(
-    `sessions:${getClientIp(request)}`,
+  const { allowed: ipAllowed } = await checkRateLimit(
+    `sessions:ip:${getClientIp(request)}`,
     SESSION_CREATE_RULE,
   );
-  if (!allowed) {
+  if (!ipAllowed) {
     return apiFail("請求過於頻繁，請稍後再試", 429);
   }
 
@@ -36,6 +38,16 @@ export async function POST(request: Request): Promise<Response> {
   const parsed = createSessionBodySchema.safeParse(body);
   if (!parsed.success) {
     return apiFail(formatZodError(parsed.error), 400);
+  }
+
+  // slug 桶獨立於 IP 桶：防同一 slug 被大量不同來源（殭屍網路/共用 NAT）灌爆，
+  // 這在只有 IP 桶時完全沒有防護。body 驗證通過後才知道 slug，故此檢查排在此處。
+  const { allowed: slugAllowed } = await checkRateLimit(
+    `sessions:slug:${parsed.data.slug}`,
+    SESSION_CREATE_RULE,
+  );
+  if (!slugAllowed) {
+    return apiFail("請求過於頻繁，請稍後再試", 429);
   }
 
   try {

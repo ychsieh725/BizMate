@@ -15,6 +15,7 @@ vi.mock("@/lib/rateLimit/rateLimit.ts", () => ({
   getClientIp: () => "test-ip",
   SESSION_CREATE_RULE: { limit: 10, windowMs: 3_600_000 },
 }));
+import { SESSION_CREATE_RULE } from "@/lib/rateLimit/rateLimit.ts";
 
 import { createSession } from "@/domains/intake/sessionService.ts";
 import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
@@ -63,6 +64,14 @@ describe("POST /api/sessions", () => {
     });
     expect(mockFindBySlug).toHaveBeenCalledWith("dev");
     expect(mockCreateSession).toHaveBeenCalledWith("illustration", MERCHANT.id);
+    expect(mockCheckRateLimit).toHaveBeenCalledWith(
+      "sessions:ip:test-ip",
+      SESSION_CREATE_RULE,
+    );
+    expect(mockCheckRateLimit).toHaveBeenCalledWith(
+      "sessions:slug:dev",
+      SESSION_CREATE_RULE,
+    );
   });
 
   it("查無 slug 對應商家 → 404 且不建立 session", async () => {
@@ -120,6 +129,19 @@ describe("POST /api/sessions", () => {
     expect(mockFindBySlug).not.toHaveBeenCalled();
     expect(json.success).toBe(false);
     expect(mockCreateSession).not.toHaveBeenCalled();
+  });
+
+  it("同 slug 超過 rate limit（IP 桶允許但 slug 桶超限）→ 429", async () => {
+    mockCheckRateLimit.mockImplementation(async (bucketKey: string) => ({
+      allowed: !bucketKey.startsWith("sessions:slug:"),
+    }));
+
+    const res = await POST(postRequest({ category: "illustration", slug: "dev" }));
+    const json = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(mockFindBySlug).not.toHaveBeenCalled();
+    expect(json.success).toBe(false);
   });
 
   it("service 拋錯 → 500 + 友善訊息（不洩漏內部細節）", async () => {
