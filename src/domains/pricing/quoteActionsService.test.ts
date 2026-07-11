@@ -99,6 +99,7 @@ describe("adjustQuoteAmount", () => {
 
   it("RPC 回 false（併發下被搶先）→ conflict", async () => {
     repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue(SESSION_A);
     mockAdjust.mockResolvedValue(false);
 
     const result = await adjustQuoteAmount({
@@ -110,11 +111,48 @@ describe("adjustQuoteAmount", () => {
     expect(result).toEqual({ ok: false, reason: "conflict" });
   });
 
+  it("session 屬於其他商家 → not_found，且不呼叫 RPC", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue({
+      ...SESSION_A,
+      merchant_id: MERCHANT_B,
+    });
+
+    const result = await adjustQuoteAmount({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+      finalAmount: 9000,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "not_found" });
+    expect(mockAdjust).not.toHaveBeenCalled();
+  });
+
+  // 計價 pipeline 的寫入順序是「建 quote(awaiting_review) → 寫明細 → 推進 session」
+  // （resolveAfterParse.ts:126-146）。若只看 quote.status 就放行，PATCH 可能落在
+  // 「quote 已待審、明細還沒進 DB」的窗口內：base_sum=0 → 插入等於全額的調整列 →
+  // pipeline 隨後補上基礎明細 → sum(line_items) != final_amount，不變式破裂。
+  // session 狀態是 pipeline 最後才推進的，拿它當閘門即可關掉這個窗口。
+  it("session 尚未進入 awaiting_review（明細還沒落地）→ conflict，且不呼叫 RPC", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue({ ...SESSION_A, status: "pricing" });
+
+    const result = await adjustQuoteAmount({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+      finalAmount: 9000,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "conflict" });
+    expect(mockAdjust).not.toHaveBeenCalled();
+  });
+
   it("成功 → 回傳更新後的報價，RPC 參數正確", async () => {
     const updated = { ...QUOTE_A, final_amount: 9000 };
     repo.findById
       .mockResolvedValueOnce(QUOTE_A)
       .mockResolvedValueOnce(updated);
+    repo.findSessionById.mockResolvedValue(SESSION_A);
     mockAdjust.mockResolvedValue(true);
 
     const result = await adjustQuoteAmount({

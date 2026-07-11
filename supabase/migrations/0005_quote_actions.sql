@@ -78,6 +78,10 @@ DECLARE
   v_diff       NUMERIC;
   v_rows       INTEGER;
 BEGIN
+  -- ⚠ 承重牆：UPDATE quotes 必須是第一個語句，不可與下方的 DELETE/SUM/INSERT 對調。
+  -- 它取得 quotes 該列的 row lock，把並發的第二個 PATCH 阻塞在此，使後續的
+  -- 「刪調整列 → 重算加總 → 插新調整列」被序列化。若把它挪到最後，兩個並發的
+  -- PATCH 會各自以相同的 base_sum 算差額並各插一列，明細加總直接爆掉。
   UPDATE quotes
      SET final_amount = p_new_amount
    WHERE id = p_quote_id

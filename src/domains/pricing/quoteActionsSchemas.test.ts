@@ -15,6 +15,18 @@ describe("adjustAmountBodySchema", () => {
     expect(adjustAmountBodySchema.safeParse({ final_amount: -100 }).success).toBe(false);
   });
 
+  // quotes.final_amount 是 NUMERIC(10,2)，上限 99,999,999.99。
+  // 沒有上界的話，超大金額會在 Postgres 端溢位 → RepositoryError → 500，
+  // 但那其實是輸入錯誤，該在邊界擋下並回 400。
+  it("超過 NUMERIC(10,2) 上限失敗", () => {
+    expect(
+      adjustAmountBodySchema.safeParse({ final_amount: 99_999_999.99 }).success,
+    ).toBe(true);
+    expect(
+      adjustAmountBodySchema.safeParse({ final_amount: 100_000_000 }).success,
+    ).toBe(false);
+  });
+
   it("缺欄位失敗", () => {
     expect(adjustAmountBodySchema.safeParse({}).success).toBe(false);
   });

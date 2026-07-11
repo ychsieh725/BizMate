@@ -75,12 +75,14 @@ RPC 不知道也不在乎什麼是合法轉移——那是 `transitions.ts` 的�
 
 ### 3.2 決策：以「手動調整」明細列補差額
 
-`adjust_quote_amount` RPC 在單一 transaction 內：
+`adjust_quote_amount` RPC 在單一 transaction 內，**依此順序**：
 
-1. 刪除既有的手動調整列（識別條件：`rule_id IS NULL AND modifier_id IS NULL`）
-2. 重算剩餘明細加總 `base_sum`
-3. `diff = p_new_amount - base_sum`；若 `diff <> 0`，插入一列調整明細（`agent_reasoning` 記錄為商家後台調整）
-4. `UPDATE quotes SET final_amount = p_new_amount`
+1. `UPDATE quotes SET final_amount = p_new_amount`（含 CAS 條件）
+2. 刪除既有的手動調整列（識別條件：`rule_id IS NULL AND modifier_id IS NULL`）
+3. 重算剩餘明細加總 `base_sum`
+4. `diff = p_new_amount - base_sum`；若 `diff <> 0`，插入一列調整明細（`agent_reasoning` 記錄為商家後台調整）
+
+**順序是承重牆，不可對調**：第 1 步的 `UPDATE` 取得 quotes 該列的 row lock，把並發的第二個 PATCH 阻塞住，使後面的「刪 → 算 → 插」被序列化。若把 `UPDATE` 挪到最後，兩個並發 PATCH 會各自以相同的 `base_sum` 算差額並各插一列，明細加總直接爆掉。
 
 差額由 RPC 自算，應用層不碰。**不變式 `sum(line_items) == final_amount` 由這個函式獨自保證**——這是它存在的理由。重複調整不累積多列（每次先刪再插）。
 

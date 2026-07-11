@@ -309,6 +309,70 @@ async function main(): Promise<void> {
     );
     console.log("✅ 重複確認與確認後調金額皆被擋下，資料未被改動");
 
+    // ── 以下三組直接打 RPC，不經 service ──────────────────────────
+    // 理由：上面的斷言全部走 service，而 service 的應用層守衛（歸屬檢查、
+    // 狀態機）在 RPC 之前就短路了 —— RPC 自己的 WHERE merchant_id 與 CAS
+    // 條件因此一次都沒被真的觸發過。那是防禦縱深的第二道防線，必須獨立驗證。
+
+    // ⑥ CAS：對已 confirmed 的報價傳過期的 from_status → 0 列 → FALSE
+    const { data: staleCas, error: staleError } = await admin.rpc("confirm_quote", {
+      p_quote_id: merchantA.quoteId,
+      p_merchant_id: merchantA.merchantId,
+      p_from_status: "awaiting_review", // 實際已是 confirmed
+      p_to_status: "confirmed",
+    });
+    assert(staleError === null, `CAS 探測不該報錯：${staleError?.message}`);
+    assert(staleCas === false, "過期的 from_status 必須讓 CAS 回 FALSE");
+
+    // ⑦ 租戶隔離的第二道防線：用 B 的 merchantId 直接打 RPC 動 A 的報價
+    const { data: crossRpc } = await admin.rpc("adjust_quote_amount", {
+      p_quote_id: merchantA.quoteId,
+      p_merchant_id: merchantB.merchantId, // 不是 A
+      p_new_amount: 99999,
+      p_from_status: "awaiting_review",
+    });
+    assert(
+      crossRpc === false,
+      "RPC 的 WHERE merchant_id 必須擋下跨租戶寫入（第二道防線）",
+    );
+    assert(
+      (await sumLineItems(merchantA.sessionId)) === 7000,
+      "跨租戶 RPC 呼叫失敗後，A 的明細不得被改動",
+    );
+    console.log("✅ 直接打 RPC：CAS 與 WHERE merchant_id 第二道防線皆生效");
+
+    // ⑧ Rollback：人為造出「quote 待審、session 已確認」的不一致狀態，
+    //    confirm_quote 會先成功更新 quotes（1 列）、再對 sessions 拿到 0 列 →
+    //    RAISE EXCEPTION → 整個 function 回滾。
+    //    驗收核心：quotes.status 必須仍是 awaiting_review，不可留下半套資料。
+    await admin
+      .from("quotes")
+      .update({ status: "awaiting_review" })
+      .eq("id", merchantA.quoteId);
+    // sessions 維持 confirmed（上一步 ④ 已推進），刻意不還原 → 製造不一致
+
+    const { error: rollbackError } = await admin.rpc("confirm_quote", {
+      p_quote_id: merchantA.quoteId,
+      p_merchant_id: merchantA.merchantId,
+      p_from_status: "awaiting_review",
+      p_to_status: "confirmed",
+    });
+    assert(
+      rollbackError !== null,
+      "兩表狀態不同步時，confirm_quote 必須拋例外（而非靜默留下半套資料）",
+    );
+
+    const { data: afterRollback } = await admin
+      .from("quotes")
+      .select("status")
+      .eq("id", merchantA.quoteId)
+      .single();
+    assert(
+      afterRollback?.status === "awaiting_review",
+      `例外必須回滾 quotes 的更新，實際狀態：${afterRollback?.status}`,
+    );
+    console.log("✅ 兩表不同步時 RAISE EXCEPTION 回滾，quotes 未留下半套更新");
+
     console.log("\n🎉 MT-M4b 原子 RPC 與租戶隔離驗收通過。");
   } finally {
     await cleanup(merchantA);

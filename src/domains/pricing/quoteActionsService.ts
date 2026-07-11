@@ -38,6 +38,22 @@ export async function adjustQuoteAmount(params: {
     return { ok: false, reason: "conflict" };
   }
 
+  // session 也要過閘門，理由有二：
+  // (1) 歸屬複查——quotes 的 session_id 與 merchant_id 是兩個獨立 FK（見 5.6）。
+  // (2) 關掉不變式的破口：計價 pipeline 先建 quote（已是 awaiting_review）、
+  //     再寫明細、最後才推進 session（resolveAfterParse.ts:126-146）。只看
+  //     quote.status 就放行的話，PATCH 可能落在「明細尚未落地」的窗口內，
+  //     RPC 會以 base_sum=0 算差額並插入等於全額的調整列，等 pipeline 補上
+  //     基礎明細後 sum(line_items) != final_amount。session 狀態是最後才推進的，
+  //     拿它當閘門即可保證明細已完整落地。
+  const session = await quoteReviewRepository.findSessionById(quote.session_id);
+  if (session === null || session.merchant_id !== merchantId) {
+    return { ok: false, reason: "not_found" };
+  }
+  if (session.status !== EDITABLE_QUOTE_STATUS) {
+    return { ok: false, reason: "conflict" };
+  }
+
   const applied = await callAdjustQuoteAmount({
     quoteId,
     merchantId,
