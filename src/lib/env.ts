@@ -28,13 +28,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, "不可為空"),
   // 功能性（啟用時由 requireEnv 把關；現階段留空不報錯）
   GEMINI_API_KEY: optional(z.string().min(1)),
-  LINE_CHANNEL_ACCESS_TOKEN: optional(z.string().min(1)),
-  LINE_CHANNEL_SECRET: optional(z.string().min(1)),
-  GMAIL_USER: optional(z.string().email()),
-  GMAIL_APP_PASSWORD: optional(z.string().min(1)),
   RESEND_API_KEY: optional(z.string().min(1)),
   EMAIL_FROM: optional(z.string().min(1)),
-  ADMIN_SECRET: optional(z.string().min(1)),
 });
 
 type Env = z.infer<typeof envSchema>;
