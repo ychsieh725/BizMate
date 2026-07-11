@@ -13,6 +13,8 @@ export const PAGE_ROUTES = {
   signup: "/signup",
   onboarding: "/onboarding",
   dashboard: "/dashboard",
+  dashboardQuotes: "/dashboard/quotes",
+  dashboardQuote: (id: string) => `/dashboard/quotes/${id}`,
 } as const;
 
 /** API 端點 */
@@ -22,4 +24,6 @@ export const API_ROUTES = {
   describe: (id: string) => `/api/sessions/${id}/describe`,
   answer: (id: string) => `/api/sessions/${id}/answer`,
   status: (id: string) => `/api/sessions/${id}/status`,
+  dashboardQuotes: "/api/dashboard/quotes",
+  dashboardQuote: (id: string) => `/api/dashboard/quotes/${id}`,
 } as const;

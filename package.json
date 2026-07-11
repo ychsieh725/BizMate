@@ -22,6 +22,7 @@
     "verify:answer": "tsx --env-file=.env.local scripts/verify-answer.ts",
     "verify:auth": "tsx --env-file=.env.local scripts/verify-auth.ts",
     "verify:services": "tsx --env-file=.env.local scripts/verify-services.ts",
+    "verify:quotes": "tsx --env-file=.env.local scripts/verify-quotes.ts",
     "seed:rate-card": "tsx --env-file=.env.local scripts/seed-rate-card.ts"
   },
   "dependencies": {

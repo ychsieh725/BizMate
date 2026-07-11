@@ -4,6 +4,7 @@ import { CopyLinkButton } from "./CopyLinkButton.tsx";
 import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
 import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
 import { quotesRepository } from "@/domains/pricing/repositories/quotesRepository.ts";
+import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 
 export default async function DashboardPage() {
   const auth = await requireMerchant();
@@ -26,8 +27,16 @@ export default async function DashboardPage() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <p className="text-gray-600">待審報價：{pendingCount} 筆</p>
+      <Link
+        href={`${PAGE_ROUTES.dashboardQuotes}?status=awaiting_review`}
+        className="text-gray-600 underline"
+      >
+        待審報價：{pendingCount} 筆
+      </Link>
       {merchant !== null && <CopyLinkButton slug={merchant.public_slug} />}
+      <Link href={PAGE_ROUTES.dashboardQuotes} className="text-sm underline">
+        報價管理
+      </Link>
       <Link href="/dashboard/services" className="text-sm underline">
         管理服務項目
       </Link>
