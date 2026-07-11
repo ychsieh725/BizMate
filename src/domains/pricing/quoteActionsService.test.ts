@@ -9,20 +9,44 @@ vi.mock("./repositories/quoteReviewRepository.ts", () => ({
 }));
 
 vi.mock("./repositories/quoteActionsRepository.ts", () => ({
-  callConfirmQuote: vi.fn(),
+  callAdvanceQuoteStatus: vi.fn(),
   callAdjustQuoteAmount: vi.fn(),
+}));
+
+vi.mock("./quoteReviewService.ts", () => ({
+  getQuoteDetail: vi.fn(),
+}));
+
+vi.mock("@/domains/merchant/repositories/merchantsRepository.ts", () => ({
+  merchantsRepository: { findById: vi.fn() },
+}));
+
+vi.mock("@/lib/email/renderQuoteEmail.ts", () => ({
+  renderQuoteEmail: vi.fn(),
+}));
+
+vi.mock("@/lib/email/resendClient.ts", () => ({
+  sendEmail: vi.fn(),
 }));
 
 import { quoteReviewRepository } from "./repositories/quoteReviewRepository.ts";
 import {
-  callConfirmQuote,
+  callAdvanceQuoteStatus,
   callAdjustQuoteAmount,
 } from "./repositories/quoteActionsRepository.ts";
-import { adjustQuoteAmount, confirmQuote } from "./quoteActionsService.ts";
+import { getQuoteDetail } from "./quoteReviewService.ts";
+import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
+import { renderQuoteEmail } from "@/lib/email/renderQuoteEmail.ts";
+import { sendEmail } from "@/lib/email/resendClient.ts";
+import { adjustQuoteAmount, confirmQuote, sendQuoteEmail } from "./quoteActionsService.ts";
 
 const repo = vi.mocked(quoteReviewRepository);
-const mockConfirm = vi.mocked(callConfirmQuote);
+const mockAdvance = vi.mocked(callAdvanceQuoteStatus);
 const mockAdjust = vi.mocked(callAdjustQuoteAmount);
+const mockGetQuoteDetail = vi.mocked(getQuoteDetail);
+const mockFindMerchantById = vi.mocked(merchantsRepository.findById);
+const mockRenderQuoteEmail = vi.mocked(renderQuoteEmail);
+const mockSendEmail = vi.mocked(sendEmail);
 
 const MERCHANT_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const MERCHANT_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -182,7 +206,7 @@ describe("confirmQuote", () => {
 
     expect(result).toEqual({ ok: false, reason: "not_found" });
     expect(repo.findSessionById).not.toHaveBeenCalled();
-    expect(mockConfirm).not.toHaveBeenCalled();
+    expect(mockAdvance).not.toHaveBeenCalled();
   });
 
   it("session 屬於其他商家 → not_found", async () => {
@@ -198,7 +222,7 @@ describe("confirmQuote", () => {
     });
 
     expect(result).toEqual({ ok: false, reason: "not_found" });
-    expect(mockConfirm).not.toHaveBeenCalled();
+    expect(mockAdvance).not.toHaveBeenCalled();
   });
 
   it("session 已 confirmed（狀態機不接受 quote_confirmed）→ conflict", async () => {
@@ -214,13 +238,13 @@ describe("confirmQuote", () => {
     });
 
     expect(result).toEqual({ ok: false, reason: "conflict" });
-    expect(mockConfirm).not.toHaveBeenCalled();
+    expect(mockAdvance).not.toHaveBeenCalled();
   });
 
   it("RPC 回 false（併發下被搶先）→ conflict", async () => {
     repo.findById.mockResolvedValue(QUOTE_A);
     repo.findSessionById.mockResolvedValue(SESSION_A);
-    mockConfirm.mockResolvedValue(false);
+    mockAdvance.mockResolvedValue(false);
 
     const result = await confirmQuote({
       quoteId: QUOTE_ID,
@@ -236,7 +260,7 @@ describe("confirmQuote", () => {
       .mockResolvedValueOnce(QUOTE_A)
       .mockResolvedValueOnce(confirmed);
     repo.findSessionById.mockResolvedValue(SESSION_A);
-    mockConfirm.mockResolvedValue(true);
+    mockAdvance.mockResolvedValue(true);
 
     const result = await confirmQuote({
       quoteId: QUOTE_ID,
@@ -244,11 +268,115 @@ describe("confirmQuote", () => {
     });
 
     expect(result).toEqual({ ok: true, quote: confirmed });
-    expect(mockConfirm).toHaveBeenCalledWith({
+    expect(mockAdvance).toHaveBeenCalledWith({
       quoteId: QUOTE_ID,
       merchantId: MERCHANT_A,
       fromStatus: "awaiting_review",
       toStatus: "confirmed",
+      setSentAt: false,
+    });
+  });
+});
+
+describe("sendQuoteEmail", () => {
+  const MERCHANT_RECORD: Tables<"merchants"> = {
+    id: MERCHANT_A,
+    display_name: "小美設計工作室",
+    public_slug: "xiaomei",
+    contact_email: "xiaomei@example.com",
+    created_at: "2026-07-01T00:00:00.000Z",
+    updated_at: "2026-07-01T00:00:00.000Z",
+  };
+
+  const CONFIRMED_SESSION: Tables<"sessions"> = { ...SESSION_A, status: "confirmed" };
+  const CONFIRMED_QUOTE: Tables<"quotes"> = { ...QUOTE_A, status: "confirmed" };
+
+  const DETAIL = {
+    quote: CONFIRMED_QUOTE,
+    session: CONFIRMED_SESSION,
+    lineItems: [],
+    extractedFields: [],
+    clarifications: [],
+    rawInputs: [],
+  };
+
+  const RENDERED = { subject: "s", html: "<p>h</p>", text: "t" };
+
+  beforeEach(() => {
+    mockRenderQuoteEmail.mockReturnValue(RENDERED);
+  });
+
+  it("查無報價或跨租戶 → not_found，不呼叫 Resend", async () => {
+    mockGetQuoteDetail.mockResolvedValue(null);
+
+    const result = await sendQuoteEmail({ quoteId: QUOTE_ID, merchantId: MERCHANT_A });
+
+    expect(result).toEqual({ ok: false, reason: "not_found" });
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("session 狀態不接受 email_sent（例如尚未確認）→ conflict，不呼叫 Resend", async () => {
+    mockGetQuoteDetail.mockResolvedValue({
+      ...DETAIL,
+      session: { ...CONFIRMED_SESSION, status: "awaiting_review" },
+    });
+
+    const result = await sendQuoteEmail({ quoteId: QUOTE_ID, merchantId: MERCHANT_A });
+
+    expect(result).toEqual({ ok: false, reason: "conflict" });
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("Resend 寄送失敗 → email_failed，且不推進狀態", async () => {
+    mockGetQuoteDetail.mockResolvedValue(DETAIL);
+    mockFindMerchantById.mockResolvedValue(MERCHANT_RECORD);
+    mockSendEmail.mockResolvedValue({ ok: false, message: "domain not verified" });
+
+    const result = await sendQuoteEmail({ quoteId: QUOTE_ID, merchantId: MERCHANT_A });
+
+    expect(result).toEqual({
+      ok: false,
+      reason: "email_failed",
+      message: "domain not verified",
+    });
+    expect(mockAdvance).not.toHaveBeenCalled();
+  });
+
+  it("RPC 回 false（併發下被搶先）→ conflict", async () => {
+    mockGetQuoteDetail.mockResolvedValue(DETAIL);
+    mockFindMerchantById.mockResolvedValue(MERCHANT_RECORD);
+    mockSendEmail.mockResolvedValue({ ok: true });
+    mockAdvance.mockResolvedValue(false);
+
+    const result = await sendQuoteEmail({ quoteId: QUOTE_ID, merchantId: MERCHANT_A });
+
+    expect(result).toEqual({ ok: false, reason: "conflict" });
+  });
+
+  it("成功 → 寄送成功後才推進狀態，RPC 參數含 setSentAt: true", async () => {
+    const sentQuote = { ...CONFIRMED_QUOTE, status: "sent" as const };
+    mockGetQuoteDetail.mockResolvedValue(DETAIL);
+    mockFindMerchantById.mockResolvedValue(MERCHANT_RECORD);
+    mockSendEmail.mockResolvedValue({ ok: true });
+    mockAdvance.mockResolvedValue(true);
+    repo.findById.mockResolvedValue(sentQuote);
+
+    const result = await sendQuoteEmail({ quoteId: QUOTE_ID, merchantId: MERCHANT_A });
+
+    expect(result).toEqual({ ok: true, quote: sentQuote });
+    expect(mockSendEmail).toHaveBeenCalledWith({
+      to: CONFIRMED_SESSION.contact_email,
+      replyTo: MERCHANT_RECORD.contact_email,
+      subject: RENDERED.subject,
+      html: RENDERED.html,
+      text: RENDERED.text,
+    });
+    expect(mockAdvance).toHaveBeenCalledWith({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+      fromStatus: "confirmed",
+      toStatus: "sent",
+      setSentAt: true,
     });
   });
 });

@@ -24,4 +24,5 @@ export type AdjustAmountBody = z.infer<typeof adjustAmountBodySchema>;
  */
 export type QuoteActionResult =
   | { readonly ok: true; readonly quote: Tables<"quotes"> }
-  | { readonly ok: false; readonly reason: "not_found" | "conflict" };
+  | { readonly ok: false; readonly reason: "not_found" | "conflict" }
+  | { readonly ok: false; readonly reason: "email_failed"; readonly message: string };

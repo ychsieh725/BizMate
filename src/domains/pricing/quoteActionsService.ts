@@ -1,10 +1,14 @@
 import { transition } from "@/orchestrator/stateMachine.ts";
 import { quoteReviewRepository } from "./repositories/quoteReviewRepository.ts";
 import {
-  callConfirmQuote,
+  callAdvanceQuoteStatus,
   callAdjustQuoteAmount,
 } from "./repositories/quoteActionsRepository.ts";
 import type { QuoteActionResult } from "./quoteActionsSchemas.ts";
+import { getQuoteDetail } from "./quoteReviewService.ts";
+import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
+import { renderQuoteEmail } from "@/lib/email/renderQuoteEmail.ts";
+import { sendEmail } from "@/lib/email/resendClient.ts";
 
 /**
  * 後台終審的兩個寫入動作（5.7）。與唯讀的 quoteReviewService 分開——
@@ -91,11 +95,77 @@ export async function confirmQuote(params: {
     return { ok: false, reason: "conflict" };
   }
 
-  const applied = await callConfirmQuote({
+  const applied = await callAdvanceQuoteStatus({
     quoteId,
     merchantId,
     fromStatus: session.status,
     toStatus: next.state,
+    setSentAt: false,
+  });
+  if (!applied) {
+    return { ok: false, reason: "conflict" };
+  }
+
+  return reloadQuote(quoteId);
+}
+
+/**
+ * 寄送最終報價單：email_sent 事件落地。
+ * 順序刻意固定：先呼叫 Resend、成功了才推進狀態——若順序反過來，
+ * 狀態已是 sent 但信根本沒寄出，商家會誤以為流程已完成。
+ * Resend 失敗時 quote 留在 confirmed，本 API 天然冪等地允許重新呼叫
+ * （即重寄機制，不需獨立端點）。
+ * 已知邊界：若 Resend 成功但緊接著的 RPC 呼叫拋出例外（而非回傳 false），
+ * 信已寄出但狀態仍是 confirmed——重試會真的再寄一封。這不是分散式交易，
+ * 沒有補償機制；取捨是寧可偶爾重寄，也不要讓 status=sent 卻信沒寄出。
+ */
+export async function sendQuoteEmail(params: {
+  quoteId: string;
+  merchantId: string;
+}): Promise<QuoteActionResult> {
+  const { quoteId, merchantId } = params;
+
+  const detail = await getQuoteDetail(quoteId, merchantId);
+  if (detail === null) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  const { quote, session, lineItems } = detail;
+
+  const next = transition(session.status, "email_sent");
+  if (!next.ok) {
+    return { ok: false, reason: "conflict" };
+  }
+
+  const merchant = await merchantsRepository.findById(merchantId);
+  if (merchant === null) {
+    throw new Error(`sendQuoteEmail: merchant ${merchantId} 應存在但查無`);
+  }
+  if (session.contact_email === null) {
+    throw new Error(
+      `sendQuoteEmail: session ${session.id} 缺少 contact_email，資料不一致` +
+        "（Step 2 的 describe API 已強制要求此欄位，不應發生）",
+    );
+  }
+
+  const rendered = renderQuoteEmail({ merchant, quote, lineItems });
+  const sent = await sendEmail({
+    to: session.contact_email,
+    replyTo: merchant.contact_email,
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
+  });
+  if (!sent.ok) {
+    return { ok: false, reason: "email_failed", message: sent.message };
+  }
+
+  const applied = await callAdvanceQuoteStatus({
+    quoteId,
+    merchantId,
+    fromStatus: session.status,
+    toStatus: next.state,
+    setSentAt: true,
   });
   if (!applied) {
     return { ok: false, reason: "conflict" };

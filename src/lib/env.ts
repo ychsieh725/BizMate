@@ -32,6 +32,8 @@ const envSchema = z.object({
   LINE_CHANNEL_SECRET: optional(z.string().min(1)),
   GMAIL_USER: optional(z.string().email()),
   GMAIL_APP_PASSWORD: optional(z.string().min(1)),
+  RESEND_API_KEY: optional(z.string().min(1)),
+  EMAIL_FROM: optional(z.string().min(1)),
   ADMIN_SECRET: optional(z.string().min(1)),
 });
 
