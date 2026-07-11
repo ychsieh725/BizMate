@@ -114,8 +114,8 @@ type QuoteListRow = {
   status: QuoteStatus;
   is_conservative: boolean;
   created_at: string;
-  category: CaseCategory;        // 來自 sessions
-  contact_email: string | null;  // 來自 sessions
+  category: CaseCategory | null;  // 來自 sessions（防禦式建模：資料不一致時列表仍能渲染）
+  contact_email: string | null;   // 來自 sessions
 };
 ```
 
