@@ -9,6 +9,7 @@ import { fieldLabel } from "@/shared/constants/fieldLabels.ts";
 import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 import { formatAmount, formatDateTime } from "../formatters.ts";
 import { QuoteActions } from "./QuoteActions.tsx";
+import { SendQuoteButton } from "./SendQuoteButton.tsx";
 
 export default async function QuoteDetailPage({
   params,
@@ -79,6 +80,8 @@ export default async function QuoteDetailPage({
       {quote.status === "awaiting_review" && (
         <QuoteActions quoteId={quote.id} initialAmount={quote.final_amount} />
       )}
+
+      {quote.status === "confirmed" && <SendQuoteButton quoteId={quote.id} />}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium">費用明細</h2>
