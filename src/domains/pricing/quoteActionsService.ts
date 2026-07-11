@@ -5,6 +5,10 @@ import {
   callAdjustQuoteAmount,
 } from "./repositories/quoteActionsRepository.ts";
 import type { QuoteActionResult } from "./quoteActionsSchemas.ts";
+import { getQuoteDetail } from "./quoteReviewService.ts";
+import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
+import { renderQuoteEmail } from "@/lib/email/renderQuoteEmail.ts";
+import { sendEmail } from "@/lib/email/resendClient.ts";
 
 /**
  * 後台終審的兩個寫入動作（5.7）。與唯讀的 quoteReviewService 分開——
@@ -97,6 +101,68 @@ export async function confirmQuote(params: {
     fromStatus: session.status,
     toStatus: next.state,
     setSentAt: false,
+  });
+  if (!applied) {
+    return { ok: false, reason: "conflict" };
+  }
+
+  return reloadQuote(quoteId);
+}
+
+/**
+ * 寄送最終報價單：email_sent 事件落地。
+ * 順序刻意固定：先呼叫 Resend、成功了才推進狀態——若順序反過來，
+ * 狀態已是 sent 但信根本沒寄出，商家會誤以為流程已完成。
+ * 失敗（Resend 或 RPC）都不留半套狀態：Resend 失敗時 quote 留在 confirmed，
+ * 本 API 天然冪等地允許重新呼叫（即重寄機制，不需獨立端點）。
+ */
+export async function sendQuoteEmail(params: {
+  quoteId: string;
+  merchantId: string;
+}): Promise<QuoteActionResult> {
+  const { quoteId, merchantId } = params;
+
+  const detail = await getQuoteDetail(quoteId, merchantId);
+  if (detail === null) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  const { quote, session, lineItems } = detail;
+
+  const next = transition(session.status, "email_sent");
+  if (!next.ok) {
+    return { ok: false, reason: "conflict" };
+  }
+
+  const merchant = await merchantsRepository.findById(merchantId);
+  if (merchant === null) {
+    throw new Error(`sendQuoteEmail: merchant ${merchantId} 應存在但查無`);
+  }
+  if (session.contact_email === null) {
+    throw new Error(
+      `sendQuoteEmail: session ${session.id} 缺少 contact_email，資料不一致` +
+        "（Step 2 的 describe API 已強制要求此欄位，不應發生）",
+    );
+  }
+
+  const rendered = renderQuoteEmail({ merchant, quote, lineItems });
+  const sent = await sendEmail({
+    to: session.contact_email,
+    replyTo: merchant.contact_email,
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
+  });
+  if (!sent.ok) {
+    return { ok: false, reason: "email_failed", message: sent.message };
+  }
+
+  const applied = await callAdvanceQuoteStatus({
+    quoteId,
+    merchantId,
+    fromStatus: session.status,
+    toStatus: next.state,
+    setSentAt: true,
   });
   if (!applied) {
     return { ok: false, reason: "conflict" };
