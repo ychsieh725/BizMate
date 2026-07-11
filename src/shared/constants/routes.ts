@@ -27,4 +27,5 @@ export const API_ROUTES = {
   dashboardQuotes: "/api/dashboard/quotes",
   dashboardQuote: (id: string) => `/api/dashboard/quotes/${id}`,
   dashboardQuoteConfirm: (id: string) => `/api/dashboard/quotes/${id}/confirm`,
+  dashboardQuoteSend: (id: string) => `/api/dashboard/quotes/${id}/send`,
 } as const;
