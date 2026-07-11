@@ -13,6 +13,7 @@ import { generateQuoteCode } from "@/domains/pricing/quoteFormatter.ts";
 import { quotesRepository } from "@/domains/pricing/repositories/quotesRepository.ts";
 import { priceLineItemsRepository } from "@/domains/pricing/repositories/priceLineItemsRepository.ts";
 import type { FlowOutcome } from "@/orchestrator/flowOutcome.ts";
+import { isUniqueViolation } from "@/lib/supabase/errors.ts";
 
 export type { FlowOutcome };
 
@@ -50,12 +51,6 @@ async function createQuoteWithRetry(params: {
     await insertQuote(retryCode);
     return retryCode;
   }
-}
-
-/** Postgres 23505（unique_violation）的錯誤訊息判斷；repository 只帶回訊息字串。 */
-function isUniqueViolation(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return message.includes("duplicate key") || message.includes("23505");
 }
 
 /** 內部不變量：對已知合法的轉移取下一狀態，不合法代表程式邏輯錯誤。 */

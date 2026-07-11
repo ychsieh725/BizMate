@@ -28,6 +28,25 @@ async function main(): Promise<void> {
     );
   }
 
+  // 5.9：雙桶各自獨立計數——不同 bucketKey 前綴互不影響彼此的計數與上限判斷。
+  const ipBucket = `verify:ip:${Date.now()}`;
+  const slugBucket = `verify:slug:${Date.now()}`;
+  let dualBucketPassed = true;
+
+  for (let attempt = 1; attempt <= rule.limit; attempt++) {
+    const { allowed } = await checkRateLimit(ipBucket, rule);
+    dualBucketPassed = dualBucketPassed && allowed;
+  }
+  const { allowed: slugStillAllowed } = await checkRateLimit(slugBucket, rule);
+  dualBucketPassed = dualBucketPassed && slugStillAllowed;
+
+  console.log(
+    dualBucketPassed
+      ? "✅ 雙桶彼此獨立：IP 桶打滿上限不影響 slug 桶（仍允許第一次請求）。"
+      : "❌ 雙桶互相干擾——slug 桶不應被 IP 桶的計數影響。",
+  );
+  allPassed = allPassed && dualBucketPassed;
+
   console.log(
     allPassed
       ? "\n✅ 限流行為正確：前 N 次允許、第 N+1 次擋下。"

@@ -15,6 +15,7 @@ export const PAGE_ROUTES = {
   dashboard: "/dashboard",
   dashboardQuotes: "/dashboard/quotes",
   dashboardQuote: (id: string) => `/dashboard/quotes/${id}`,
+  dashboardSettings: "/dashboard/settings",
 } as const;
 
 /** API 端點 */
@@ -28,4 +29,5 @@ export const API_ROUTES = {
   dashboardQuote: (id: string) => `/api/dashboard/quotes/${id}`,
   dashboardQuoteConfirm: (id: string) => `/api/dashboard/quotes/${id}/confirm`,
   dashboardQuoteSend: (id: string) => `/api/dashboard/quotes/${id}/send`,
+  dashboardSettings: "/api/dashboard/settings",
 } as const;
