@@ -5,7 +5,7 @@
 **開發模式:** MVP 分階段（多租戶重構 MT-M2 → MT-M6，之後進階功能）
 **專案描述:** 多租戶自動化報價 SaaS。使用者（接案者/商家）註冊登入、管理自己的服務項目與價格，取得專屬分享連結 /q/{slug} 傳給客戶；客戶以口語文字描述需求，系統以多 Agent 管線解析並產出可追溯報價，商家於網頁後台終審後以 Email 寄送最終報價單。
 **技術棧:** Next.js 16 + Vercel Serverless / Supabase(Postgres + Auth) / Gemini API / Resend(Email)
-**文件依據:** 多租戶重構計畫 `documents/BizMate_多租戶重構計畫_v1.0.md`（最新權威）；PRD v0.2 / SRS v0.1 / SAD v0.1 / SDS v0.2（單一使用者假設與 LINE 章節已作廢，其餘仍有效）
+**文件依據:** 多租戶重構計畫 `documents/BizMate_多租戶重構計畫_v1.0.md`（最新權威）；PRD v0.3（2026-07-11 已依多租戶方向全面改寫，取代 v0.2）／SRS v0.1 / SAD v0.1 / SDS v0.2（單一使用者假設與 LINE 章節已作廢，其餘仍有效）
 
 ---
 
