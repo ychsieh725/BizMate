@@ -113,8 +113,11 @@ export async function confirmQuote(params: {
  * 寄送最終報價單：email_sent 事件落地。
  * 順序刻意固定：先呼叫 Resend、成功了才推進狀態——若順序反過來，
  * 狀態已是 sent 但信根本沒寄出，商家會誤以為流程已完成。
- * 失敗（Resend 或 RPC）都不留半套狀態：Resend 失敗時 quote 留在 confirmed，
- * 本 API 天然冪等地允許重新呼叫（即重寄機制，不需獨立端點）。
+ * Resend 失敗時 quote 留在 confirmed，本 API 天然冪等地允許重新呼叫
+ * （即重寄機制，不需獨立端點）。
+ * 已知邊界：若 Resend 成功但緊接著的 RPC 呼叫拋出例外（而非回傳 false），
+ * 信已寄出但狀態仍是 confirmed——重試會真的再寄一封。這不是分散式交易，
+ * 沒有補償機制；取捨是寧可偶爾重寄，也不要讓 status=sent 卻信沒寄出。
  */
 export async function sendQuoteEmail(params: {
   quoteId: string;

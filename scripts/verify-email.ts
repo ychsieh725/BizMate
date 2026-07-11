@@ -6,7 +6,7 @@
  * 設定 VERIFY_EMAIL_RECIPIENT 為一個你能實際收信的信箱——腳本結束後請自行
  * 打開該信箱，人工確認主旨/內文/寄件者/回覆地址是否正確（這件事無法自動化）。
  *
- * 證明四件事：
+ * 證明三件事：
  * 1. confirmed 狀態下呼叫 sendQuoteEmail 成功，quotes.status/sessions.status
  *    原子同步為 sent，且 sent_at 已寫入。
  * 2. 跨租戶（B 的 merchantId 呼叫 A 的報價）→ not_found。
