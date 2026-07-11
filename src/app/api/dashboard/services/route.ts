@@ -3,6 +3,7 @@ import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
 import { servicesRepository } from "@/domains/pricing/repositories/servicesRepository.ts";
 import { createServiceBodySchema } from "@/domains/pricing/servicesSchemas.ts";
 import { formatZodError } from "@/domains/intake/sessionSchemas.ts";
+import { isUniqueViolation } from "@/lib/supabase/errors.ts";
 
 /** GET /api/dashboard/services — 該商家所有服務項目（含已停售）+ 加成規則（唯讀）。 */
 export async function GET(): Promise<Response> {
@@ -61,10 +62,4 @@ export async function POST(request: Request): Promise<Response> {
     console.error("[POST /api/dashboard/services] 新增失敗：", error);
     return apiFail("系統忙碌，請稍後再試", 500);
   }
-}
-
-/** Postgres 23505（unique_violation）的錯誤訊息判斷；repository 只帶回訊息字串。 */
-function isUniqueViolation(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : "";
-  return message.includes("duplicate key") || message.includes("23505");
 }
