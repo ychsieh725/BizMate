@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories";
+import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 
 /**
- * BizMate 首頁佔位。
- * 多租戶重構後報價入口是各商家的專屬連結 /q/{slug}，首頁不再直連 wizard；
- * M2 起將加上註冊/登入導流（landing 正式版在 M6）。
+ * BizMate 首頁（M6 正式版）。
+ * 多租戶重構後報價入口是各商家的專屬連結 /q/{slug}，首頁不再直連 wizard，
+ * 改導流註冊/登入。
  */
 export default function Home() {
   return (
@@ -18,6 +20,17 @@ export default function Home() {
         <p className="text-zinc-600 dark:text-zinc-400">
           註冊帳號、管理你的服務與價格，把專屬連結傳給客戶自動報價。
         </p>
+        <div className="flex items-center gap-4">
+          <Link
+            href={PAGE_ROUTES.signup}
+            className="rounded bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            開始使用
+          </Link>
+          <Link href={PAGE_ROUTES.login} className="text-sm underline">
+            已有帳號？登入
+          </Link>
+        </div>
       </header>
 
       <section aria-labelledby="categories-heading" className="flex flex-col gap-3">
