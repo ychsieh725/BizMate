@@ -15,6 +15,7 @@ export const PAGE_ROUTES = {
   dashboard: "/dashboard",
   dashboardQuotes: "/dashboard/quotes",
   dashboardQuote: (id: string) => `/dashboard/quotes/${id}`,
+  dashboardServices: "/dashboard/services",
   dashboardSettings: "/dashboard/settings",
 } as const;
 

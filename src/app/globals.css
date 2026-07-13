@@ -3,11 +3,39 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --ink: #1a1a18;
+  --ink-soft: #6b6b64;
+  --ink-faint: #8a897f;
+  --surface: #fbfaf7;
+  --surface-line: #e2e2dd;
+  --rail-bg: rgba(255, 255, 255, 0.72);
+  --accent: #e2664a;
+  --accent-ink: #1b1a20;
+  --status-review-bg: #fbead0;
+  --status-review-fg: #9a6300;
+  --status-confirmed-bg: #dfe9ff;
+  --status-confirmed-fg: #2c4fb0;
+  --status-sent-bg: #dcf0e6;
+  --status-sent-fg: #16794f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-surface: var(--surface);
+  --color-surface-line: var(--surface-line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-status-review-bg: var(--status-review-bg);
+  --color-status-review-fg: var(--status-review-fg);
+  --color-status-confirmed-bg: var(--status-confirmed-bg);
+  --color-status-confirmed-fg: var(--status-confirmed-fg);
+  --color-status-sent-bg: var(--status-sent-bg);
+  --color-status-sent-fg: var(--status-sent-fg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -23,4 +51,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.aura-bg {
+  background:
+    radial-gradient(ellipse 620px 480px at 6% -6%, rgba(246, 208, 164, 0.85), transparent 60%),
+    radial-gradient(ellipse 520px 420px at 34% 6%, rgba(247, 196, 196, 0.55), transparent 60%),
+    radial-gradient(ellipse 640px 560px at 100% 96%, rgba(196, 209, 244, 0.85), transparent 62%),
+    radial-gradient(ellipse 460px 380px at 78% 60%, rgba(222, 231, 248, 0.55), transparent 65%),
+    #f7f4ee;
+}
+
+.card-float {
+  box-shadow:
+    0 20px 46px -26px rgba(35, 26, 15, 0.28),
+    0 2px 10px rgba(35, 26, 15, 0.05);
 }

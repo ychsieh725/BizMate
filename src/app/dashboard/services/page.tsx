@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
 import { servicesRepository } from "@/domains/pricing/repositories/servicesRepository.ts";
 import { ServicesTable } from "./ServicesTable.tsx";
@@ -6,15 +5,10 @@ import { NewServiceForm } from "./NewServiceForm.tsx";
 
 export default async function ServicesPage() {
   const auth = await requireMerchant();
-
+  // layout 已攔截未登入/無商家的情況（不會渲染到這裡）；
+  // 這裡的 if 只是讓 TypeScript 把 auth 窄化成 { ok: true, merchantId } 型別。
   if (!auth.ok) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-        <p className="text-red-600">
-          {auth.status === 401 ? "請先登入" : "查無商家資料，請先完成 onboarding"}
-        </p>
-      </main>
-    );
+    return null;
   }
 
   const [items, modifiers] = await Promise.all([
@@ -23,17 +17,16 @@ export default async function ServicesPage() {
   ]);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">服務項目管理</h1>
-        <Link href="/dashboard" className="text-sm underline">
-          返回 Dashboard
-        </Link>
+    <main className="flex flex-1 flex-col gap-4 p-4">
+      <h1 className="text-ink text-2xl font-semibold tracking-tight">服務項目管理</h1>
+      <div className="card-float rounded-[24px] bg-[var(--surface)] p-6">
+        <NewServiceForm />
       </div>
-      <NewServiceForm />
-      <ServicesTable initialItems={items} />
-      <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-medium">加成規則（唯讀）</h2>
+      <div className="card-float rounded-[24px] bg-[var(--surface)] p-6">
+        <ServicesTable initialItems={items} />
+      </div>
+      <section className="card-float flex flex-col gap-2 rounded-[24px] bg-[var(--surface)] p-6 text-xs">
+        <h2 className="text-ink-soft font-medium">加成規則（唯讀）</h2>
         {modifiers.length === 0 ? (
           <p className="text-sm text-gray-600">尚無加成規則</p>
         ) : (

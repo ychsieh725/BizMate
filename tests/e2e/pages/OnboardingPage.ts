@@ -21,8 +21,6 @@ export class OnboardingPage {
   async completeOnboarding(displayName: string): Promise<void> {
     await this.page.locator("#display_name").fill(displayName);
     await this.page.getByTestId("onboarding-submit").click();
-    await expect(
-      this.page.getByRole("link", { name: "管理服務項目" }),
-    ).toBeVisible();
+    await expect(this.page.getByTestId("dashboard-nav-services")).toBeVisible();
   }
 }

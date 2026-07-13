@@ -76,7 +76,7 @@ export function QuoteActions({
   const busy = pending !== "none";
 
   return (
-    <section className="flex flex-col gap-3 rounded border p-4">
+    <section className="card-float flex flex-col gap-3 rounded-[24px] bg-[var(--surface)] p-5">
       <h2 className="text-lg font-medium">終審操作</h2>
 
       <div className="flex items-end gap-2">
@@ -99,7 +99,7 @@ export function QuoteActions({
           type="button"
           onClick={handleSave}
           disabled={busy}
-          className="rounded border px-3 py-1 disabled:opacity-50"
+          className="rounded-[14px] border border-[var(--surface-line)] px-3 py-1.5 text-sm disabled:opacity-50"
         >
           {pending === "save" ? "儲存中…" : "儲存金額"}
         </button>
@@ -108,7 +108,7 @@ export function QuoteActions({
           data-testid="quote-confirm"
           onClick={handleConfirm}
           disabled={busy}
-          className="rounded bg-gray-900 px-3 py-1 text-white disabled:opacity-50"
+          className="bg-ink text-surface rounded-full px-4 py-1.5 text-sm disabled:opacity-50"
         >
           {pending === "confirm" ? "確認中…" : "確認報價"}
         </button>
