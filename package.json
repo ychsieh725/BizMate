@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report",
     "db:verify": "tsx --env-file=.env.local scripts/verify-db.ts",
     "verify:repo": "tsx --env-file=.env.local scripts/verify-repo.ts",
     "verify:gemini": "tsx --env-file=.env.local scripts/verify-gemini.ts",
@@ -40,6 +42,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

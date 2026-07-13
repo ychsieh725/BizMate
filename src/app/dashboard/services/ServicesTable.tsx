@@ -125,7 +125,11 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
           const draft = drafts[item.id] ?? toEditable(item);
           const disabled = !item.is_active || savingId === item.id;
           return (
-            <tr key={item.id} className="border-b align-top">
+            <tr
+              key={item.id}
+              data-testid={`service-row-${item.id}`}
+              className="border-b align-top"
+            >
               <td className="py-2">{CASE_CATEGORY_LABELS[item.category]}</td>
               <td className="py-2">{item.subtype}</td>
               <td className="py-2">
@@ -139,6 +143,7 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
               <td className="py-2">
                 <input
                   type="number"
+                  data-testid={`service-base-price-${item.id}`}
                   value={draft.base_price}
                   onChange={(event) =>
                     updateDraft(item.id, { base_price: event.target.value })
@@ -168,6 +173,7 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
                     <div className="flex gap-2">
                       <button
                         type="button"
+                        data-testid={`service-save-${item.id}`}
                         onClick={() => handleSave(item.id)}
                         disabled={disabled}
                         className="rounded border px-2 py-1 disabled:opacity-50"

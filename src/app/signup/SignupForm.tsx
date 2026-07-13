@@ -13,7 +13,10 @@ export function SignupForm() {
 
   if (state.verificationSent) {
     return (
-      <p className="max-w-sm text-center text-sm text-gray-700">
+      <p
+        data-testid="signup-verification-sent"
+        className="max-w-sm text-center text-sm text-gray-700"
+      >
         請檢查你的信箱，點擊驗證連結後即可登入。
       </p>
     );
@@ -55,6 +58,7 @@ export function SignupForm() {
       )}
       <button
         type="submit"
+        data-testid="signup-submit"
         disabled={isPending}
         className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
       >

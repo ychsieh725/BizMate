@@ -30,6 +30,7 @@ export function StepCategory({ onSelect, disabled = false }: StepCategoryProps) 
           <li key={category}>
             <button
               type="button"
+              data-testid={`category-option-${category}`}
               disabled={disabled}
               onClick={() => onSelect(category)}
               className="flex w-full items-center justify-between rounded-2xl border border-black/[.08] px-5 py-4 text-left text-base font-medium transition-colors hover:border-foreground/40 hover:bg-black/[.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-50 dark:border-white/[.145] dark:hover:bg-white/[.04]"

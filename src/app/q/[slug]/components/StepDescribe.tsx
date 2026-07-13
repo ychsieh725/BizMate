@@ -62,6 +62,7 @@ export function StepDescribe({
           </label>
           <textarea
             id="raw-text"
+            data-testid="describe-raw-text"
             value={rawText}
             onChange={(event) => setRawText(event.target.value)}
             onBlur={() => setTouched(true)}
@@ -85,6 +86,7 @@ export function StepDescribe({
           </label>
           <input
             id="contact-email"
+            data-testid="describe-email"
             type="email"
             value={contactEmail}
             onChange={(event) => setContactEmail(event.target.value)}
@@ -119,6 +121,7 @@ export function StepDescribe({
           </button>
           <button
             type="submit"
+            data-testid="describe-submit"
             disabled={submitting}
             className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:opacity-90 disabled:opacity-50"
           >
