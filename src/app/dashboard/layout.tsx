@@ -6,10 +6,10 @@ import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 import { RailNavLink } from "./RailNavLink.tsx";
 
 const NAV_ITEMS = [
-  { href: PAGE_ROUTES.dashboard, label: "總覽", icon: LayoutGrid },
-  { href: PAGE_ROUTES.dashboardQuotes, label: "報價", icon: FileText },
-  { href: PAGE_ROUTES.dashboardServices, label: "服務", icon: Tag },
-  { href: PAGE_ROUTES.dashboardSettings, label: "設定", icon: Settings },
+  { href: PAGE_ROUTES.dashboard, label: "總覽", icon: LayoutGrid, testId: "dashboard-nav-overview" },
+  { href: PAGE_ROUTES.dashboardQuotes, label: "報價", icon: FileText, testId: "dashboard-nav-quotes" },
+  { href: PAGE_ROUTES.dashboardServices, label: "服務", icon: Tag, testId: "dashboard-nav-services" },
+  { href: PAGE_ROUTES.dashboardSettings, label: "設定", icon: Settings, testId: "dashboard-nav-settings" },
 ] as const;
 
 export default async function DashboardLayout({
@@ -43,7 +43,12 @@ export default async function DashboardLayout({
         </div>
 
         {NAV_ITEMS.map((item) => (
-          <RailNavLink key={item.href} href={item.href} label={item.label}>
+          <RailNavLink
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            testId={item.testId}
+          >
             <item.icon className="h-[15px] w-[15px]" strokeWidth={1.6} />
           </RailNavLink>
         ))}
