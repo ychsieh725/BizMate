@@ -56,7 +56,7 @@ export function NewServiceForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded border p-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <h2 className="text-lg font-medium">新增服務項目</h2>
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-sm">
@@ -64,7 +64,7 @@ export function NewServiceForm() {
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value as CaseCategory)}
-            className="rounded border px-2 py-1"
+            className="rounded-[10px] border px-2 py-1"
           >
             {CASE_CATEGORIES.map((value) => (
               <option key={value} value={value}>
@@ -79,7 +79,7 @@ export function NewServiceForm() {
             required
             value={subtype}
             onChange={(event) => setSubtype(event.target.value)}
-            className="rounded border px-2 py-1"
+            className="rounded-[10px] border px-2 py-1"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -88,7 +88,7 @@ export function NewServiceForm() {
             required
             value={unit}
             onChange={(event) => setUnit(event.target.value)}
-            className="rounded border px-2 py-1"
+            className="rounded-[10px] border px-2 py-1"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
@@ -99,7 +99,7 @@ export function NewServiceForm() {
             min="1"
             value={basePrice}
             onChange={(event) => setBasePrice(event.target.value)}
-            className="rounded border px-2 py-1"
+            className="rounded-[10px] border px-2 py-1"
           />
         </label>
         <label className="col-span-2 flex flex-col gap-1 text-sm">
@@ -107,7 +107,7 @@ export function NewServiceForm() {
           <input
             value={includes}
             onChange={(event) => setIncludes(event.target.value)}
-            className="rounded border px-2 py-1"
+            className="rounded-[10px] border px-2 py-1"
           />
         </label>
       </div>
@@ -119,7 +119,7 @@ export function NewServiceForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="self-start rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="self-start rounded-full bg-black px-4 py-2 text-white disabled:opacity-50"
       >
         {isPending ? "新增中…" : "新增"}
       </button>

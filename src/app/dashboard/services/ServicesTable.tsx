@@ -128,7 +128,9 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
             <tr
               key={item.id}
               data-testid={`service-row-${item.id}`}
-              className="border-b align-top"
+              className={`border-b border-[var(--surface-line)] align-top ${
+                item.is_active ? "" : "opacity-40"
+              }`}
             >
               <td className="py-2">{CASE_CATEGORY_LABELS[item.category]}</td>
               <td className="py-2">{item.subtype}</td>
@@ -176,7 +178,7 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
                         data-testid={`service-save-${item.id}`}
                         onClick={() => handleSave(item.id)}
                         disabled={disabled}
-                        className="rounded border px-2 py-1 disabled:opacity-50"
+                        className="rounded-[10px] border border-[var(--surface-line)] px-2 py-1 text-sm disabled:opacity-50"
                       >
                         {savingId === item.id ? "儲存中…" : "儲存"}
                       </button>
@@ -184,7 +186,7 @@ export function ServicesTable({ initialItems }: { initialItems: ServiceRow[] }) 
                         type="button"
                         onClick={() => handleDelete(item.id)}
                         disabled={disabled}
-                        className="rounded border px-2 py-1 text-red-600 disabled:opacity-50"
+                        className="rounded-[10px] border border-[var(--surface-line)] px-2 py-1 text-red-600 disabled:opacity-50"
                       >
                         停售
                       </button>
