@@ -63,7 +63,7 @@
 | 7.5 | ~~FinOps Dashboard~~ | ⏭️ 作廢 | - | - | - | 降級：SQL 直查 cost_logs |
 | **8. 貫穿性任務（每階段並行）** | | | | | | |
 | 8.1 | 單元 + 整合測試（TDD，80%+ 覆蓋率） | 🔄 進行中 | 高 | 各實作 | 貫穿 | 現況 372 測試綠；每個 5.x 任務先寫測試；跨租戶隔離是 5.5+ 的必測項（5.5/5.6/5.7 已補齊）。**教訓（5.7）**：verify script 若全走 service，DB 層的守衛（RPC 的 CAS/WHERE）會因應用層短路而從未被觸發——防禦縱深的第二道防線必須獨立驗證。**教訓（5.8）**：涉及真實第三方 API（Resend）的功能，mock 測試無法證明「內文渲染正確」「reply-to 真的送達」——verify script 需真的呼叫外部 API + 人工開信箱核對 |
-| 8.2 | E2E 測試（Playwright，關鍵使用者流程） | ⏳ 待處理 | 中 | 5.8 | 4h | 註冊→onboarding→改價→無痕跑 /q/{slug}→後台確認→寄信 |
+| 8.2 | E2E 測試（Playwright，關鍵使用者流程） | ✅ 完成 | 中 | 5.8 | 4h | 對真實 dev stack（Supabase/Gemini/Resend）跑通金路徑：登入→onboarding→改價→匿名 /q/{slug} 出報價→後台確認→寄信；獨立重跑驗證通過、DB 無殘留。**環境事實更正**：5.9 記錄的「無瀏覽器工具」已過時，headless Chromium/WebKit 實測可用。此 dev Supabase 專案整站關閉公開註冊（signup_disabled），金路徑改走 admin 預備已確認帳號 + `/login`（與 verify-auth.ts 慣例一致），`/signup` UI 另有獨立輕量測試覆蓋；完整報告見 `.claude/context/e2e/e2e-validation-specialist-2026-07-13-1035-wbs-8-2-critical-path.md` |
 | 8.3 | 安全審查（prompt injection 三層防禦 + OWASP + RLS 複核） | ✅ 完成 | 高 | 5.9 | 2h | NFR-8；security.md；未發現 Critical/High；14/14 表 RLS 全開、四張無 merchant_id 子表隔離不變式複核成立；修復 M1（RPC 對 PUBLIC 開放 EXECUTE，migration 0007 已套用+verify:security 驗證通過）、M2（postcss XSS，pnpm override 修復，audit 歸零）；M3（prompt injection，已有三層緩解降級 Medium）與 L4-L7 留 backlog；完整報告見 `.claude/context/security/security-infrastructure-auditor-2026-07-13-1010-wbs-8-3-review.md` |
 | 8.4 | 部署（Vercel + Supabase 免費層，實測執行上限） | ⏳ 待處理 | 中 | 5.9 | 2h | NFR-3；含 Resend 網域驗證（SPF/DKIM）；**待辦**：verify:* scripts 接進 CI——5.6 code review 指出租戶隔離目前只由手動腳本守門（repository 層刪掉 merchant_id 過濾，單元測試不會紅） |
 

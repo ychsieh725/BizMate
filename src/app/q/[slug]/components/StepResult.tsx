@@ -75,7 +75,12 @@ export function StepResult({
         <div className="flex flex-col gap-4">
           <div className="rounded-2xl border border-black/[.08] px-5 py-4 dark:border-white/[.145]">
             <p className="text-sm text-zinc-500">報價單編號</p>
-            <p className="mt-1 font-mono text-lg font-semibold">{outcome.quoteCode}</p>
+            <p
+              data-testid="result-quote-code"
+              className="mt-1 font-mono text-lg font-semibold"
+            >
+              {outcome.quoteCode}
+            </p>
           </div>
           <p aria-live="polite" className="text-sm text-zinc-600 dark:text-zinc-400">
             目前狀態：<span className="font-medium text-foreground">{STATUS_LABELS[liveStatus]}</span>
@@ -86,7 +91,7 @@ export function StepResult({
       )}
 
       {!isQuoteAccepted && outcome.missingFields && outcome.missingFields.length > 0 && (
-        <div className="flex flex-col gap-4">
+        <div data-testid="result-missing-fields" className="flex flex-col gap-4">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             為了給你準確報價，還需要補充以下資訊：
           </p>
@@ -111,7 +116,7 @@ export function StepResult({
       )}
 
       {!isQuoteAccepted && outcome.outOfScope && (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p data-testid="result-out-of-scope" className="text-sm text-zinc-600 dark:text-zinc-400">
           你的需求超出標準報價範圍，我們已轉由專人評估，將盡快與你聯繫。
         </p>
       )}

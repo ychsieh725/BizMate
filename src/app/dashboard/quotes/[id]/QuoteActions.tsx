@@ -84,6 +84,7 @@ export function QuoteActions({
           最終金額（NT$）
           <input
             type="number"
+            data-testid="quote-amount"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
             disabled={busy}
@@ -104,6 +105,7 @@ export function QuoteActions({
         </button>
         <button
           type="button"
+          data-testid="quote-confirm"
           onClick={handleConfirm}
           disabled={busy}
           className="rounded bg-gray-900 px-3 py-1 text-white disabled:opacity-50"

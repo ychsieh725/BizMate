@@ -45,6 +45,7 @@ export function SendQuoteButton({ quoteId }: { quoteId: string }) {
       <div>
         <button
           type="button"
+          data-testid="quote-send"
           onClick={handleSend}
           disabled={pending}
           className="rounded bg-gray-900 px-3 py-1 text-white disabled:opacity-50"
