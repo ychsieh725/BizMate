@@ -3,7 +3,7 @@ import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories";
 import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 
 /**
- * BizMate 首頁（M6 正式版）。
+ * BizMate 首頁（根目錄）。
  * 多租戶重構後報價入口是各商家的專屬連結 /q/{slug}，首頁不再直連 wizard，
  * 改導流註冊/登入。
  */
