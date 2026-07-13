@@ -40,7 +40,7 @@ export function SendQuoteButton({ quoteId }: { quoteId: string }) {
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded border p-4">
+    <section className="card-float flex flex-col gap-3 rounded-[24px] bg-[var(--surface)] p-5">
       <h2 className="text-lg font-medium">寄送報價單</h2>
       <div>
         <button
@@ -48,7 +48,7 @@ export function SendQuoteButton({ quoteId }: { quoteId: string }) {
           data-testid="quote-send"
           onClick={handleSend}
           disabled={pending}
-          className="rounded bg-gray-900 px-3 py-1 text-white disabled:opacity-50"
+          className="bg-ink text-surface rounded-full px-4 py-1.5 text-sm disabled:opacity-50"
         >
           {pending ? "寄送中…" : "寄送給客戶"}
         </button>
