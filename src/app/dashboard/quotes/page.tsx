@@ -15,15 +15,10 @@ export default async function QuotesPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const auth = await requireMerchant();
-
+  // layout 已攔截未登入/無商家的情況（不會渲染到這裡）；
+  // 這裡的 if 只是讓 TypeScript 把 auth 窄化成 { ok: true, merchantId } 型別。
   if (!auth.ok) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-        <p className="text-red-600">
-          {auth.status === 401 ? "請先登入" : "查無商家資料，請先完成 onboarding"}
-        </p>
-      </main>
-    );
+    return null;
   }
 
   const { status: statusParam } = await searchParams;
@@ -36,12 +31,7 @@ export default async function QuotesPage({
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">報價管理</h1>
-        <Link href={PAGE_ROUTES.dashboard} className="text-sm underline">
-          返回 Dashboard
-        </Link>
-      </div>
+      <h1 className="text-2xl font-semibold">報價管理</h1>
 
       <nav aria-label="狀態篩選" className="flex gap-2 text-sm">
         <Link

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
 import { getQuoteDetail } from "@/domains/pricing/quoteReviewService.ts";
@@ -6,7 +5,6 @@ import { quoteIdSchema } from "@/domains/pricing/quoteReviewSchemas.ts";
 import { QUOTE_STATUS_LABELS } from "@/shared/constants/quoteStatus.ts";
 import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories.ts";
 import { fieldLabel } from "@/shared/constants/fieldLabels.ts";
-import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 import { formatAmount, formatDateTime } from "../formatters.ts";
 import { QuoteActions } from "./QuoteActions.tsx";
 import { SendQuoteButton } from "./SendQuoteButton.tsx";
@@ -17,15 +15,10 @@ export default async function QuoteDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const auth = await requireMerchant();
-
+  // layout 已攔截未登入/無商家的情況（不會渲染到這裡）；
+  // 這裡的 if 只是讓 TypeScript 把 auth 窄化成 { ok: true, merchantId } 型別。
   if (!auth.ok) {
-    return (
-      <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-        <p className="text-red-600">
-          {auth.status === 401 ? "請先登入" : "查無商家資料，請先完成 onboarding"}
-        </p>
-      </main>
-    );
+    return null;
   }
 
   const { id } = await params;
@@ -45,14 +38,9 @@ export default async function QuoteDetailPage({
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">
-          報價 <span className="font-mono">{quote.quote_code}</span>
-        </h1>
-        <Link href={PAGE_ROUTES.dashboardQuotes} className="text-sm underline">
-          返回報價列表
-        </Link>
-      </div>
+      <h1 className="text-2xl font-semibold">
+        報價 <span className="font-mono">{quote.quote_code}</span>
+      </h1>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium">報價摘要</h2>
