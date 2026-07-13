@@ -20,12 +20,14 @@ export default async function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 p-8">
-      <h1 className="text-2xl font-semibold">帳號設定</h1>
-      <SettingsForm
-        initialDisplayName={merchant.display_name}
-        initialSlug={merchant.public_slug}
-      />
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
+      <h1 className="text-ink text-2xl font-semibold tracking-tight">帳號設定</h1>
+      <div className="card-float rounded-[24px] bg-[var(--surface)] p-6">
+        <SettingsForm
+          initialDisplayName={merchant.display_name}
+          initialSlug={merchant.public_slug}
+        />
+      </div>
     </main>
   );
 }

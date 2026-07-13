@@ -49,7 +49,7 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
           value={displayName}
           onChange={(event) => setDisplayName(event.target.value)}
           disabled={saving}
-          className="rounded border px-3 py-2 disabled:opacity-50"
+          className="rounded-[10px] border border-[var(--surface-line)] px-3 py-2 disabled:opacity-50"
         />
       </div>
 
@@ -63,7 +63,7 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
           onChange={(event) => setSlug(event.target.value)}
           disabled={saving}
           aria-describedby="slug-preview"
-          className="rounded border px-3 py-2 disabled:opacity-50"
+          className="rounded-[10px] border border-[var(--surface-line)] px-3 py-2 disabled:opacity-50"
         />
         <p id="slug-preview" className="text-xs text-gray-500">
           目前連結：{PAGE_ROUTES.quoteWizard(savedSlug)}
@@ -80,7 +80,7 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
       <button
         type="submit"
         disabled={saving}
-        className="rounded border px-4 py-2 disabled:opacity-50"
+        className="rounded-full bg-[var(--ink)] px-4 py-2 text-[var(--surface)] disabled:opacity-50"
       >
         {saving ? "儲存中…" : "儲存"}
       </button>
