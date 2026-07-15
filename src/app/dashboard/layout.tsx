@@ -36,7 +36,7 @@ export default async function DashboardLayout({
     <div className="aura-bg flex min-h-screen flex-1 gap-4 p-4">
       <nav
         aria-label="後台導覽"
-        className="card-float bg-rail-bg flex w-16 flex-none flex-col items-center gap-2 rounded-[26px] py-4 backdrop-blur-lg"
+        className="card-float bg-rail-bg sticky top-4 flex h-[calc(100vh-2rem)] w-24 flex-none flex-col items-center gap-2 self-start rounded-[26px] py-4 backdrop-blur-lg"
       >
         <div className="bg-ink text-surface mb-2 flex h-9 w-9 items-center justify-center rounded-[11px] font-mono text-sm font-medium">
           BM
@@ -49,7 +49,7 @@ export default async function DashboardLayout({
             label={item.label}
             testId={item.testId}
           >
-            <item.icon className="h-[15px] w-[15px]" strokeWidth={1.6} />
+            <item.icon className="h-[22.5px] w-[22.5px]" strokeWidth={1.6} />
           </RailNavLink>
         ))}
 
