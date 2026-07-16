@@ -89,16 +89,17 @@ pnpm verify:security  # RPC 對 anon 回 permission denied for function（0007 �
 
 ---
 
-## Step 3：確認 Seed 已完成（現況已 seed）
+## Step 3：Seed 範本 + 建示範商家
 
-`seed:rate-card` 冪等地做三件事：灌全域範本、建 `dev` 商家（`dev@bizmate.local`，slug=`dev`）、把範本複製到該商家，給你一個**立即可 demo 的 `/q/dev` 連結**。現有專案**已 seed 過**，通常不需再跑。
+`seed:rate-card` 冪等地做三件事：灌全域範本、建 `dev` 商家（`dev@bizmate.local`，slug=`dev`）、把範本複製到該商家。這給你一個**立即可 demo 的 `/q/dev` 連結**（作品集展示用）。
 
-若核對後發現缺（例如清資料時誤刪範本），因 `.env.local` 就是 production，直接跑捷徑補回即可（冪等，安全）：
+> ⚠️ npm script（`pnpm seed:rate-card`）寫死讀 `.env.local`。對 production 執行時，**不要**用該捷徑，改建 `.env.production.local`（已被 `.gitignore` 排除）填入 Step 1 的 production 值，再跑原始指令：
+
 ```bash
-pnpm seed:rate-card
+tsx --env-file=.env.production.local scripts/seed-rate-card.ts
 ```
 
-> 註：`verify:*` / `seed` 腳本寫死讀 `.env.local` 的限制，在單一專案下反而無痛（本機即 prod）；未來若真的分離 dev/prod，需改用正規 env 注入——這正是 8.5/8.6 要在 CI 解決的問題之一。
+> 這個「verify/seed 腳本寫死 `.env.local`」的限制，正是 8.5/8.6 要在 CI 用正規 env 注入解決的問題之一。
 
 ---
 
