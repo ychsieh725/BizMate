@@ -8,6 +8,13 @@ import {
 } from "@/domains/intake/sessionSchemas.ts";
 
 /**
+ * Vercel function 逾時上限（Route Segment Config，僅在 Vercel 生效，本機無作用）。
+ * 本路由觸發 Gemini（重新解析 + 計價），與 /describe 同為全 app 最慢的呼叫；
+ * Vercel Hobby 預設 10s 會把長 LLM 呼叫 504 截斷（SAD R-1）。60 為 Hobby 上限，取滿。
+ */
+export const maxDuration = 60;
+
+/**
  * POST /api/sessions/{id}/answer — Wizard Step 3 回答反問（SDS §5.1、FR-CL-1）。
  * 填入答案 → 以「原始描述 + 累積問答」重新解析 → 再問一輪 / 出報價 / 保守估算。
  */
