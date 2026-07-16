@@ -8,8 +8,10 @@
 | 項目 | 選擇 | 理由 |
 | :--- | :--- | :--- |
 | 執行模式 | AI 備料、使用者執行 | 帳號、密鑰、DNS 屬使用者資源，AI 無法代勞 |
-| Production Supabase | **新建專用專案** | 測試資料不污染正式庫；可真正驗證 migration 從零套用（順便驗 8.6 基線） |
+| Production Supabase | **沿用現有專案升格** | Supabase 免費層上限 2 個專案、另一個名額被作品集網站佔用，BizMate 只能有一個專案；現有專案已套好 `0001–0007` 且 seed 過，直接當 prod 最省事 |
 | Resend 寄信網域 | **共享 `resend.dev`** | 零 DNS、立即可寄；作品集 demo 夠用，自有網域留日後 |
+
+> **單一專案取捨**：本機開發 / E2E 與 production 共用同一個 Supabase 專案（免費層限制下無法分離）。E2E 測試會自清資料，作品集規模可接受；若要更乾淨，可另建一個示範用商家與 production 商家隔開。原「新建專用 production 專案」的計畫因專案數上限改為此方案。
 
 ---
 
@@ -18,9 +20,9 @@
 程式碼一旦上線就會立刻連 production Supabase。若 schema 尚未就緒，production 會直接故障。**務必照下列順序**：
 
 ```
-1. 建 production Supabase 專案
-2. 依序套用 migrations 0001–0007
-3. seed 範本價目表 + 建示範商家（/q/dev）
+1. 沿用現有 Supabase 專案當 prod（抄下連線資訊）
+2. 確認 migrations 0001–0007 已在位（現況已套用，僅核對，不需重跑）
+3. 確認 seed 已完成（/q/dev 可走；如缺才補跑）
 4. 建 Gemini / Resend 金鑰
 5. Vercel 連 repo + 設環境變數 + 設 Node/Region
 6. 觸發部署 → 冒煙測試
@@ -30,21 +32,26 @@
 
 ---
 
-## Step 1：建 Production Supabase 專案
+## Step 1：沿用現有 Supabase 專案當 Production
 
-1. [Supabase Dashboard](https://supabase.com/dashboard) → New project。
-2. **Region 選離使用者近的**（台灣使用者建議 `Southeast Asia (Singapore)` 或 `Northeast Asia (Tokyo)`）——記住這個 region，Step 5 的 Vercel region 要對齊，降低 DB 往返延遲。
-3. 設定強資料庫密碼（記錄於密碼管理器）。
-4. 專案建好後，到 **Project Settings → API** 抄下四個值（Step 5 要用）：
+免費層只剩一個名額給 BizMate，故**不新建、不刪除**，直接把現有專案（本機
+`.env.local` 指向的那個）升格為 production。
+
+1. （選配）[Supabase Dashboard](https://supabase.com/dashboard) → Project Settings → General 把專案改名為 `BizMate`（純美觀）。
+2. **記下這個專案的 Region**——Step 5 的 Vercel region 要對齊，降低 DB 往返延遲。
+3. 到 **Project Settings → API** 抄下四個值（Step 5 要用；其實就是 `.env.local` 現有那組）：
    - `Project URL` → 對應 `SUPABASE_URL` 與 `NEXT_PUBLIC_SUPABASE_URL`（同值）
    - `service_role` secret → 對應 `SUPABASE_SERVICE_ROLE_KEY`（**極機密，勿外流**）
    - `anon` / `public` key → 對應 `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
+> ⚠️ **不要刪這個專案**：它已套好 0001–0007 且 seed 過，是最接近 prod 的現成資產。刪掉重開會丟失手建帳號並得重跑全部 migration + seed，換來的結果完全相同。
+
 ---
 
-## Step 2：依序套用 Migrations（順序敏感）
+## Step 2：確認 Migrations 已在位（現況已套用）
 
-現況：`0001–0007` 在 dev 專案為**手動套用**。新 production 專案需從零依序套一次。
+因沿用現有專案，`0001–0007` **已手動套用完畢，本步驟只需核對、不需重跑**。下方
+清單保留供 (a) 核對用、(b) 萬一日後真的另建專案時從零套用的參考。
 
 ### Migration 基線清單
 
@@ -72,27 +79,26 @@ supabase link --project-ref <production-project-ref>
 supabase db push   # 依 migrations 目錄順序套用
 ```
 
-### 套用後驗證
+### 核對（沿用現有專案，直接用 .env.local）
 
-建一份指向 production 的環境檔（見 Step 3 說明），對真實 production DB 跑：
+因 production 就是本機 `.env.local` 指向的專案，直接跑既有捷徑核對即可：
 ```bash
-tsx --env-file=.env.production.local scripts/verify-db.ts       # 14/14 表可存取
-tsx --env-file=.env.production.local scripts/verify-security.ts # RPC 對 anon 回 permission denied for function
+pnpm db:verify        # 14/14 表可存取
+pnpm verify:security  # RPC 對 anon 回 permission denied for function（0007 已套用的證明）
 ```
 
 ---
 
-## Step 3：Seed 範本 + 建示範商家
+## Step 3：確認 Seed 已完成（現況已 seed）
 
-`seed:rate-card` 冪等地做三件事：灌全域範本、建 `dev` 商家（`dev@bizmate.local`，slug=`dev`）、把範本複製到該商家。這給你一個**立即可 demo 的 `/q/dev` 連結**（作品集展示用）。
+`seed:rate-card` 冪等地做三件事：灌全域範本、建 `dev` 商家（`dev@bizmate.local`，slug=`dev`）、把範本複製到該商家，給你一個**立即可 demo 的 `/q/dev` 連結**。現有專案**已 seed 過**，通常不需再跑。
 
-> ⚠️ npm script（`pnpm seed:rate-card`）寫死讀 `.env.local`。對 production 執行時，**不要**用該捷徑，改建 `.env.production.local`（已被 `.gitignore` 排除）填入 Step 1 的 production 值，再跑原始指令：
-
+若核對後發現缺（例如清資料時誤刪範本），因 `.env.local` 就是 production，直接跑捷徑補回即可（冪等，安全）：
 ```bash
-tsx --env-file=.env.production.local scripts/seed-rate-card.ts
+pnpm seed:rate-card
 ```
 
-> 這個「verify/seed 腳本寫死 `.env.local`」的限制，正是 8.5/8.6 要在 CI 用正規 env 注入解決的問題之一。
+> 註：`verify:*` / `seed` 腳本寫死讀 `.env.local` 的限制，在單一專案下反而無痛（本機即 prod）；未來若真的分離 dev/prod，需改用正規 env 注入——這正是 8.5/8.6 要在 CI 解決的問題之一。
 
 ---
 
