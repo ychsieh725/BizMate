@@ -43,7 +43,7 @@ export async function POST(
   try {
     const result = await handleAnswer({
       sessionId: idParsed.data,
-      answer: parsed.data.answer,
+      answers: parsed.data.answers,
     });
 
     if (!result.ok) {

@@ -11,16 +11,21 @@ import type { CaseCategory, SessionStatus } from "@/shared/types/domain.types";
  */
 export type WizardStep = "category" | "describe" | "clarify" | "result";
 
+/** 單題反問（問題 + 目標欄位）。 */
+export type ClarificationItem = {
+  question: string;
+  targetField: string;
+};
+
 /**
  * 解析（Parser）後的結果，describe 與 answer 兩端共用同一形狀（已從
- * snake_case 轉為 camelCase）。反問路徑帶 question/targetField，出報價路徑
- * 帶 quoteCode（conservative 表反問用盡後的保守估算）。
+ * snake_case 轉為 camelCase）。反問路徑帶 questions（一輪要問的全部問題），
+ * 出報價路徑帶 quoteCode（conservative 表反問用盡後的保守估算）。
  */
 export type DescribeOutcome = {
   status: SessionStatus;
   missingFields?: readonly string[];
-  question?: string;
-  targetField?: string;
+  questions?: readonly ClarificationItem[];
   quoteCode?: string;
   outOfScope?: boolean;
   conservative?: boolean;

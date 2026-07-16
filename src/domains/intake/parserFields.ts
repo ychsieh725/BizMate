@@ -8,11 +8,10 @@ import type { CaseCategory } from "@/shared/types/domain.types";
  * Gemini structured output（強制回傳形狀）與程式端的缺漏判斷。
  */
 
-/** 跨案件類型共用的必要欄位（附錄 A.1：授權、交期、修改次數）。 */
+/** 跨案件類型共用的必要欄位（附錄 A.1：授權、交期）。 */
 export const COMMON_REQUIRED_FIELDS = [
   "license_scope", // 用途/授權範圍：個人/商業/獨家買斷/有限期限
   "deadline_days", // 交期天數（判斷是否急件）
-  "revision_count", // 內含修改次數
 ] as const;
 
 /** 各案件類型專屬的必要欄位（附錄 A.2–A.4）。 */
@@ -21,12 +20,7 @@ export const CATEGORY_SPECIFIC_FIELDS: Record<
   readonly string[]
 > = {
   graphic_design: ["subtype", "quantity", "includes_pitch_rounds"],
-  illustration: [
-    "subtype",
-    "quantity",
-    "coloring_complexity",
-    "resolution_requirement",
-  ],
+  illustration: ["subtype", "quantity", "coloring_complexity"],
   web_design: [
     "subtype",
     "page_count",

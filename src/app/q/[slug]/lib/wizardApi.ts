@@ -17,8 +17,7 @@ import type {
 type FlowResponseData = {
   status: DescribeOutcome["status"];
   missing_fields?: readonly string[];
-  question?: string;
-  target_field?: string;
+  questions?: readonly { question: string; target_field: string }[];
   quote_code?: string;
   out_of_scope?: boolean;
   conservative?: boolean;
@@ -26,13 +25,18 @@ type FlowResponseData = {
 
 /** snake_case 回應 → camelCase DescribeOutcome（describe / answer 共用）。 */
 function toOutcome(data: FlowResponseData): DescribeOutcome {
-  const { status, missing_fields, question, target_field, quote_code, out_of_scope, conservative } =
-    data;
+  const { status, missing_fields, questions, quote_code, out_of_scope, conservative } = data;
   return {
     status,
     ...(missing_fields ? { missingFields: missing_fields } : {}),
-    ...(question ? { question } : {}),
-    ...(target_field ? { targetField: target_field } : {}),
+    ...(questions
+      ? {
+          questions: questions.map((item) => ({
+            question: item.question,
+            targetField: item.target_field,
+          })),
+        }
+      : {}),
     ...(quote_code ? { quoteCode: quote_code } : {}),
     ...(out_of_scope !== undefined ? { outOfScope: out_of_scope } : {}),
     ...(conservative !== undefined ? { conservative } : {}),
@@ -114,17 +118,17 @@ export async function submitDescribe(
 }
 
 /**
- * Step 3：回答本輪反問。打同一 session 的 /answer 端點——後端以「原始描述 +
- * 累積問答」重新解析，回傳下一輪反問 / 出報價 / 保守估算。絕不建立新 session，
- * 故客戶不需要重述先前描述。
+ * Step 3：一次回答本輪所有反問。打同一 session 的 /answer 端點——後端以「原始
+ * 描述 + 累積問答」重新解析，回傳下一輪反問 / 出報價 / 保守估算。絕不建立新
+ * session，故客戶不需要重述先前描述。answers 每筆對應一個 targetField。
  */
 export async function submitAnswer(
   sessionId: string,
-  answer: string,
+  answers: readonly { field: string; answer: string }[],
 ): Promise<ApiResult<DescribeOutcome>> {
   const result = await request<FlowResponseData>(API_ROUTES.answer(sessionId), {
     method: "POST",
-    body: JSON.stringify({ answer }),
+    body: JSON.stringify({ answers }),
   });
   if (!result.ok) return result;
   return { ok: true, data: toOutcome(result.data) };

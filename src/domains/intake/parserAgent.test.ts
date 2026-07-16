@@ -79,7 +79,7 @@ describe("parseIntake", () => {
   it("某欄 value 為 null → 列入缺漏", async () => {
     mockReturns(
       fullFields("illustration", {
-        revision_count: { value: null, confidence: 0, source_span: null },
+        deadline_days: { value: null, confidence: 0, source_span: null },
       }),
     );
 
@@ -89,7 +89,7 @@ describe("parseIntake", () => {
       rawText: "幫我畫一個角色",
     });
 
-    expect(result.missingRequiredFields).toContain("revision_count");
+    expect(result.missingRequiredFields).toContain("deadline_days");
   });
 
   it("某欄低 confidence → 列入缺漏", async () => {

@@ -7,7 +7,6 @@ export const FIELD_LABELS: Record<string, string> = {
   // 共用
   license_scope: "授權範圍",
   deadline_days: "交期天數",
-  revision_count: "修改次數",
   // 平面設計 / 插畫 / 網頁設計 共用
   subtype: "子類型",
   quantity: "數量",
@@ -15,7 +14,6 @@ export const FIELD_LABELS: Record<string, string> = {
   includes_pitch_rounds: "提案輪數",
   // 插畫
   coloring_complexity: "上色複雜度",
-  resolution_requirement: "解析度需求",
   // 網頁設計
   page_count: "頁數",
   feature_modules: "功能模組",

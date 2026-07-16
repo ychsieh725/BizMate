@@ -156,14 +156,16 @@ describe("submitDescribe", () => {
     });
   });
 
-  it("轉換 question/target_field（反問路徑，不再丟棄問題）", async () => {
+  it("轉換 questions 陣列（批次反問，不再丟棄問題）", async () => {
     mockFetchOnce({
       success: true,
       data: {
         status: "awaiting_clarification",
-        missing_fields: ["dimensions"],
-        question: "請問成品大約多大尺寸？",
-        target_field: "dimensions",
+        missing_fields: ["subtype", "deadline_days"],
+        questions: [
+          { question: "這是哪一種平面設計呢？", target_field: "subtype" },
+          { question: "希望什麼時候完成？", target_field: "deadline_days" },
+        ],
       },
       error: null,
     });
@@ -177,9 +179,11 @@ describe("submitDescribe", () => {
       ok: true,
       data: {
         status: "awaiting_clarification",
-        missingFields: ["dimensions"],
-        question: "請問成品大約多大尺寸？",
-        targetField: "dimensions",
+        missingFields: ["subtype", "deadline_days"],
+        questions: [
+          { question: "這是哪一種平面設計呢？", targetField: "subtype" },
+          { question: "希望什麼時候完成？", targetField: "deadline_days" },
+        ],
       },
     });
   });
@@ -205,20 +209,25 @@ describe("submitDescribe", () => {
 });
 
 describe("submitAnswer", () => {
-  it("送出 answer 到 /answer 端點（同一 session，不建新 session）", async () => {
+  const ANSWERS = [
+    { field: "subtype", answer: "海報" },
+    { field: "deadline_days", answer: "兩週" },
+  ];
+
+  it("送出 answers 陣列到 /answer 端點（同一 session，不建新 session）", async () => {
     mockFetchOnce({
       success: true,
       data: { status: "awaiting_review", quote_code: "I-2607001" },
       error: null,
     });
 
-    const result = await submitAnswer(SESSION_ID, "A2 尺寸");
+    const result = await submitAnswer(SESSION_ID, ANSWERS);
 
     expect(fetch).toHaveBeenCalledWith(
       `/api/sessions/${SESSION_ID}/answer`,
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ answer: "A2 尺寸" }),
+        body: JSON.stringify({ answers: ANSWERS }),
       }),
     );
     expect(result).toEqual({
@@ -227,27 +236,25 @@ describe("submitAnswer", () => {
     });
   });
 
-  it("答完仍缺欄位時回傳下一輪反問問題", async () => {
+  it("答完仍缺欄位時回傳下一輪的 questions 陣列", async () => {
     mockFetchOnce({
       success: true,
       data: {
         status: "awaiting_clarification",
-        missing_fields: ["deadline"],
-        question: "希望什麼時候完成？",
-        target_field: "deadline",
+        missing_fields: ["quantity"],
+        questions: [{ question: "需要幾份呢？", target_field: "quantity" }],
       },
       error: null,
     });
 
-    const result = await submitAnswer(SESSION_ID, "A2 尺寸");
+    const result = await submitAnswer(SESSION_ID, ANSWERS);
 
     expect(result).toEqual({
       ok: true,
       data: {
         status: "awaiting_clarification",
-        missingFields: ["deadline"],
-        question: "希望什麼時候完成？",
-        targetField: "deadline",
+        missingFields: ["quantity"],
+        questions: [{ question: "需要幾份呢？", targetField: "quantity" }],
       },
     });
   });
@@ -263,7 +270,7 @@ describe("submitAnswer", () => {
       error: null,
     });
 
-    const result = await submitAnswer(SESSION_ID, "不確定");
+    const result = await submitAnswer(SESSION_ID, ANSWERS);
 
     expect(result).toEqual({
       ok: true,
@@ -285,7 +292,7 @@ describe("submitAnswer", () => {
       409,
     );
 
-    const result = await submitAnswer(SESSION_ID, "隨便");
+    const result = await submitAnswer(SESSION_ID, ANSWERS);
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.httpStatus).toBe(409);

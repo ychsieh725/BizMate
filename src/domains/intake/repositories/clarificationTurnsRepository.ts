@@ -3,33 +3,36 @@ import type { Tables } from "@/lib/supabase/database.types.ts";
 
 /**
  * clarification_turns 表 repository。
- * 支援反問迴圈：建立新一輪問題、找出待回答的 turn、計算已回答輪數（判斷是否達上限）。
+ * 支援批次反問迴圈：一輪建立多題（每缺漏欄位一筆、共用同一 round）、
+ * 找出本輪待回答的所有 turn、取已回答問答對重組上下文。
+ * 輪數計算改由呼叫端從已回答 turn 的相異 round 數推得（不再逐 turn 計數）。
  */
 export class ClarificationTurnsRepository extends BaseRepository<"clarification_turns"> {
   constructor() {
     super("clarification_turns");
   }
 
-  /** 找出該 session 尚未回答（answer is null）的最新一輪；無則回 null。 */
-  async findUnansweredLatest(
+  /**
+   * 取該 session 所有尚未回答（answer is null）的 turn。批次模式下這些同屬
+   * 當前待答的那一輪（整輪一起建、一起答）。依 round 遞增穩定排序。
+   */
+  async findUnanswered(
     sessionId: string,
-  ): Promise<Tables<"clarification_turns"> | null> {
+  ): Promise<Tables<"clarification_turns">[]> {
     const { data, error } = await this.client
       .from("clarification_turns")
       .select("*")
       .eq("session_id", sessionId)
       .is("answer", null)
-      .order("round", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .order("round", { ascending: true });
     if (error) {
       throw new RepositoryError(
         "clarification_turns",
-        "findUnansweredLatest",
+        "findUnanswered",
         error.message,
       );
     }
-    return data ?? null;
+    return data ?? [];
   }
 
   /** 取該 session 已回答的問答對，依 round 遞增——供反問重新解析時組合上下文。 */
@@ -50,23 +53,6 @@ export class ClarificationTurnsRepository extends BaseRepository<"clarification_
       );
     }
     return data ?? [];
-  }
-
-  /** 計算該 session 已回答（answer 非 null）的輪數——用於輪數上限判斷。 */
-  async countAnswered(sessionId: string): Promise<number> {
-    const { count, error } = await this.client
-      .from("clarification_turns")
-      .select("*", { count: "exact", head: true })
-      .eq("session_id", sessionId)
-      .not("answer", "is", null);
-    if (error) {
-      throw new RepositoryError(
-        "clarification_turns",
-        "countAnswered",
-        error.message,
-      );
-    }
-    return count ?? 0;
   }
 }
 

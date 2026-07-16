@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/domains/intake/clarificationAgent.ts", () => ({
-  generateClarificationQuestion: vi.fn(),
+  generateClarificationQuestions: vi.fn(),
 }));
 vi.mock("@/domains/intake/repositories/clarificationTurnsRepository.ts", () => ({
   clarificationTurnsRepository: { create: vi.fn() },
@@ -23,13 +23,13 @@ vi.mock("@/domains/pricing/repositories/priceLineItemsRepository.ts", () => ({
 }));
 
 import { resolveAfterParse } from "./resolveAfterParse.ts";
-import { generateClarificationQuestion } from "@/domains/intake/clarificationAgent.ts";
+import { generateClarificationQuestions } from "@/domains/intake/clarificationAgent.ts";
 import { clarificationTurnsRepository } from "@/domains/intake/repositories/clarificationTurnsRepository.ts";
 import { computeBasePricing } from "@/domains/pricing/basePricing.ts";
 import { generateQuoteCode } from "@/domains/pricing/quoteFormatter.ts";
 import { quotesRepository } from "@/domains/pricing/repositories/quotesRepository.ts";
 
-const mockGenerateQuestion = vi.mocked(generateClarificationQuestion);
+const mockGenerateQuestions = vi.mocked(generateClarificationQuestions);
 const mockTurnCreate = vi.mocked(clarificationTurnsRepository.create);
 const mockPricing = vi.mocked(computeBasePricing);
 const mockQuoteCode = vi.mocked(generateQuoteCode);
@@ -58,7 +58,7 @@ describe("resolveAfterParse", () => {
       completedRounds: 0,
     });
 
-    expect(mockGenerateQuestion).not.toHaveBeenCalled();
+    expect(mockGenerateQuestions).not.toHaveBeenCalled();
     expect(mockPricing).toHaveBeenCalledWith(MERCHANT_ID, "illustration", {});
     expect(mockQuoteCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -76,32 +76,36 @@ describe("resolveAfterParse", () => {
     });
   });
 
-  it("有缺 & 未達上限 → 依優先序選下一題、寫 turn，不計價", async () => {
-    mockGenerateQuestion.mockResolvedValue({
-      question: "這張插畫會用在哪些地方呢？",
-      targetField: "license_scope",
-    });
+  it("有缺 & 未達上限 → 一次為全部缺漏欄位建 turn（同一輪），不計價", async () => {
+    mockGenerateQuestions.mockResolvedValue([
+      { question: "這張插畫會用在哪些地方呢？", targetField: "license_scope" },
+      { question: "希望什麼時候完成呢？", targetField: "deadline_days" },
+    ]);
 
     const outcome = await resolveAfterParse({
       ...BASE,
-      missingFields: ["deadline_days", "license_scope"], // license 優先序高
+      missingFields: ["deadline_days", "license_scope"], // 兩欄都要問
       completedRounds: 0,
     });
 
-    expect(mockGenerateQuestion).toHaveBeenCalledWith(
-      expect.objectContaining({ targetField: "license_scope" }),
+    // 一次呼叫、依優先序把全部缺漏欄位傳入
+    expect(mockGenerateQuestions).toHaveBeenCalledWith(
+      expect.objectContaining({ targetFields: ["license_scope", "deadline_days"] }),
+    );
+    // 兩欄各建一筆 turn，共用 round=1
+    expect(mockTurnCreate).toHaveBeenCalledTimes(2);
+    expect(mockTurnCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ round: 1, triggered_field: "license_scope" }),
     );
     expect(mockTurnCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        round: 1,
-        triggered_field: "license_scope",
-        question: "這張插畫會用在哪些地方呢？",
-      }),
+      expect.objectContaining({ round: 1, triggered_field: "deadline_days" }),
     );
     expect(mockPricing).not.toHaveBeenCalled();
     expect(outcome.status).toBe("awaiting_clarification");
-    expect(outcome.question).toBe("這張插畫會用在哪些地方呢？");
-    expect(outcome.targetField).toBe("license_scope");
+    expect(outcome.questions).toEqual([
+      { question: "這張插畫會用在哪些地方呢？", targetField: "license_scope" },
+      { question: "希望什麼時候完成呢？", targetField: "deadline_days" },
+    ]);
   });
 
   it("有缺 & 已達輪數上限 → 保守估算，quote 標示 is_conservative=true", async () => {
@@ -111,7 +115,7 @@ describe("resolveAfterParse", () => {
       completedRounds: 3, // 達 MAX_CLARIFICATION_ROUNDS
     });
 
-    expect(mockGenerateQuestion).not.toHaveBeenCalled();
+    expect(mockGenerateQuestions).not.toHaveBeenCalled();
     expect(mockPricing).toHaveBeenCalledOnce();
     expect(mockQuoteCreate).toHaveBeenCalledWith(
       expect.objectContaining({ is_conservative: true }),

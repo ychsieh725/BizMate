@@ -5,7 +5,7 @@ vi.mock("@/domains/finops/costLogger.ts", () => ({
 }));
 
 import { generateStructuredAndLog } from "@/domains/finops/costLogger.ts";
-import { generateClarificationQuestion } from "./clarificationAgent.ts";
+import { generateClarificationQuestions } from "./clarificationAgent.ts";
 
 const mockGenerate = vi.mocked(generateStructuredAndLog);
 
@@ -13,16 +13,18 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("generateClarificationQuestion", () => {
-  it("以 light tier 呼叫，prompt 含案件類型與欄位中文標籤", async () => {
+describe("generateClarificationQuestions（批次：一次問多欄）", () => {
+  it("以 light tier 一次呼叫，prompt 含案件類型與各欄位中文標籤", async () => {
     mockGenerate.mockResolvedValue({
-      data: { question: "這個案子預計可以接受幾次修改呢？" },
+      data: {
+        questions: ["這個作品會用在哪些用途上呢？", "希望什麼時候完成呢？"],
+      },
     } as never);
 
-    await generateClarificationQuestion({
+    await generateClarificationQuestions({
       sessionId: "sid-1",
       category: "illustration",
-      targetField: "revision_count",
+      targetFields: ["license_scope", "deadline_days"],
     });
 
     expect(mockGenerate).toHaveBeenCalledTimes(1);
@@ -36,23 +38,53 @@ describe("generateClarificationQuestion", () => {
     expect(args.agentName).toBe("clarification");
     expect(args.sessionId).toBe("sid-1");
     expect(args.prompt).toContain("插畫"); // 案件類型中文
-    expect(args.prompt).toContain("修改次數"); // 欄位中文標籤
+    expect(args.prompt).toContain("授權範圍"); // 欄位中文標籤
+    expect(args.prompt).toContain("交期天數");
   });
 
-  it("target_field 由程式端原樣回傳（不由 LLM 決定，保證 ∈ 缺漏清單）", async () => {
+  it("questions 依索引與 targetFields 對齊（target_field 不交給 LLM）", async () => {
     mockGenerate.mockResolvedValue({
-      data: { question: "這個作品會用在哪些用途上呢？" },
+      data: {
+        questions: ["用途問句", "交期問句"],
+      },
     } as never);
 
-    const result = await generateClarificationQuestion({
+    const result = await generateClarificationQuestions({
       sessionId: "sid-1",
       category: "graphic_design",
-      targetField: "license_scope",
+      targetFields: ["license_scope", "deadline_days"],
     });
 
-    expect(result).toEqual({
-      question: "這個作品會用在哪些用途上呢？",
-      targetField: "license_scope",
+    expect(result).toEqual([
+      { targetField: "license_scope", question: "用途問句" },
+      { targetField: "deadline_days", question: "交期問句" },
+    ]);
+  });
+
+  it("LLM 回傳問句數量不足時，缺的以欄位標籤兜底", async () => {
+    mockGenerate.mockResolvedValue({
+      data: { questions: ["用途問句"] }, // 只回一句，但問了兩欄
+    } as never);
+
+    const result = await generateClarificationQuestions({
+      sessionId: "sid-1",
+      category: "graphic_design",
+      targetFields: ["license_scope", "deadline_days"],
     });
+
+    expect(result[0]).toEqual({ targetField: "license_scope", question: "用途問句" });
+    expect(result[1]!.targetField).toBe("deadline_days");
+    expect(result[1]!.question).toContain("交期天數"); // 兜底問句含標籤
+  });
+
+  it("targetFields 為空時不呼叫 LLM、回空陣列", async () => {
+    const result = await generateClarificationQuestions({
+      sessionId: "sid-1",
+      category: "illustration",
+      targetFields: [],
+    });
+
+    expect(result).toEqual([]);
+    expect(mockGenerate).not.toHaveBeenCalled();
   });
 });

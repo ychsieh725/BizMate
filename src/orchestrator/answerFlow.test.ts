@@ -13,10 +13,9 @@ vi.mock("@/domains/intake/repositories/extractedFieldsRepository.ts", () => ({
 }));
 vi.mock("@/domains/intake/repositories/clarificationTurnsRepository.ts", () => ({
   clarificationTurnsRepository: {
-    findUnansweredLatest: vi.fn(),
+    findUnanswered: vi.fn(),
     update: vi.fn(),
     findAnsweredOrdered: vi.fn(),
-    countAnswered: vi.fn(),
   },
 }));
 vi.mock("@/domains/intake/parserAgent.ts", () => ({ parseIntake: vi.fn() }));
@@ -31,10 +30,9 @@ import { handleAnswer } from "@/orchestrator/answerFlow.ts";
 
 const mockFindById = vi.mocked(sessionsRepository.findById);
 const mockRawLatest = vi.mocked(rawInputsRepository.findLatestBySession);
-const mockFindUnanswered = vi.mocked(clarificationTurnsRepository.findUnansweredLatest);
+const mockFindUnanswered = vi.mocked(clarificationTurnsRepository.findUnanswered);
 const mockTurnUpdate = vi.mocked(clarificationTurnsRepository.update);
 const mockFindAnswered = vi.mocked(clarificationTurnsRepository.findAnsweredOrdered);
-const mockCountAnswered = vi.mocked(clarificationTurnsRepository.countAnswered);
 const mockParse = vi.mocked(parseIntake);
 const mockResolve = vi.mocked(resolveAfterParse);
 
@@ -51,7 +49,29 @@ function fakeSession(status: SessionStatus, category: CaseCategory = "illustrati
   };
 }
 
-const CALL = { sessionId: "s1", answer: "商業使用" };
+function turn(
+  overrides: Partial<Tables<"clarification_turns">>,
+): Tables<"clarification_turns"> {
+  return {
+    id: "turn-x",
+    session_id: "s1",
+    round: 1,
+    question: "問句",
+    answer: null,
+    triggered_field: "license_scope",
+    created_at: "2026-07-05T00:00:00Z",
+    ...overrides,
+  };
+}
+
+// 本輪一次回答兩個欄位（批次）
+const CALL = {
+  sessionId: "s1",
+  answers: [
+    { field: "license_scope", answer: "商業使用" },
+    { field: "deadline_days", answer: "兩週內" },
+  ],
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -61,7 +81,6 @@ beforeEach(() => {
     fields: { license_scope: { value: "商業使用", confidence: 0.9, source_span: "商業" } },
     missingRequiredFields: [],
   });
-  mockCountAnswered.mockResolvedValue(1);
   mockResolve.mockResolvedValue({ status: "awaiting_review", quoteCode: "I-2607005", conservative: false });
 });
 
@@ -82,26 +101,21 @@ describe("handleAnswer — 前置檢查", () => {
     expect(mockParse).not.toHaveBeenCalled();
   });
 
-  it("無待回答的反問 → no_pending_question", async () => {
+  it("本輪無待回答的反問 → no_pending_question", async () => {
     mockFindById.mockResolvedValue(fakeSession("awaiting_clarification"));
-    mockFindUnanswered.mockResolvedValue(null);
+    mockFindUnanswered.mockResolvedValue([]);
     expect(await handleAnswer(CALL)).toEqual({ ok: false, error: "no_pending_question" });
     expect(mockParse).not.toHaveBeenCalled();
   });
 });
 
-describe("handleAnswer — 主流程", () => {
+describe("handleAnswer — 主流程（批次）", () => {
   beforeEach(() => {
     mockFindById.mockResolvedValue(fakeSession("awaiting_clarification"));
-    mockFindUnanswered.mockResolvedValue({
-      id: "turn-1",
-      session_id: "s1",
-      round: 1,
-      question: "這張插畫會用在哪些地方呢？",
-      answer: null,
-      triggered_field: "license_scope",
-      created_at: "2026-07-05T00:00:00Z",
-    });
+    mockFindUnanswered.mockResolvedValue([
+      turn({ id: "turn-1", round: 1, triggered_field: "license_scope", question: "用途？" }),
+      turn({ id: "turn-2", round: 1, triggered_field: "deadline_days", question: "交期？" }),
+    ]);
     mockRawLatest.mockResolvedValue({
       id: "raw-1",
       session_id: "s1",
@@ -109,21 +123,15 @@ describe("handleAnswer — 主流程", () => {
       created_at: "2026-07-05T00:00:00Z",
     });
     mockFindAnswered.mockResolvedValue([
-      {
-        id: "turn-1",
-        session_id: "s1",
-        round: 1,
-        question: "這張插畫會用在哪些地方呢？",
-        answer: "商業使用",
-        triggered_field: "license_scope",
-        created_at: "2026-07-05T00:00:00Z",
-      },
+      turn({ id: "turn-1", round: 1, triggered_field: "license_scope", question: "用途？", answer: "商業使用" }),
+      turn({ id: "turn-2", round: 1, triggered_field: "deadline_days", question: "交期？", answer: "兩週內" }),
     ]);
   });
 
-  it("填入本輪答案", async () => {
+  it("依 triggered_field 對應，填入本輪每一題的答案", async () => {
     await handleAnswer(CALL);
     expect(mockTurnUpdate).toHaveBeenCalledWith("turn-1", { answer: "商業使用" });
+    expect(mockTurnUpdate).toHaveBeenCalledWith("turn-2", { answer: "兩週內" });
   });
 
   it("以「原始描述 + 累積問答」重新解析", async () => {
@@ -132,13 +140,26 @@ describe("handleAnswer — 主流程", () => {
     expect(rawText).toContain("幫我畫一個角色");
     expect(rawText).toContain("補充問答");
     expect(rawText).toContain("商業使用");
+    expect(rawText).toContain("兩週內");
   });
 
-  it("以已答輪數委派 resolveAfterParse", async () => {
-    mockCountAnswered.mockResolvedValue(2);
+  it("completedRounds = 已答 turn 的相異 round 數（同一輪多筆算一輪）", async () => {
+    // 兩筆都是 round 1 → 相異輪數 = 1
     await handleAnswer(CALL);
     expect(mockResolve).toHaveBeenCalledWith(
-      expect.objectContaining({ sessionId: "s1", completedRounds: 2 }),
+      expect.objectContaining({ sessionId: "s1", completedRounds: 1 }),
+    );
+  });
+
+  it("跨兩輪已答（round 1 + round 2）→ completedRounds = 2", async () => {
+    mockFindAnswered.mockResolvedValue([
+      turn({ id: "t1", round: 1, answer: "a" }),
+      turn({ id: "t2", round: 1, answer: "b" }),
+      turn({ id: "t3", round: 2, answer: "c" }),
+    ]);
+    await handleAnswer(CALL);
+    expect(mockResolve).toHaveBeenCalledWith(
+      expect.objectContaining({ completedRounds: 2 }),
     );
   });
 
