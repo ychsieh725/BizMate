@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createSession, submitDescribe, fetchStatus } from "./wizardApi.ts";
+import {
+  createSession,
+  submitDescribe,
+  submitAnswer,
+  fetchStatus,
+} from "./wizardApi.ts";
 
 /**
  * wizardApi 是前端唯一碰 fetch 的地方——mock 全域 fetch 驗證：
@@ -151,6 +156,34 @@ describe("submitDescribe", () => {
     });
   });
 
+  it("轉換 question/target_field（反問路徑，不再丟棄問題）", async () => {
+    mockFetchOnce({
+      success: true,
+      data: {
+        status: "awaiting_clarification",
+        missing_fields: ["dimensions"],
+        question: "請問成品大約多大尺寸？",
+        target_field: "dimensions",
+      },
+      error: null,
+    });
+
+    const result = await submitDescribe(SESSION_ID, {
+      rawText: "我要一張海報",
+      contactEmail: "a@b.com",
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      data: {
+        status: "awaiting_clarification",
+        missingFields: ["dimensions"],
+        question: "請問成品大約多大尺寸？",
+        targetField: "dimensions",
+      },
+    });
+  });
+
   it("409（狀態不允許重送）收斂成 ok:false", async () => {
     mockFetchOnce(
       {
@@ -165,6 +198,94 @@ describe("submitDescribe", () => {
       rawText: "再送一次",
       contactEmail: "a@b.com",
     });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.httpStatus).toBe(409);
+  });
+});
+
+describe("submitAnswer", () => {
+  it("送出 answer 到 /answer 端點（同一 session，不建新 session）", async () => {
+    mockFetchOnce({
+      success: true,
+      data: { status: "awaiting_review", quote_code: "I-2607001" },
+      error: null,
+    });
+
+    const result = await submitAnswer(SESSION_ID, "A2 尺寸");
+
+    expect(fetch).toHaveBeenCalledWith(
+      `/api/sessions/${SESSION_ID}/answer`,
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ answer: "A2 尺寸" }),
+      }),
+    );
+    expect(result).toEqual({
+      ok: true,
+      data: { status: "awaiting_review", quoteCode: "I-2607001" },
+    });
+  });
+
+  it("答完仍缺欄位時回傳下一輪反問問題", async () => {
+    mockFetchOnce({
+      success: true,
+      data: {
+        status: "awaiting_clarification",
+        missing_fields: ["deadline"],
+        question: "希望什麼時候完成？",
+        target_field: "deadline",
+      },
+      error: null,
+    });
+
+    const result = await submitAnswer(SESSION_ID, "A2 尺寸");
+
+    expect(result).toEqual({
+      ok: true,
+      data: {
+        status: "awaiting_clarification",
+        missingFields: ["deadline"],
+        question: "希望什麼時候完成？",
+        targetField: "deadline",
+      },
+    });
+  });
+
+  it("反問用盡後保守估算：轉換 conservative + quote_code", async () => {
+    mockFetchOnce({
+      success: true,
+      data: {
+        status: "awaiting_review",
+        quote_code: "I-2607002",
+        conservative: true,
+      },
+      error: null,
+    });
+
+    const result = await submitAnswer(SESSION_ID, "不確定");
+
+    expect(result).toEqual({
+      ok: true,
+      data: {
+        status: "awaiting_review",
+        quoteCode: "I-2607002",
+        conservative: true,
+      },
+    });
+  });
+
+  it("409（狀態不允許回答）收斂成 ok:false", async () => {
+    mockFetchOnce(
+      {
+        success: false,
+        data: null,
+        error: "session 目前狀態無法接受回答",
+      },
+      409,
+    );
+
+    const result = await submitAnswer(SESSION_ID, "隨便");
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.httpStatus).toBe(409);

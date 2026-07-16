@@ -60,7 +60,9 @@ export class CustomerWizardPage {
    */
   async expectQuoteAcceptedAndGetCode(): Promise<string> {
     const quoteCode = this.page.getByTestId("result-quote-code");
-    const clarification = this.page.getByTestId("result-missing-fields");
+    // 反問現在落在獨立的 clarify 步驟（同一 session，不重述描述），
+    // 以其問題卡片的 testid 偵測——取代舊的 result-missing-fields。
+    const clarification = this.page.getByTestId("clarify-question");
     const outOfScope = this.page.getByTestId("result-out-of-scope");
 
     await expect(

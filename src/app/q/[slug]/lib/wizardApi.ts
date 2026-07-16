@@ -13,13 +13,31 @@ import type {
  * 永不 throw，讓元件端只需處理 ok true/false 兩條路徑。
  */
 
-/** describe 回傳的原始（snake_case）資料形狀。 */
-type DescribeResponseData = {
+/** describe / answer 回傳的原始（snake_case）資料形狀（兩端共用）。 */
+type FlowResponseData = {
   status: DescribeOutcome["status"];
   missing_fields?: readonly string[];
+  question?: string;
+  target_field?: string;
   quote_code?: string;
   out_of_scope?: boolean;
+  conservative?: boolean;
 };
+
+/** snake_case 回應 → camelCase DescribeOutcome（describe / answer 共用）。 */
+function toOutcome(data: FlowResponseData): DescribeOutcome {
+  const { status, missing_fields, question, target_field, quote_code, out_of_scope, conservative } =
+    data;
+  return {
+    status,
+    ...(missing_fields ? { missingFields: missing_fields } : {}),
+    ...(question ? { question } : {}),
+    ...(target_field ? { targetField: target_field } : {}),
+    ...(quote_code ? { quoteCode: quote_code } : {}),
+    ...(out_of_scope !== undefined ? { outOfScope: out_of_scope } : {}),
+    ...(conservative !== undefined ? { conservative } : {}),
+  };
+}
 
 /** createSession 回傳的原始（snake_case）資料形狀。 */
 type CreatedSessionData = {
@@ -81,7 +99,7 @@ export async function submitDescribe(
   sessionId: string,
   input: { rawText: string; contactEmail: string },
 ): Promise<ApiResult<DescribeOutcome>> {
-  const result = await request<DescribeResponseData>(
+  const result = await request<FlowResponseData>(
     API_ROUTES.describe(sessionId),
     {
       method: "POST",
@@ -92,17 +110,24 @@ export async function submitDescribe(
     },
   );
   if (!result.ok) return result;
+  return { ok: true, data: toOutcome(result.data) };
+}
 
-  const { status, missing_fields, quote_code, out_of_scope } = result.data;
-  return {
-    ok: true,
-    data: {
-      status,
-      ...(missing_fields ? { missingFields: missing_fields } : {}),
-      ...(quote_code ? { quoteCode: quote_code } : {}),
-      ...(out_of_scope !== undefined ? { outOfScope: out_of_scope } : {}),
-    },
-  };
+/**
+ * Step 3：回答本輪反問。打同一 session 的 /answer 端點——後端以「原始描述 +
+ * 累積問答」重新解析，回傳下一輪反問 / 出報價 / 保守估算。絕不建立新 session，
+ * 故客戶不需要重述先前描述。
+ */
+export async function submitAnswer(
+  sessionId: string,
+  answer: string,
+): Promise<ApiResult<DescribeOutcome>> {
+  const result = await request<FlowResponseData>(API_ROUTES.answer(sessionId), {
+    method: "POST",
+    body: JSON.stringify({ answer }),
+  });
+  if (!result.ok) return result;
+  return { ok: true, data: toOutcome(result.data) };
 }
 
 /** Step 4：輪詢目前狀態。 */
