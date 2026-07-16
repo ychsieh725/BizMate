@@ -15,13 +15,24 @@ import { handleAnswer } from "@/orchestrator/answerFlow.ts";
 import type { FlowOutcome } from "@/orchestrator/flowOutcome.ts";
 import { ensureDevMerchant } from "./dev-merchant.ts";
 
-/** 依序回答反問的預備答案（涵蓋常見缺漏欄位）。 */
-const ANSWERS = ["角色設計一張", "商業使用", "兩週內完成", "含兩次修改"];
+/** 各缺漏欄位的預備答案（批次反問：一輪一次回答所有被問到的欄位）。 */
+const ANSWER_BY_FIELD: Record<string, string> = {
+  subtype: "角色設計",
+  quantity: "一張",
+  license_scope: "商業使用",
+  deadline_days: "兩週內完成",
+  coloring_complexity: "全彩細緻",
+  includes_pitch_rounds: "一次提案",
+  page_count: "五頁",
+  feature_modules: "無特殊功能",
+  includes_rwd: "需要",
+  includes_cms: "不需要",
+};
 
 function printOutcome(label: string, outcome: FlowOutcome): void {
   console.log(`\n[${label}] status=${outcome.status}`);
-  if (outcome.question) {
-    console.log(`  反問（${outcome.targetField}）：${outcome.question}`);
+  for (const item of outcome.questions ?? []) {
+    console.log(`  反問（${item.targetField}）：${item.question}`);
   }
   if (outcome.quoteCode) {
     console.log(
@@ -49,11 +60,16 @@ async function main(): Promise<void> {
   while (
     result.ok &&
     result.outcome.status === "awaiting_clarification" &&
-    round < ANSWERS.length
+    (result.outcome.questions?.length ?? 0) > 0 &&
+    round < 3
   ) {
-    const answer = ANSWERS[round];
-    console.log(`\n→ 回答：${answer}`);
-    const next = await handleAnswer({ sessionId, answer });
+    // 批次：一次回答本輪被問到的所有欄位
+    const answers = (result.outcome.questions ?? []).map((item) => ({
+      field: item.targetField,
+      answer: ANSWER_BY_FIELD[item.targetField] ?? "沒有特別要求",
+    }));
+    console.log(`\n→ 回答：${answers.map((a) => `${a.field}=${a.answer}`).join("、")}`);
+    const next = await handleAnswer({ sessionId, answers });
     if (!next.ok) throw new Error(`answer 失敗：${JSON.stringify(next)}`);
     result = next;
     printOutcome(`answer #${round + 1}`, result.outcome);

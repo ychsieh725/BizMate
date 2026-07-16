@@ -21,13 +21,16 @@ function params(id = VALID_ID) {
   return { params: Promise.resolve({ id }) };
 }
 
+/** 一筆合法的批次回答主體。 */
+const VALID_BODY = { answers: [{ field: "license_scope", answer: "商業使用" }] };
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("POST /api/sessions/[id]/answer", () => {
   it("id 非 UUID → 400，不進入編排", async () => {
-    const res = await POST(postRequest({ answer: "商業使用" }), params("not-uuid"));
+    const res = await POST(postRequest(VALID_BODY), params("not-uuid"));
     expect(res.status).toBe(400);
     expect(mockHandleAnswer).not.toHaveBeenCalled();
   });
@@ -38,21 +41,27 @@ describe("POST /api/sessions/[id]/answer", () => {
     expect(mockHandleAnswer).not.toHaveBeenCalled();
   });
 
-  it("缺 answer → 400", async () => {
+  it("缺 answers → 400", async () => {
     const res = await POST(postRequest({}), params());
+    expect(res.status).toBe(400);
+    expect(mockHandleAnswer).not.toHaveBeenCalled();
+  });
+
+  it("answers 為空陣列 → 400（至少答一題）", async () => {
+    const res = await POST(postRequest({ answers: [] }), params());
     expect(res.status).toBe(400);
     expect(mockHandleAnswer).not.toHaveBeenCalled();
   });
 
   it("session 不存在 → 404", async () => {
     mockHandleAnswer.mockResolvedValue({ ok: false, error: "not_found" });
-    const res = await POST(postRequest({ answer: "商業使用" }), params());
+    const res = await POST(postRequest(VALID_BODY), params());
     expect(res.status).toBe(404);
   });
 
   it("無待回答的反問 → 409", async () => {
     mockHandleAnswer.mockResolvedValue({ ok: false, error: "no_pending_question" });
-    const res = await POST(postRequest({ answer: "商業使用" }), params());
+    const res = await POST(postRequest(VALID_BODY), params());
     expect(res.status).toBe(409);
   });
 
@@ -62,30 +71,30 @@ describe("POST /api/sessions/[id]/answer", () => {
       error: "conflict",
       currentStatus: "awaiting_review",
     });
-    const res = await POST(postRequest({ answer: "商業使用" }), params());
+    const res = await POST(postRequest(VALID_BODY), params());
     expect(res.status).toBe(409);
   });
 
-  it("續問 → 200 + question/target_field", async () => {
+  it("續問 → 200 + questions 陣列（snake_case target_field）", async () => {
     mockHandleAnswer.mockResolvedValue({
       ok: true,
       outcome: {
         status: "awaiting_clarification",
-        question: "交期希望幾天內完成呢？",
-        targetField: "deadline_days",
+        questions: [
+          { question: "交期希望幾天內完成呢？", targetField: "deadline_days" },
+        ],
         missingFields: ["deadline_days"],
       },
     });
 
-    const res = await POST(postRequest({ answer: "商業使用" }), params());
+    const res = await POST(postRequest(VALID_BODY), params());
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.data).toMatchObject({
-      status: "awaiting_clarification",
-      question: "交期希望幾天內完成呢？",
-      target_field: "deadline_days",
-    });
+    expect(json.data.status).toBe("awaiting_clarification");
+    expect(json.data.questions).toEqual([
+      { question: "交期希望幾天內完成呢？", target_field: "deadline_days" },
+    ]);
   });
 
   it("保守估算出報價 → 200 + conservative/quote_code", async () => {
@@ -99,7 +108,7 @@ describe("POST /api/sessions/[id]/answer", () => {
       },
     });
 
-    const res = await POST(postRequest({ answer: "不確定" }), params());
+    const res = await POST(postRequest(VALID_BODY), params());
     const json = await res.json();
 
     expect(res.status).toBe(200);

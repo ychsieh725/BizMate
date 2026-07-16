@@ -51,7 +51,7 @@ export function StepDescribe({
           用你的話描述需求
         </h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          越具體越好：用途、數量、交期、預算、修改次數等。
+          越具體越好：用途、數量、交期、預算等。
         </p>
       </header>
 
@@ -70,7 +70,7 @@ export function StepDescribe({
             disabled={submitting}
             aria-invalid={touched && rawTextError !== ""}
             aria-describedby={rawTextError ? "raw-text-error" : undefined}
-            placeholder="例：我想要一張 A2 尺寸的活動海報，商業用途，兩週內完成，希望能修改兩次。"
+            placeholder="例：我想要一張 A2 尺寸的活動海報，商業用途，兩週內完成。"
             className="resize-y rounded-2xl border border-black/[.08] px-4 py-3 text-base outline-none focus-visible:border-foreground/60 disabled:opacity-50 dark:border-white/[.145]"
           />
           {touched && rawTextError && (

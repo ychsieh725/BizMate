@@ -1,82 +1,101 @@
 "use client";
 
 import { useState } from "react";
+import type { ClarificationItem } from "../lib/wizardTypes.ts";
 
 /**
- * Wizard Step 3：回答系統的單題反問（FR-CL-1）。
- * 客戶只需回答這一題，先前的描述由後端保留（answerFlow 以「原始描述 + 累積
- * 問答」重新解析），不需要重述需求——這正是修掉「反問即從頭再來」的關鍵。
+ * Wizard Step 3：一次回答本輪的所有反問（批次，FR-CL-1）。
+ * 把當下缺漏的每一項各列一題、各給一個輸入框，客戶一輪填完一起送出。先前的
+ * 描述由後端保留（answerFlow 以「原始描述 + 累積問答」重新解析），不需重述。
+ * 若答完仍不完整，會再進下一輪（最多三輪）。
  */
 type StepClarifyProps = {
-  question: string;
+  questions: readonly ClarificationItem[];
   submitting: boolean;
   serverError?: string;
-  onSubmit: (answer: string) => void;
+  onSubmit: (answers: { field: string; answer: string }[]) => void;
 };
 
 export function StepClarify({
-  question,
+  questions,
   submitting,
   serverError,
   onSubmit,
 }: StepClarifyProps) {
-  const [answer, setAnswer] = useState("");
+  // 以 targetField 為鍵收集各題答案。
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState(false);
 
-  const answerError = answer.trim().length === 0 ? "請回答上面的問題" : "";
+  const allAnswered = questions.every(
+    (item) => (answers[item.targetField] ?? "").trim().length > 0,
+  );
 
   function handleSubmit(event: React.FormEvent): void {
     event.preventDefault();
     setTouched(true);
-    if (answerError !== "") return;
-    onSubmit(answer.trim());
+    if (!allAnswered) return;
+    onSubmit(
+      questions.map((item) => ({
+        field: item.targetField,
+        answer: (answers[item.targetField] ?? "").trim(),
+      })),
+    );
   }
 
   return (
-    <section aria-labelledby="step-clarify-heading" className="flex flex-col gap-6">
+    <section
+      data-testid="clarify-question"
+      aria-labelledby="step-clarify-heading"
+      className="flex flex-col gap-6"
+    >
       <header className="flex flex-col gap-2">
         <p className="text-sm font-medium tracking-widest text-zinc-500 uppercase">
           步驟 3 / 4
         </p>
         <h1 id="step-clarify-heading" className="text-2xl font-semibold tracking-tight">
-          還差一點資訊
+          還差幾項資訊
         </h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          你先前的描述已經保留，只要回答下面這一題就好。
+          你先前的描述已經保留，請一次補齊下面這些問題就好。
         </p>
       </header>
 
-      <p
-        data-testid="clarify-question"
-        className="rounded-2xl border border-black/[.08] bg-black/[.02] px-5 py-4 text-base font-medium dark:border-white/[.145] dark:bg-white/[.03]"
-      >
-        {question}
-      </p>
-
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="clarify-answer" className="text-sm font-medium">
-            你的回答
-          </label>
-          <textarea
-            id="clarify-answer"
-            data-testid="clarify-answer"
-            value={answer}
-            onChange={(event) => setAnswer(event.target.value)}
-            onBlur={() => setTouched(true)}
-            rows={3}
-            disabled={submitting}
-            aria-invalid={touched && answerError !== ""}
-            aria-describedby={answerError ? "clarify-answer-error" : undefined}
-            placeholder="用一句話回答即可"
-            className="resize-y rounded-2xl border border-black/[.08] px-4 py-3 text-base outline-none focus-visible:border-foreground/60 disabled:opacity-50 dark:border-white/[.145]"
-          />
-          {touched && answerError && (
-            <p id="clarify-answer-error" role="alert" className="text-sm text-red-600 dark:text-red-400">
-              {answerError}
-            </p>
-          )}
-        </div>
+        {questions.map((item, index) => {
+          const value = answers[item.targetField] ?? "";
+          const error = touched && value.trim().length === 0;
+          const inputId = `clarify-answer-${item.targetField}`;
+          return (
+            <div key={item.targetField} className="flex flex-col gap-1.5">
+              <label htmlFor={inputId} className="text-sm font-medium">
+                {index + 1}. {item.question}
+              </label>
+              <input
+                id={inputId}
+                data-testid={`clarify-answer-${item.targetField}`}
+                type="text"
+                value={value}
+                onChange={(event) =>
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [item.targetField]: event.target.value,
+                  }))
+                }
+                onBlur={() => setTouched(true)}
+                disabled={submitting}
+                aria-invalid={error}
+                aria-describedby={error ? `${inputId}-error` : undefined}
+                placeholder="用一句話回答即可"
+                className="rounded-2xl border border-black/[.08] px-4 py-3 text-base outline-none focus-visible:border-foreground/60 disabled:opacity-50 dark:border-white/[.145]"
+              />
+              {error && (
+                <p id={`${inputId}-error`} role="alert" className="text-sm text-red-600 dark:text-red-400">
+                  請回答這一題
+                </p>
+              )}
+            </div>
+          );
+        })}
 
         {serverError && (
           <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">

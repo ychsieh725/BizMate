@@ -4,9 +4,9 @@
  */
 
 /**
- * 反問優先序：影響金額大的先問（FR-CL-1「優先詢問影響金額最大的欄位」）。
- * subtype 決定基礎費率查表、quantity/page_count 是數量乘數，故排在授權/交期/
- * 修改次數之前；PRD 明定的三欄序（授權 > 交期 > 修改次數）內嵌其中。
+ * 反問排序：影響金額大的排前面（FR-CL-1「優先詢問影響金額最大的欄位」）。
+ * subtype 決定基礎費率查表、quantity/page_count 是數量乘數，故排在授權/交期
+ * 之前；PRD 明定的欄序（授權 > 交期）內嵌其中。
  * 未列在此的欄位優先序最低，依缺漏清單原順序穩定殿後。
  */
 export const CLARIFICATION_FIELD_PRIORITY = [
@@ -15,25 +15,26 @@ export const CLARIFICATION_FIELD_PRIORITY = [
   "page_count",
   "license_scope",
   "deadline_days",
-  "revision_count",
 ] as const;
 
 /** 全流程反問輪數上限（FR-CL-2，初始值；避免 agent 無限反問造成客戶疲勞）。 */
 export const MAX_CLARIFICATION_ROUNDS = 3;
 
 /**
- * 從缺漏欄位依優先序選出「下一個要問」的欄位（每次一題，FR-CL-1）。
- * 先掃優先序清單找第一個命中的；優先序未涵蓋的欄位則回傳缺漏清單第一個（依原序穩定）。
- * 缺漏清單為空回 null。
+ * 將全部缺漏欄位依優先序排出「一輪要一次問完」的順序（批次反問）。
+ * 先放優先序清單命中的（依清單序），再放未涵蓋的欄位（依缺漏清單原序穩定殿後）。
+ * 缺漏清單為空回空陣列。取代舊的「每次選一題」selectNextField。
  */
-export function selectNextField(missingFields: readonly string[]): string | null {
-  if (missingFields.length === 0) return null;
-
-  for (const field of CLARIFICATION_FIELD_PRIORITY) {
-    if (missingFields.includes(field)) return field;
-  }
-
-  return missingFields[0];
+export function orderMissingFields(
+  missingFields: readonly string[],
+): string[] {
+  const prioritized = CLARIFICATION_FIELD_PRIORITY.filter((field) =>
+    missingFields.includes(field),
+  );
+  const rest = missingFields.filter(
+    (field) => !CLARIFICATION_FIELD_PRIORITY.includes(field as never),
+  );
+  return [...prioritized, ...rest];
 }
 
 /**

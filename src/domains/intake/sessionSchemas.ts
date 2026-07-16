@@ -41,12 +41,22 @@ export const describeBodySchema = z.object({
     .email("email 格式不正確"),
 });
 
-/** POST /answer 主體：客戶對反問的自然語言回答（FR-CL-1）。 */
+/**
+ * POST /answer 主體：客戶對本輪多個反問欄位的回答（批次反問，FR-CL-1）。
+ * 每筆對應一個 triggered_field；至少一筆，各答非空且不超長。
+ */
 export const answerBodySchema = z.object({
-  answer: z
-    .string()
-    .min(1, "回答不可為空")
-    .max(RAW_TEXT_MAX_LENGTH, `回答長度不可超過 ${RAW_TEXT_MAX_LENGTH} 字`),
+  answers: z
+    .array(
+      z.object({
+        field: z.string().min(1, "欄位名不可為空"),
+        answer: z
+          .string()
+          .min(1, "回答不可為空")
+          .max(RAW_TEXT_MAX_LENGTH, `回答長度不可超過 ${RAW_TEXT_MAX_LENGTH} 字`),
+      }),
+    )
+    .min(1, "至少要回答一題"),
 });
 
 /** 把 zod 錯誤壓成單行、面向使用者的訊息。 */

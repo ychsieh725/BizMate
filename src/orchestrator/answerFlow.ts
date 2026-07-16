@@ -7,6 +7,12 @@ import { clarificationTurnsRepository } from "@/domains/intake/repositories/clar
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
 import { resolveAfterParse, type FlowOutcome } from "@/orchestrator/resolveAfterParse.ts";
 
+/** 客戶對某一反問欄位的回答（批次：一輪回答多個欄位）。 */
+export interface ClarificationAnswer {
+  readonly field: string;
+  readonly answer: string;
+}
+
 export type AnswerResult =
   | { readonly ok: true; readonly outcome: FlowOutcome }
   | { readonly ok: false; readonly error: "not_found" }
@@ -19,32 +25,33 @@ export type AnswerResult =
 
 /**
  * 組合「原始描述 + 已答問答」作為重新解析的輸入文字。
- * 讓 Parser 在完整上下文（含客戶對反問的回答）下重抽所有欄位，而非只補單一欄位。
+ * 讓 Parser 在完整上下文（含客戶對反問的所有回答）下重抽全部欄位。
  */
-async function buildAugmentedText(sessionId: string): Promise<string> {
-  const raw = await rawInputsRepository.findLatestBySession(sessionId);
-  const turns = await clarificationTurnsRepository.findAnsweredOrdered(sessionId);
-  const base = raw?.raw_text ?? "";
-  if (turns.length === 0) return base;
-
-  const qa = turns
-    .map((turn) => `問：${turn.question}\n答：${turn.answer}`)
+function buildAugmentedText(
+  rawText: string,
+  answeredTurns: readonly { question: string; answer: string | null }[],
+): string {
+  if (answeredTurns.length === 0) return rawText;
+  const qa = answeredTurns
+    .map((turn) => `問：${turn.question}\n答：${turn.answer ?? ""}`)
     .join("\n");
-  return `${base}\n\n補充問答：\n${qa}`;
+  return `${rawText}\n\n補充問答：\n${qa}`;
 }
 
 /**
- * POST /answer 的編排（Wizard Step 3 回答反問）：填入本輪答案、以「原始描述 +
- * 累積問答」重新解析，再委派 resolveAfterParse 決定續問 / 出報價 / 保守估算。
+ * POST /answer 的編排（Wizard Step 3 回答反問）：一次填入本輪所有欄位的答案、
+ * 以「原始描述 + 累積問答」重新解析，再委派 resolveAfterParse 決定續問 /
+ * 出報價 / 保守估算。
  *
  * 狀態機：awaiting_clarification --answer_submitted--> parsing，之後分支由
- * resolveAfterParse 依 missingFields 與已答輪數決定（FR-CL-1~3）。
+ * resolveAfterParse 依 missingFields 與「已答輪數」決定（FR-CL-1~3）。
+ * 已答輪數 = 已回答 turn 的相異 round 數（批次下一輪含多筆 turn）。
  */
 export async function handleAnswer(params: {
   sessionId: string;
-  answer: string;
+  answers: readonly ClarificationAnswer[];
 }): Promise<AnswerResult> {
-  const { sessionId, answer } = params;
+  const { sessionId, answers } = params;
 
   const session = await sessionsRepository.findById(sessionId);
   if (session == null) {
@@ -57,16 +64,28 @@ export async function handleAnswer(params: {
     return { ok: false, error: "conflict", currentStatus: session.status };
   }
 
-  // 填入本輪答案；找不到待回答的反問代表狀態不一致
-  const turn = await clarificationTurnsRepository.findUnansweredLatest(sessionId);
-  if (turn == null) {
+  // 本輪所有待回答的反問；找不到代表狀態不一致
+  const pending = await clarificationTurnsRepository.findUnanswered(sessionId);
+  if (pending.length === 0) {
     return { ok: false, error: "no_pending_question" };
   }
-  await clarificationTurnsRepository.update(turn.id, { answer });
+
+  // 依 triggered_field 對應填入每一題的答案（順序無關，用欄位對映）
+  const answerByField = new Map(answers.map((a) => [a.field, a.answer]));
+  for (const turn of pending) {
+    const answer = answerByField.get(turn.triggered_field);
+    if (answer !== undefined) {
+      await clarificationTurnsRepository.update(turn.id, { answer });
+    }
+  }
 
   await sessionsRepository.update(sessionId, { status: toParsing.state });
 
-  const augmentedText = await buildAugmentedText(sessionId);
+  const raw = await rawInputsRepository.findLatestBySession(sessionId);
+  const answeredTurns =
+    await clarificationTurnsRepository.findAnsweredOrdered(sessionId);
+  const augmentedText = buildAugmentedText(raw?.raw_text ?? "", answeredTurns);
+
   const parsed = await parseIntake({
     sessionId,
     category: session.category,
@@ -83,7 +102,7 @@ export async function handleAnswer(params: {
     })),
   );
 
-  const completedRounds = await clarificationTurnsRepository.countAnswered(sessionId);
+  const completedRounds = new Set(answeredTurns.map((turn) => turn.round)).size;
   const outcome = await resolveAfterParse({
     sessionId,
     merchantId: session.merchant_id,

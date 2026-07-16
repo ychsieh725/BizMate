@@ -2,10 +2,10 @@ import type { CaseCategory, SessionStatus } from "@/shared/types/domain.types";
 import { transition } from "@/orchestrator/stateMachine.ts";
 import type { FieldExtraction } from "@/domains/intake/parserFields.ts";
 import {
-  selectNextField,
+  orderMissingFields,
   canAskMoreClarifications,
 } from "@/domains/intake/clarificationFields.ts";
-import { generateClarificationQuestion } from "@/domains/intake/clarificationAgent.ts";
+import { generateClarificationQuestions } from "@/domains/intake/clarificationAgent.ts";
 import { clarificationTurnsRepository } from "@/domains/intake/repositories/clarificationTurnsRepository.ts";
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { computeBasePricing } from "@/domains/pricing/basePricing.ts";
@@ -85,29 +85,29 @@ export async function resolveAfterParse(params: {
   const { sessionId, merchantId, category, fields, missingFields, completedRounds } =
     params;
 
-  // 續問路徑：仍缺欄位且未達輪數上限 → 生成下一題
+  // 續問路徑：仍缺欄位且未達輪數上限 → 一次生成本輪全部問題（批次反問）
   if (missingFields.length > 0 && canAskMoreClarifications(completedRounds)) {
-    const targetField = selectNextField(missingFields);
-    if (targetField == null) {
-      throw new Error("resolveAfterParse：missingFields 非空但選不出欄位");
-    }
-
-    const { question } = await generateClarificationQuestion({
+    const orderedFields = orderMissingFields(missingFields);
+    const questions = await generateClarificationQuestions({
       sessionId,
       category,
-      targetField,
+      targetFields: orderedFields,
     });
 
-    await clarificationTurnsRepository.create({
-      session_id: sessionId,
-      round: completedRounds + 1,
-      question,
-      triggered_field: targetField,
-    });
+    // 本輪所有欄位共用同一個 round 號（clarification_turns 對 round 無唯一約束）
+    const round = completedRounds + 1;
+    for (const item of questions) {
+      await clarificationTurnsRepository.create({
+        session_id: sessionId,
+        round,
+        question: item.question,
+        triggered_field: item.targetField,
+      });
+    }
 
     const status = nextState("parsing", "parse_incomplete");
     await sessionsRepository.update(sessionId, { status });
-    return { status, missingFields, question, targetField };
+    return { status, missingFields, questions };
   }
 
   // 出報價路徑：齊全（正常）或缺欄位但輪數用盡（保守估算）

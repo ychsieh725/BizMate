@@ -34,13 +34,13 @@ export function WizardPage({
   const [serverError, setServerError] = useState<string>("");
 
   /**
-   * 依解析結果決定下一畫面：仍需反問（有 question）→ clarify；否則進 result
+   * 依解析結果決定下一畫面：仍需反問（有 questions）→ clarify；否則進 result
    * （出報價 / 超範圍 / 保守估算皆為終態）。describe 與 answer 共用此路由。
    */
   function routeOutcome(next: DescribeOutcome): void {
     setOutcome(next);
     setStep(
-      next.status === "awaiting_clarification" && next.question
+      next.status === "awaiting_clarification" && (next.questions?.length ?? 0) > 0
         ? "clarify"
         : "result",
     );
@@ -79,14 +79,16 @@ export function WizardPage({
   }
 
   /**
-   * Step 3：回答反問（同一 session，不重述描述）。依新 outcome 決定續問或結果；
-   * 失敗留在反問畫面，讓客戶重試。
+   * Step 3：一次回答本輪所有反問（同一 session，不重述描述）。依新 outcome 決定
+   * 續問或結果；失敗留在反問畫面，讓客戶重試。
    */
-  async function handleSubmitAnswer(answer: string): Promise<void> {
+  async function handleSubmitAnswer(
+    answers: { field: string; answer: string }[],
+  ): Promise<void> {
     if (!sessionId) return;
     setServerError("");
     setSubmitting(true);
-    const result = await submitAnswer(sessionId, answer);
+    const result = await submitAnswer(sessionId, answers);
     setSubmitting(false);
     if (!result.ok) {
       setServerError(result.error);
@@ -137,9 +139,9 @@ export function WizardPage({
         />
       )}
 
-      {step === "clarify" && outcome?.question && (
+      {step === "clarify" && outcome?.questions && outcome.questions.length > 0 && (
         <StepClarify
-          question={outcome.question}
+          questions={outcome.questions}
           submitting={submitting}
           serverError={serverError || undefined}
           onSubmit={handleSubmitAnswer}
