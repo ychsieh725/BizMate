@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ClarificationItem } from "../lib/wizardTypes.ts";
+import { StepProgress } from "./StepProgress.tsx";
 
 /**
  * Wizard Step 3：一次回答本輪的所有反問（批次，FR-CL-1）。
@@ -48,14 +49,12 @@ export function StepClarify({
       aria-labelledby="step-clarify-heading"
       className="flex flex-col gap-6"
     >
-      <header className="flex flex-col gap-2">
-        <p className="text-sm font-medium tracking-widest text-zinc-500 uppercase">
-          步驟 3 / 4
-        </p>
-        <h1 id="step-clarify-heading" className="text-2xl font-semibold tracking-tight">
+      <header className="flex flex-col gap-3">
+        <StepProgress current={3} />
+        <h1 id="step-clarify-heading" className="text-2xl font-semibold tracking-tight text-ink">
           還差幾項資訊
         </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-ink-soft">
           你先前的描述已經保留，請一次補齊下面這些問題就好。
         </p>
       </header>
@@ -67,7 +66,7 @@ export function StepClarify({
           const inputId = `clarify-answer-${item.targetField}`;
           return (
             <div key={item.targetField} className="flex flex-col gap-1.5">
-              <label htmlFor={inputId} className="text-sm font-medium">
+              <label htmlFor={inputId} className="text-sm font-medium text-ink">
                 {index + 1}. {item.question}
               </label>
               <input
@@ -86,10 +85,10 @@ export function StepClarify({
                 aria-invalid={error}
                 aria-describedby={error ? `${inputId}-error` : undefined}
                 placeholder="用一句話回答即可"
-                className="rounded-2xl border border-black/[.08] px-4 py-3 text-base outline-none focus-visible:border-foreground/60 disabled:opacity-50 dark:border-white/[.145]"
+                className="rounded-xl border border-surface-line px-4 py-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
               />
               {error && (
-                <p id={`${inputId}-error`} role="alert" className="text-sm text-red-600 dark:text-red-400">
+                <p id={`${inputId}-error`} role="alert" className="text-sm text-danger">
                   請回答這一題
                 </p>
               )}
@@ -98,7 +97,7 @@ export function StepClarify({
         })}
 
         {serverError && (
-          <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          <p role="alert" className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
             {serverError}
           </p>
         )}
@@ -107,7 +106,7 @@ export function StepClarify({
           type="submit"
           data-testid="clarify-submit"
           disabled={submitting}
-          className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:opacity-90 disabled:opacity-50"
+          className="inline-flex h-12 items-center justify-center rounded-xl bg-accent px-6 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
         >
           {submitting ? "處理中…" : "送出回答"}
         </button>
