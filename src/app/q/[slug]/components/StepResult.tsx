@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { SessionStatus } from "@/shared/types/domain.types";
 import { fetchStatus } from "../lib/wizardApi.ts";
 import type { DescribeOutcome } from "../lib/wizardTypes.ts";
+import { StepProgress } from "./StepProgress.tsx";
 
 /**
  * Wizard Step 4：終態結果 + 狀態輪詢（FR-CW-3、FR-CW-4）。
@@ -51,11 +52,9 @@ export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
 
   return (
     <section aria-labelledby="step-result-heading" className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <p className="text-sm font-medium tracking-widest text-zinc-500 uppercase">
-          步驟 4 / 4
-        </p>
-        <h1 id="step-result-heading" className="text-2xl font-semibold tracking-tight">
+      <header className="flex flex-col gap-3">
+        <StepProgress current={4} />
+        <h1 id="step-result-heading" className="text-2xl font-semibold tracking-tight text-ink">
           {isQuoteAccepted
             ? "已收到你的需求"
             : outcome.outOfScope
@@ -66,22 +65,22 @@ export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
 
       {isQuoteAccepted && (
         <div className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-black/[.08] px-5 py-4 dark:border-white/[.145]">
-            <p className="text-sm text-zinc-500">報價單編號</p>
+          <div className="rounded-2xl border border-surface-line px-5 py-4">
+            <p className="text-sm text-ink-soft">報價單編號</p>
             <p
               data-testid="result-quote-code"
-              className="mt-1 font-mono text-lg font-semibold"
+              className="mt-1 font-mono text-lg font-semibold text-ink"
             >
               {outcome.quoteCode}
             </p>
           </div>
           {outcome.conservative && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-ink-soft">
               此為依現有資訊做的初步估算，商家確認時會再依實際需求調整。
             </p>
           )}
-          <p aria-live="polite" className="text-sm text-zinc-600 dark:text-zinc-400">
-            目前狀態：<span className="font-medium text-foreground">{STATUS_LABELS[liveStatus]}</span>
+          <p aria-live="polite" className="text-sm text-ink-soft">
+            目前狀態：<span className="font-medium text-ink">{STATUS_LABELS[liveStatus]}</span>
             <br />
             商家確認後，報價單將以 email 寄送給你。
           </p>
@@ -89,7 +88,7 @@ export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
       )}
 
       {!isQuoteAccepted && outcome.outOfScope && (
-        <p data-testid="result-out-of-scope" className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p data-testid="result-out-of-scope" className="text-sm text-ink-soft">
           你的需求超出標準報價範圍，我們已轉由專人評估，將盡快與你聯繫。
         </p>
       )}
@@ -97,7 +96,7 @@ export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
       <button
         type="button"
         onClick={onRestart}
-        className="text-sm font-medium text-zinc-500 underline underline-offset-4 hover:text-foreground"
+        className="text-sm font-medium text-ink-soft hover:text-accent"
       >
         重新開始一筆新報價
       </button>
