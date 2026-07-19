@@ -37,7 +37,7 @@
 
 ## 3. 缺陷發現
 
-Golden Set 建立完成後，第一次對真實 Gemini 執行 `pnpm verify:golden-set`，
+Golden Set 建立完成後，第一次對真實 Gemini 執行基準線量測腳本（當時為 `pnpm verify:golden-set`，7.2 已併入 `pnpm eval`），
 逐案例對照立刻暴露一個系統性模式：
 
 ```
@@ -160,7 +160,7 @@ export function normalizeLicenseScope(value: string | null): string | null
 | `src/domains/pricing/repositories/rateCardRepository.ts` | 新增 `findActiveSubtypes` |
 | `src/orchestrator/describeFlow.ts` | 查值域後傳入 Parser |
 | `src/orchestrator/answerFlow.ts` | 同上（反問補答同樣需要值域約束） |
-| `scripts/verify-parser.ts`、`scripts/verify-golden-set.ts` | 同步更新呼叫 |
+| `scripts/verify-parser.ts`、基準線量測腳本 | 同步更新呼叫 |
 
 無資料庫變更（`is_active` 欄位在 5.5 已存在）。
 
@@ -329,7 +329,7 @@ $ pnpm lint           # 無錯誤
 中斷（`429 RESOURCE_EXHAUSTED`）。既有的重試機制不涵蓋配額耗盡——重試只會
 繼續撞牆。
 
-**處理**：`verify-golden-set.ts` 內建 4.5s/則節流（約 13 RPM，留安全邊際），
+**處理**：量測腳本內建 4.5s/則節流（約 13 RPM，留安全邊際），
 並提供 `--delay=` 覆寫與 `--limit=` 小量試跑。
 
 **後續影響**：WBS 7.2（Eval Runner）與 8.5（CI 雙閘門）會遇到同一限制，
@@ -357,6 +357,6 @@ $ pnpm lint           # 無錯誤
 | 標註資料集 | `src/domains/eval/goldenCases.{graphic,illustration,web}.ts` |
 | 資料集型別與正規化約定 | `src/domains/eval/goldenSet.types.ts` |
 | 完整性測試（14 項） | `src/domains/eval/goldenSet.test.ts` |
-| 基準線量測腳本 | `scripts/verify-golden-set.ts`（`pnpm verify:golden-set`） |
+| 基準線量測腳本 | `scripts/run-eval.ts`（`pnpm eval`；7.2 起取代原 `verify-golden-set.ts`） |
 | 值域定義 | `src/shared/constants/fieldDomains.ts` |
 | 值域 schema 測試（8 項） | `src/domains/intake/parserFields.test.ts` |
