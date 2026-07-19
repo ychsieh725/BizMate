@@ -165,7 +165,7 @@ export function WizardPage({
           <StepProgress current={STEP_NUMBERS[step]} />
           {step === "category" && (
             <Link
-              href={PAGE_ROUTES.home}
+              href={PAGE_ROUTES.customerHome}
               className="text-sm font-medium text-ink-soft hover:text-accent"
             >
               ← 回首頁
@@ -181,7 +181,7 @@ export function WizardPage({
                 重新開始一筆新報價
               </button>
               <Link
-                href={PAGE_ROUTES.home}
+                href={PAGE_ROUTES.customerHome}
                 className="text-sm font-medium text-ink-soft hover:text-accent"
               >
                 回首頁
