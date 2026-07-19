@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const mockGetUser = vi.fn();
+const mockGetClaims = vi.fn();
 
 vi.mock("@supabase/ssr", () => ({
   createServerClient: vi.fn(() => ({
-    auth: { getUser: mockGetUser },
+    auth: { getClaims: mockGetClaims },
   })),
 }));
 
@@ -16,45 +16,48 @@ vi.mock("@/lib/env.ts", () => ({
   },
 }));
 
-import { getUserAndResponse } from "./middlewareClient.ts";
+import { getUserIdAndResponse } from "./middlewareClient.ts";
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("getUserAndResponse", () => {
-  it("回傳已登入使用者", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+describe("getUserIdAndResponse", () => {
+  it("JWT 驗證通過 → 回傳 claims.sub 作為 userId", async () => {
+    mockGetClaims.mockResolvedValue({
+      data: { claims: { sub: "u1" } },
+      error: null,
+    });
 
     const request = new NextRequest("http://localhost/dashboard");
-    const { user } = await getUserAndResponse(request);
+    const { userId } = await getUserIdAndResponse(request);
 
-    expect(user).toEqual({ id: "u1" });
+    expect(userId).toBe("u1");
   });
 
-  it("未登入時 user 為 null", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null } });
+  it("無 session（data 為 null）→ userId 為 null", async () => {
+    mockGetClaims.mockResolvedValue({ data: null, error: null });
 
     const request = new NextRequest("http://localhost/dashboard");
-    const { user } = await getUserAndResponse(request);
+    const { userId } = await getUserIdAndResponse(request);
 
-    expect(user).toBeNull();
+    expect(userId).toBeNull();
   });
 
   it("Supabase 呼叫失敗時 fail closed（視為未登入，不拋錯）", async () => {
-    mockGetUser.mockRejectedValue(new Error("network error"));
+    mockGetClaims.mockRejectedValue(new Error("network error"));
 
     const request = new NextRequest("http://localhost/dashboard");
-    const { user } = await getUserAndResponse(request);
+    const { userId } = await getUserIdAndResponse(request);
 
-    expect(user).toBeNull();
+    expect(userId).toBeNull();
   });
 
   it("回傳 NextResponse 物件供 middleware 沿用", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: null } });
+    mockGetClaims.mockResolvedValue({ data: null, error: null });
 
     const request = new NextRequest("http://localhost/dashboard");
-    const { response } = await getUserAndResponse(request);
+    const { response } = await getUserIdAndResponse(request);
 
     expect(response).toBeDefined();
   });

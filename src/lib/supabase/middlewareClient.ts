@@ -2,15 +2,21 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env.ts";
 import type { Database } from "@/lib/supabase/database.types.ts";
-import type { User } from "@supabase/supabase-js";
 
-type Result = { user: User | null; response: NextResponse };
+type Result = { userId: string | null; response: NextResponse };
 
 /**
- * middleware 專用：以 request cookie 建立 Supabase client 並刷新 session cookie。
- * Supabase 呼叫失敗一律 fail closed（user=null），不可讓例外讓保護路由誤放行。
+ * middleware 專用：以 request cookie 建立 Supabase client、驗證 JWT 並刷新 session cookie。
+ *
+ * 用 getClaims() 而非 getUser()：本專案 JWT 為 ES256 非對稱簽章（JWKS 實測確認），
+ * 驗證走 WebCrypto 本地完成、JWKS 快取於 function 實例，正常路徑零網路往返；
+ * token 快過期時 supabase-js 仍會自動刷新並透過 setAll 寫回 cookie。
+ * 安全邊界：middleware 只做 UX 重導，租戶隔離的主要守門在 requireMerchant
+ * （getUser 伺服器端驗證，可感知撤銷）+ RLS 第二道防線。
+ *
+ * Supabase 呼叫失敗一律 fail closed（userId=null），不可讓例外讓保護路由誤放行。
  */
-export async function getUserAndResponse(
+export async function getUserIdAndResponse(
   request: NextRequest,
 ): Promise<Result> {
   let response = NextResponse.next({ request });
@@ -37,11 +43,9 @@ export async function getUserAndResponse(
   );
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return { user, response };
+    const { data } = await supabase.auth.getClaims();
+    return { userId: data?.claims.sub ?? null, response };
   } catch {
-    return { user: null, response };
+    return { userId: null, response };
   }
 }

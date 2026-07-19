@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation";
 import { LayoutGrid, FileText, Tag, Settings, LogOut } from "lucide-react";
 import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
-import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
 import { logoutAction } from "./actions.ts";
 import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 import { RailNavLink } from "./RailNavLink.tsx";
@@ -19,18 +19,14 @@ export default async function DashboardLayout({
 }) {
   const auth = await requireMerchant();
 
+  // middleware 已不再為 /dashboard 查 merchants（省高頻導覽的 DB 往返），
+  // 「登入但無 merchant」的重導守門移到這裡；401 亦重導而非顯示死頁。
   if (!auth.ok) {
-    return (
-      <div className="flex min-h-screen flex-1 flex-col items-center justify-center gap-4 bg-surface-subtle p-8">
-        <p className="text-danger">
-          {auth.status === 401 ? "請先登入" : "查無商家資料，請先完成 onboarding"}
-        </p>
-      </div>
-    );
+    redirect(auth.status === 401 ? "/login" : "/onboarding");
   }
 
-  const merchant = await merchantsRepository.findById(auth.merchantId);
-  const initial = merchant?.display_name?.charAt(0) ?? "商";
+  const { merchant } = auth;
+  const initial = merchant.display_name?.charAt(0) ?? "商";
 
   return (
     <div className="flex min-h-screen flex-1 gap-4 bg-surface-subtle p-4">
@@ -67,7 +63,7 @@ export default async function DashboardLayout({
 
         <div
           className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-bold text-white"
-          title={merchant?.display_name ?? undefined}
+          title={merchant.display_name}
         >
           {initial}
         </div>
