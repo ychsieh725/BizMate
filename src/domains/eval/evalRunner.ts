@@ -3,6 +3,7 @@ import type { CaseOutcome, EvalMetrics } from "@/domains/eval/evalTypes.ts";
 import { GOLDEN_CASES } from "@/domains/eval/goldenSet.ts";
 import { DATASET_VERSION } from "@/domains/eval/goldenSet.types.ts";
 import { compareFields, toExtractedValues } from "@/domains/eval/comparison.ts";
+import { EVAL_CONTACT_EMAIL } from "@/domains/eval/evalConstants.ts";
 import { computeMetrics } from "@/domains/eval/metrics.ts";
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
@@ -37,9 +38,11 @@ export async function runEvalCase(
   goldenCase: GoldenCase,
   merchantId: string,
 ): Promise<CaseOutcome> {
+  // 標記為 eval 測試資料，供 pnpm eval:clean 事後辨識清理（見 evalConstants）
   const session = await sessionsRepository.create({
     category: goldenCase.category,
     merchant_id: merchantId,
+    contact_email: EVAL_CONTACT_EMAIL,
   });
   const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
     merchantId,

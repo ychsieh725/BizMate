@@ -31,6 +31,7 @@
     "verify:settings": "tsx --env-file=.env.local scripts/verify-settings.ts",
     "verify:security": "tsx --env-file=.env.local scripts/verify-security.ts",
     "eval": "tsx --env-file=.env.local scripts/run-eval.ts",
+    "eval:clean": "tsx --env-file=.env.local scripts/clean-eval-data.ts",
     "seed:rate-card": "tsx --env-file=.env.local scripts/seed-rate-card.ts"
   },
   "dependencies": {
