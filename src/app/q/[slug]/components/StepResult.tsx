@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import type { SessionStatus } from "@/shared/types/domain.types";
 import { fetchStatus } from "../lib/wizardApi.ts";
 import type { DescribeOutcome } from "../lib/wizardTypes.ts";
-import { StepProgress } from "./StepProgress.tsx";
 
 /**
  * Wizard Step 4：終態結果 + 狀態輪詢（FR-CW-3、FR-CW-4）。
@@ -14,7 +13,6 @@ import { StepProgress } from "./StepProgress.tsx";
 type StepResultProps = {
   sessionId: string;
   outcome: DescribeOutcome;
-  onRestart: () => void;
 };
 
 /** 狀態的中文顯示（面向客戶，不洩露金額）。 */
@@ -31,7 +29,7 @@ const STATUS_LABELS: Record<SessionStatus, string> = {
 
 const POLL_INTERVAL_MS = 5000;
 
-export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
+export function StepResult({ sessionId, outcome }: StepResultProps) {
   const isQuoteAccepted = Boolean(outcome.quoteCode);
   const [liveStatus, setLiveStatus] = useState<SessionStatus>(outcome.status);
 
@@ -51,10 +49,9 @@ export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
   }, [isQuoteAccepted, sessionId]);
 
   return (
-    <section aria-labelledby="step-result-heading" className="flex flex-col gap-6">
+    <section aria-labelledby="step-result-heading" className="mx-auto flex w-full max-w-md flex-col gap-6">
       <header className="flex flex-col gap-3">
-        <StepProgress current={4} />
-        <h1 id="step-result-heading" className="text-2xl font-semibold tracking-tight text-ink">
+        <h1 id="step-result-heading" className="text-3xl font-semibold tracking-tight text-ink">
           {isQuoteAccepted
             ? "已收到你的需求"
             : outcome.outOfScope
@@ -92,14 +89,6 @@ export function StepResult({ sessionId, outcome, onRestart }: StepResultProps) {
           你的需求超出標準報價範圍，我們已轉由專人評估，將盡快與你聯繫。
         </p>
       )}
-
-      <button
-        type="button"
-        onClick={onRestart}
-        className="text-sm font-medium text-ink-soft hover:text-accent"
-      >
-        重新開始一筆新報價
-      </button>
     </section>
   );
 }
