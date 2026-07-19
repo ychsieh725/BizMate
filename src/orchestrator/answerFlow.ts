@@ -5,6 +5,7 @@ import { rawInputsRepository } from "@/domains/intake/repositories/rawInputsRepo
 import { extractedFieldsRepository } from "@/domains/intake/repositories/extractedFieldsRepository.ts";
 import { clarificationTurnsRepository } from "@/domains/intake/repositories/clarificationTurnsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
+import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { resolveAfterParse, type FlowOutcome } from "@/orchestrator/resolveAfterParse.ts";
 
 /** 客戶對某一反問欄位的回答（批次：一輪回答多個欄位）。 */
@@ -86,10 +87,18 @@ export async function handleAnswer(params: {
     await clarificationTurnsRepository.findAnsweredOrdered(sessionId);
   const augmentedText = buildAugmentedText(raw?.raw_text ?? "", answeredTurns);
 
+  // 與 describeFlow 同：subtype 值域取自該商家 rate card（WBS 6.8）。反問後的
+  // 補答同樣需要值域約束——客戶回「海報」時仍須映射到「海報文宣」才查得到表。
+  const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+    session.merchant_id,
+    session.category,
+  );
+
   const parsed = await parseIntake({
     sessionId,
     category: session.category,
     rawText: augmentedText,
+    allowedSubtypes,
   });
 
   await extractedFieldsRepository.upsertMany(

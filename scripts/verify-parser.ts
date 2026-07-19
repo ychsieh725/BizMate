@@ -12,6 +12,7 @@
 import type { CaseCategory } from "@/shared/types/domain.types";
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
+import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { ensureDevMerchant } from "./dev-merchant.ts";
 
 const SAMPLES: { category: CaseCategory; rawText: string }[] = [
@@ -33,10 +34,15 @@ async function main(): Promise<void> {
   const merchantId = await ensureDevMerchant();
   for (const { category, rawText } of SAMPLES) {
     const session = await sessionsRepository.create({ category, merchant_id: merchantId });
+    const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+      merchantId,
+      category,
+    );
     const result = await parseIntake({
       sessionId: session.id,
       category,
       rawText,
+      allowedSubtypes,
     });
 
     console.log(`\n──────── ${category} ────────`);

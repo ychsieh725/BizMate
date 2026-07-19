@@ -19,12 +19,16 @@ vi.mock("@/domains/intake/repositories/clarificationTurnsRepository.ts", () => (
   },
 }));
 vi.mock("@/domains/intake/parserAgent.ts", () => ({ parseIntake: vi.fn() }));
+vi.mock("@/domains/pricing/repositories/rateCardRepository.ts", () => ({
+  rateCardRepository: { findActiveSubtypes: vi.fn() },
+}));
 vi.mock("@/orchestrator/resolveAfterParse.ts", () => ({ resolveAfterParse: vi.fn() }));
 
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { rawInputsRepository } from "@/domains/intake/repositories/rawInputsRepository.ts";
 import { clarificationTurnsRepository } from "@/domains/intake/repositories/clarificationTurnsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
+import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { resolveAfterParse } from "@/orchestrator/resolveAfterParse.ts";
 import { handleAnswer } from "@/orchestrator/answerFlow.ts";
 
@@ -76,6 +80,10 @@ const CALL = {
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(sessionsRepository.update).mockResolvedValue(fakeSession("parsing"));
+  vi.mocked(rateCardRepository.findActiveSubtypes).mockResolvedValue([
+    "角色設計",
+    "單張插畫",
+  ]);
   mockTurnUpdate.mockResolvedValue({} as never);
   mockParse.mockResolvedValue({
     fields: { license_scope: { value: "商業使用", confidence: 0.9, source_span: "商業" } },

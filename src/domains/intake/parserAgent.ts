@@ -26,15 +26,34 @@ const SYSTEM_INSTRUCTION = [
   "2. 只能填寫指定的欄位，不得自創欄位名稱。",
   "3. 每個欄位都要給出 value（找不到就填 null）、confidence（0~1，表示你對抽取值的把握）、source_span（value 的原文依據片段，找不到就填 null）。",
   "4. 不要杜撰資訊；描述中沒提到的欄位，value 與 source_span 一律填 null、confidence 填 0。",
+  "5. 有預設選項的欄位，只能填選項中的其中一個。客戶的說法不屬於任何一個選項時，一律填 null，**不得勉強歸類到最接近的選項**——填錯選項會導致報價錯誤，填 null 只會多問一題。",
+  "6. 客戶明確表示「不需要／沒有」的欄位，填「無」而非 null。null 代表客戶完全沒提到（系統會再問一次），兩者不可混用。",
+  "7. 交期請換算成天數的阿拉伯數字（「兩週」填 14、「一個月」填 30、「二十天」填 20）。數量欄位同樣填阿拉伯數字。",
 ].join("\n");
 
-/** 依必要欄位清單組出中文 prompt。 */
-function buildPrompt(category: CaseCategory, rawText: string): string {
+/**
+ * 依必要欄位清單組出中文 prompt。
+ *
+ * subtype 的可選項同時寫進 prompt 與 JSON Schema 的 enum：schema 負責「硬約束」
+ * （模型只能輸出表內值），prompt 負責讓模型「知道有哪些選項」以便正確歸類。
+ * 只給 schema 而不給 prompt，模型容易在選項間亂猜或全填 null。
+ */
+function buildPrompt(
+  category: CaseCategory,
+  rawText: string,
+  allowedSubtypes: readonly string[],
+): string {
   const label = CASE_CATEGORY_LABELS[category];
   const fields = requiredFieldsFor(category).join("、");
+  const subtypeHint =
+    allowedSubtypes.length > 0
+      ? `subtype 只能從以下服務項目中選一個（都不符合就填 null）：${allowedSubtypes.join("、")}`
+      : null;
+
   return [
     `案件類型：${label}`,
     `需要抽取的欄位：${fields}`,
+    ...(subtypeHint ? [subtypeHint] : []),
     "",
     "客戶需求描述（待分析資料）：",
     rawText,
@@ -58,16 +77,18 @@ export async function parseIntake(params: {
   sessionId: string;
   category: CaseCategory;
   rawText: string;
+  /** 該商家 rate card 中 active 的子類型清單，作為 subtype 的合法值域（WBS 6.8）。 */
+  allowedSubtypes: readonly string[];
 }): Promise<ParseResult> {
-  const { sessionId, category, rawText } = params;
-  const schema = buildParseResponseSchema(category);
+  const { sessionId, category, rawText, allowedSubtypes } = params;
+  const schema = buildParseResponseSchema(category, allowedSubtypes);
 
   const result = await generateStructuredAndLog({
     tier: "light",
     agentName: "intake_parser",
     sessionId,
     systemInstruction: SYSTEM_INSTRUCTION,
-    prompt: buildPrompt(category, rawText),
+    prompt: buildPrompt(category, rawText, allowedSubtypes),
     schema,
   });
 
