@@ -1,6 +1,7 @@
 import type { CaseCategory } from "@/shared/types/domain.types";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
+import { normalizeLicenseScope } from "@/domains/pricing/licenseScope.ts";
 import type {
   ExtractedValues,
   LineItem,
@@ -22,17 +23,10 @@ function parseQuantity(category: CaseCategory, fields: ExtractedValues): number 
 }
 
 /**
- * 將授權範圍抽取值正規化到 rate card 的授權維度值域。
- * P0 用關鍵字比對（deterministic、可測）；抽取值多變（「商用」「商業用途」），
- * 故以包含關係判斷，而非精確相等。判斷不出回 null。
+ * 授權範圍正規化已抽至 licenseScope.ts（純函式、無 IO 依賴），供 eval 的比對
+ * 邏輯重用而不必拉進整條 DB 依賴鏈。此處 re-export 維持既有呼叫端不變。
  */
-export function normalizeLicenseScope(value: string | null): string | null {
-  if (value == null) return null;
-  if (value.includes("獨家") || value.includes("買斷")) return "獨家買斷";
-  if (value.includes("商業") || value.includes("商用")) return "商業使用";
-  if (value.includes("個人")) return "個人使用";
-  return null;
-}
+export { normalizeLicenseScope };
 
 /**
  * 判斷固定倍率 modifier 是否觸發。
