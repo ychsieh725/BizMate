@@ -21,7 +21,7 @@
 |:---|:---|:---|
 | `--ink` | 主要文字 | `#0f1115` |
 | `--ink-soft` | 次要文字 | `#5b6270` |
-| `--ink-faint` | 輔助/停用文字 | `#9aa0ab` |
+| `--ink-faint` | 輔助/停用文字 | `#71767f`（Phase 2 規劃階段核算 WCAG AA 對比度後由原案 `#9aa0ab` 調深，原值僅 2.63:1 不合格） |
 | `--surface` | 頁面背景 | `#ffffff` |
 | `--surface-subtle` | 卡片/區塊底色 | `#f7f8fa` |
 | `--surface-line` | 邊框/分隔線 | `#e3e5e9` |
