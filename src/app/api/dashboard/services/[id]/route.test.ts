@@ -1,3 +1,4 @@
+import { authOkFixture } from "@/lib/auth/requireMerchantFixtures.ts";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 
@@ -65,7 +66,7 @@ describe("PATCH /api/dashboard/services/[id]", () => {
   });
 
   it("id 格式不正確 → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest({ base_price: 7000 }), context("not-a-uuid"));
 
@@ -73,7 +74,7 @@ describe("PATCH /api/dashboard/services/[id]", () => {
   });
 
   it("body 驗證失敗（負數）→ 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest({ base_price: -100 }), context(ITEM_ID));
 
@@ -82,7 +83,7 @@ describe("PATCH /api/dashboard/services/[id]", () => {
   });
 
   it("找不到資源 → 404", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue(null);
 
     const res = await PATCH(patchRequest({ base_price: 7000 }), context(ITEM_ID));
@@ -92,7 +93,7 @@ describe("PATCH /api/dashboard/services/[id]", () => {
   });
 
   it("跨租戶（非本人資源）→ 404", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue({ ...ITEM, merchant_id: OTHER_MERCHANT_ID });
 
     const res = await PATCH(patchRequest({ base_price: 7000 }), context(ITEM_ID));
@@ -102,7 +103,7 @@ describe("PATCH /api/dashboard/services/[id]", () => {
   });
 
   it("更新成功 → 200", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue(ITEM);
     mockUpdate.mockResolvedValue({ ...ITEM, base_price: 7000 });
 
@@ -125,7 +126,7 @@ describe("DELETE /api/dashboard/services/[id]", () => {
   });
 
   it("跨租戶（非本人資源）→ 404", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue({ ...ITEM, merchant_id: OTHER_MERCHANT_ID });
 
     const res = await DELETE(deleteRequest(), context(ITEM_ID));
@@ -135,7 +136,7 @@ describe("DELETE /api/dashboard/services/[id]", () => {
   });
 
   it("軟刪除成功 → 200，is_active=false", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue(ITEM);
     mockUpdate.mockResolvedValue({ ...ITEM, is_active: false });
 

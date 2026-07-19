@@ -1,3 +1,4 @@
+import { authOkFixture } from "@/lib/auth/requireMerchantFixtures.ts";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { QuoteListRow } from "@/domains/pricing/quoteReviewTypes.ts";
 
@@ -57,7 +58,7 @@ describe("GET /api/dashboard/quotes", () => {
   });
 
   it("status 非法值 → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await GET(getRequest("?status=pending"));
 
@@ -66,7 +67,7 @@ describe("GET /api/dashboard/quotes", () => {
   });
 
   it("無 status → 回全部（status 傳 undefined）", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockListQuotes.mockResolvedValue([ROW]);
 
     const res = await GET(getRequest());
@@ -78,7 +79,7 @@ describe("GET /api/dashboard/quotes", () => {
   });
 
   it("帶合法 status → 過濾條件傳遞至 service", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockListQuotes.mockResolvedValue([]);
 
     const res = await GET(getRequest("?status=awaiting_review"));
@@ -88,7 +89,7 @@ describe("GET /api/dashboard/quotes", () => {
   });
 
   it("service 拋錯 → 500", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockListQuotes.mockRejectedValue(new Error("db down"));
     vi.spyOn(console, "error").mockImplementation(() => {});
 

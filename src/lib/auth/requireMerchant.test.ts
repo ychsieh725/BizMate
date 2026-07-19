@@ -50,13 +50,15 @@ describe("requireMerchant", () => {
     expect(result).toEqual({ ok: false, status: 403 });
   });
 
-  it("已登入且有 merchant → 回傳 merchantId", async () => {
+  it("已登入且有 merchant → 回傳 merchantId 與 merchant 本體", async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
     mockFindById.mockResolvedValue(MERCHANT);
 
     const result = await requireMerchant();
 
-    expect(result).toEqual({ ok: true, merchantId: "u1" });
+    // merchant 本體一併回傳：layout 需要 display_name 等欄位，
+    // 不該為此再打一次 DB（findById 在本函式內已查過同一筆）。
+    expect(result).toEqual({ ok: true, merchantId: "u1", merchant: MERCHANT });
   });
 
   it("Supabase 呼叫例外時 fail closed → 401", async () => {

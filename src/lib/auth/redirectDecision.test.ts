@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { decideRedirect } from "./redirectDecision.ts";
+import { decideRedirect, needsMerchantLookup } from "./redirectDecision.ts";
 
 describe("decideRedirect", () => {
   it("未登入訪問 /dashboard 導向 /login", () => {
@@ -60,5 +60,24 @@ describe("decideRedirect", () => {
 
   it("已登入、無 merchant 訪問 /signup 導向 /onboarding", () => {
     expect(decideRedirect("/signup", true, false)).toBe("/onboarding");
+  });
+});
+
+describe("needsMerchantLookup", () => {
+  // /dashboard 不需要查：decideRedirect 對 dashboard 的 hasMerchant 分支
+  // 交由 layout 守門（requireMerchant 403 → redirect /onboarding），
+  // middleware 便可省下每次導覽一次 DB 往返。
+  it("/dashboard 及子路徑不需查 merchant", () => {
+    expect(needsMerchantLookup("/dashboard")).toBe(false);
+    expect(needsMerchantLookup("/dashboard/quotes")).toBe(false);
+  });
+
+  it("/onboarding 需查 merchant（有 merchant 者應被導回 /dashboard）", () => {
+    expect(needsMerchantLookup("/onboarding")).toBe(true);
+  });
+
+  it("/login 與 /signup 需查 merchant（決定導向 /dashboard 或 /onboarding）", () => {
+    expect(needsMerchantLookup("/login")).toBe(true);
+    expect(needsMerchantLookup("/signup")).toBe(true);
   });
 });
