@@ -14,5 +14,6 @@ export type SessionEvent =
   | "clarification_exhausted" // awaiting_clarification → pricing（fallback 保守估價）
   | "pricing_done" // pricing → awaiting_review
   | "quote_confirmed" // awaiting_review → confirmed（商家後台終審）
+  | "quote_declined" // awaiting_review → abandoned（商家婉拒，不接這個案子）
   | "email_sent" // confirmed → sent
   | "timeout"; // 任一等待狀態 → abandoned

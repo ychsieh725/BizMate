@@ -1,6 +1,7 @@
 import { BaseRepository, RepositoryError } from "@/lib/supabase/repository.ts";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 import type { QuoteStatus } from "@/shared/types/domain.types";
+import { HIDDEN_BY_DEFAULT_STATUSES } from "@/shared/constants/quoteStatus.ts";
 
 /**
  * 後台報價審核的唯讀查詢 repository（5.6）。
@@ -18,7 +19,11 @@ export class QuoteReviewRepository extends BaseRepository<"quotes"> {
     super("quotes");
   }
 
-  /** 該商家的報價，status 選填過濾，依建立時間新到舊。 */
+  /**
+   * 該商家的報價，status 選填過濾，依建立時間新到舊。
+   * 未指定 status（「全部」視圖）時排除 HIDDEN_BY_DEFAULT_STATUSES——
+   * 婉拒的報價等同已從待處理清單移除，但仍可用狀態 tab 明確篩出。
+   */
   async findByMerchant(
     merchantId: string,
     status?: QuoteStatus,
@@ -28,7 +33,13 @@ export class QuoteReviewRepository extends BaseRepository<"quotes"> {
       .select("*")
       .eq("merchant_id", merchantId);
     const filtered =
-      status === undefined ? byMerchant : byMerchant.eq("status", status);
+      status === undefined
+        ? byMerchant.not(
+            "status",
+            "in",
+            `(${HIDDEN_BY_DEFAULT_STATUSES.join(",")})`,
+          )
+        : byMerchant.eq("status", status);
 
     const { data, error } = await filtered.order("created_at", {
       ascending: false,

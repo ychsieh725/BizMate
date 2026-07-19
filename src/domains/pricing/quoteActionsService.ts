@@ -174,6 +174,51 @@ export async function sendQuoteEmail(params: {
   return reloadQuote(quoteId);
 }
 
+/**
+ * 婉拒報價：quote_declined 事件落地，原子推進 quote 與 session → abandoned。
+ *
+ * 刻意不做真實 DELETE：quotes/sessions 的子表 FK 皆為 CASCADE，硬刪會連帶
+ * 銷毀費用明細、抽取欄位、澄清歷程與客戶原始描述，且客戶端輪詢會轉為 404、
+ * 畫面永遠停在「等待商家確認中」。標記為終態則客戶端會正確顯示「此報價已取消」。
+ *
+ * 與 confirmQuote 結構相同、只差事件名——兩者是同一種「後台終審決定」的兩個
+ * 出口，共用 advance_quote_status RPC（0006 已為此設計為通用的 from/to 推進）。
+ */
+export async function declineQuote(params: {
+  quoteId: string;
+  merchantId: string;
+}): Promise<QuoteActionResult> {
+  const { quoteId, merchantId } = params;
+
+  const quote = await quoteReviewRepository.findById(quoteId);
+  if (quote === null || quote.merchant_id !== merchantId) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  const session = await quoteReviewRepository.findSessionById(quote.session_id);
+  if (session === null || session.merchant_id !== merchantId) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  const next = transition(session.status, "quote_declined");
+  if (!next.ok) {
+    return { ok: false, reason: "conflict" };
+  }
+
+  const applied = await callAdvanceQuoteStatus({
+    quoteId,
+    merchantId,
+    fromStatus: session.status,
+    toStatus: next.state,
+    setSentAt: false,
+  });
+  if (!applied) {
+    return { ok: false, reason: "conflict" };
+  }
+
+  return reloadQuote(quoteId);
+}
+
 /** RPC 只回 boolean，成功後重讀報價回傳給前端。 */
 async function reloadQuote(quoteId: string): Promise<QuoteActionResult> {
   const updated = await quoteReviewRepository.findById(quoteId);
