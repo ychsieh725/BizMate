@@ -109,20 +109,20 @@ export function WizardPage({
 
   return (
     <main className="mx-auto flex min-h-full max-w-2xl flex-col justify-center gap-6 px-6 py-16">
-      <header className="text-sm font-medium text-zinc-500">
+      <header className="text-sm font-medium text-ink-soft">
         {merchantName} 的自動報價
       </header>
       {step === "category" && (
         <>
           <StepCategory onSelect={startSession} />
           {serverError && (
-            <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+            <p role="alert" className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
               {serverError}
             </p>
           )}
           <Link
             href={PAGE_ROUTES.home}
-            className="text-sm font-medium text-zinc-500 underline underline-offset-4 hover:text-foreground"
+            className="text-sm font-medium text-ink-soft hover:text-accent"
           >
             ← 回首頁
           </Link>

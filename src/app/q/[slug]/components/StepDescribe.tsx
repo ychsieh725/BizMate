@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { StepProgress } from "./StepProgress.tsx";
 
 /**
  * Wizard Step 2：口語描述 + 聯絡 email（FR-CW-2）。
@@ -43,21 +44,20 @@ export function StepDescribe({
 
   return (
     <section aria-labelledby="step-describe-heading" className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <p className="text-sm font-medium tracking-widest text-zinc-500 uppercase">
-          步驟 2 / 4 · {categoryLabel}
-        </p>
-        <h1 id="step-describe-heading" className="text-2xl font-semibold tracking-tight">
+      <header className="flex flex-col gap-3">
+        <StepProgress current={2} />
+        <p className="text-sm font-medium text-ink-soft">{categoryLabel}</p>
+        <h1 id="step-describe-heading" className="text-2xl font-semibold tracking-tight text-ink">
           用你的話描述需求
         </h1>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-ink-soft">
           越具體越好：用途、數量、交期、預算等。
         </p>
       </header>
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="raw-text" className="text-sm font-medium">
+          <label htmlFor="raw-text" className="text-sm font-medium text-ink">
             需求描述
           </label>
           <textarea
@@ -71,17 +71,17 @@ export function StepDescribe({
             aria-invalid={touched && rawTextError !== ""}
             aria-describedby={rawTextError ? "raw-text-error" : undefined}
             placeholder="例：我想要一張 A2 尺寸的活動海報，商業用途，兩週內完成。"
-            className="resize-y rounded-2xl border border-black/[.08] px-4 py-3 text-base outline-none focus-visible:border-foreground/60 disabled:opacity-50 dark:border-white/[.145]"
+            className="resize-y rounded-xl border border-surface-line px-4 py-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
           />
           {touched && rawTextError && (
-            <p id="raw-text-error" role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p id="raw-text-error" role="alert" className="text-sm text-danger">
               {rawTextError}
             </p>
           )}
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="contact-email" className="text-sm font-medium">
+          <label htmlFor="contact-email" className="text-sm font-medium text-ink">
             聯絡 email
           </label>
           <input
@@ -95,17 +95,17 @@ export function StepDescribe({
             aria-invalid={touched && emailError !== ""}
             aria-describedby={emailError ? "contact-email-error" : undefined}
             placeholder="you@example.com"
-            className="rounded-2xl border border-black/[.08] px-4 py-3 text-base outline-none focus-visible:border-foreground/60 disabled:opacity-50 dark:border-white/[.145]"
+            className="rounded-xl border border-surface-line px-4 py-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
           />
           {touched && emailError && (
-            <p id="contact-email-error" role="alert" className="text-sm text-red-600 dark:text-red-400">
+            <p id="contact-email-error" role="alert" className="text-sm text-danger">
               {emailError}
             </p>
           )}
         </div>
 
         {serverError && (
-          <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          <p role="alert" className="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
             {serverError}
           </p>
         )}
@@ -115,7 +115,7 @@ export function StepDescribe({
             type="button"
             onClick={onBack}
             disabled={submitting}
-            className="h-12 rounded-full border border-black/[.08] px-5 text-sm font-medium transition-colors hover:bg-black/[.02] disabled:opacity-50 dark:border-white/[.145] dark:hover:bg-white/[.04]"
+            className="h-12 rounded-xl border border-surface-line px-5 text-sm font-medium text-ink transition-colors hover:bg-surface-subtle disabled:opacity-50"
           >
             ← 上一步
           </button>
@@ -123,7 +123,7 @@ export function StepDescribe({
             type="submit"
             data-testid="describe-submit"
             disabled={submitting}
-            className="inline-flex h-12 flex-1 items-center justify-center rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:opacity-90 disabled:opacity-50"
+            className="inline-flex h-12 flex-1 items-center justify-center rounded-xl bg-accent px-6 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
           >
             {submitting ? "解析中…" : "送出需求"}
           </button>
