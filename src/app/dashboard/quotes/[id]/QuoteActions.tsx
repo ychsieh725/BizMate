@@ -76,11 +76,11 @@ export function QuoteActions({
   const busy = pending !== "none";
 
   return (
-    <section className="card-float flex flex-col gap-3 rounded-[24px] bg-[var(--surface)] p-5">
-      <h2 className="text-lg font-medium">終審操作</h2>
+    <section className="flex flex-col gap-3 rounded-2xl border border-surface-line bg-surface shadow-card p-5">
+      <h2 className="text-lg font-medium text-ink">終審操作</h2>
 
-      <div className="flex items-end gap-2">
-        <label className="flex flex-col gap-1 text-sm">
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex flex-col gap-1 text-sm text-ink-soft">
           最終金額（NT$）
           <input
             type="number"
@@ -92,14 +92,14 @@ export function QuoteActions({
             step={1}
             aria-invalid={error !== ""}
             aria-describedby={error !== "" ? "quote-amount-error" : undefined}
-            className="w-40 rounded border px-2 py-1 disabled:opacity-50"
+            className="h-10 w-40 rounded-xl border border-surface-line bg-surface px-3 font-mono tabular-nums text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50 aria-invalid:border-danger"
           />
         </label>
         <button
           type="button"
           onClick={handleSave}
           disabled={busy}
-          className="rounded-[14px] border border-[var(--surface-line)] px-3 py-1.5 text-sm disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center rounded-xl border border-surface-line px-4 text-sm font-medium text-ink transition-colors hover:bg-surface-subtle focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
         >
           {pending === "save" ? "儲存中…" : "儲存金額"}
         </button>
@@ -108,18 +108,18 @@ export function QuoteActions({
           data-testid="quote-confirm"
           onClick={handleConfirm}
           disabled={busy}
-          className="bg-ink text-surface rounded-full px-4 py-1.5 text-sm disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-5 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
         >
           {pending === "confirm" ? "確認中…" : "確認報價"}
         </button>
       </div>
 
-      <p className="text-xs text-gray-600">
+      <p className="text-xs text-ink-soft">
         調整金額後，差額會以「商家手動調整」列入費用明細，客戶看到的明細加總與總額一致。
       </p>
 
       {error !== "" && (
-        <p id="quote-amount-error" role="alert" className="text-sm text-red-600">
+        <p id="quote-amount-error" role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

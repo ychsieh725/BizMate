@@ -40,21 +40,21 @@ export function SendQuoteButton({ quoteId }: { quoteId: string }) {
   }
 
   return (
-    <section className="card-float flex flex-col gap-3 rounded-[24px] bg-[var(--surface)] p-5">
-      <h2 className="text-lg font-medium">寄送報價單</h2>
+    <section className="flex flex-col gap-3 rounded-2xl border border-surface-line bg-surface shadow-card p-5">
+      <h2 className="text-lg font-medium text-ink">寄送報價單</h2>
       <div>
         <button
           type="button"
           data-testid="quote-send"
           onClick={handleSend}
           disabled={pending}
-          className="bg-ink text-surface rounded-full px-4 py-1.5 text-sm disabled:opacity-50"
+          className="inline-flex h-10 items-center justify-center rounded-xl bg-accent px-5 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
         >
           {pending ? "寄送中…" : "寄送給客戶"}
         </button>
       </div>
       {error !== "" && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
