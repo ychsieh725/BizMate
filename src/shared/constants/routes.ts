@@ -8,6 +8,9 @@
 /** 前端頁面路由 */
 export const PAGE_ROUTES = {
   home: "/",
+  /** 客戶端中性首頁——/q/{slug} 向導的「回首頁」導向這裡，而非商家行銷首頁 `home`
+   *（客戶不該被導去看商家登入/註冊 CTA）。 */
+  customerHome: "/thanks",
   quoteWizard: (slug: string) => `/q/${slug}`,
   login: "/login",
   signup: "/signup",
