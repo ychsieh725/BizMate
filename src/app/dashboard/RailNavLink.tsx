@@ -29,8 +29,10 @@ export function RailNavLink({
       aria-label={label}
       aria-current={active ? "page" : undefined}
       data-testid={testId}
-      className={`flex h-[54px] w-[54px] items-center justify-center rounded-full transition-colors ${
-        active ? "bg-ink text-surface" : "text-ink-soft hover:bg-black/5"
+      className={`flex h-[54px] w-[54px] items-center justify-center rounded-2xl transition-colors focus:outline-none focus:ring-2 focus:ring-accent-soft ${
+        active
+          ? "bg-accent-soft text-accent"
+          : "text-ink-soft hover:bg-surface-subtle hover:text-ink"
       }`}
     >
       {children}

@@ -21,8 +21,8 @@ export default async function DashboardLayout({
 
   if (!auth.ok) {
     return (
-      <div className="aura-bg flex min-h-screen flex-1 flex-col items-center justify-center gap-4 p-8">
-        <p className="text-red-600">
+      <div className="flex min-h-screen flex-1 flex-col items-center justify-center gap-4 bg-surface-subtle p-8">
+        <p className="text-danger">
           {auth.status === 401 ? "請先登入" : "查無商家資料，請先完成 onboarding"}
         </p>
       </div>
@@ -33,12 +33,12 @@ export default async function DashboardLayout({
   const initial = merchant?.display_name?.charAt(0) ?? "商";
 
   return (
-    <div className="aura-bg flex min-h-screen flex-1 gap-4 p-4">
+    <div className="flex min-h-screen flex-1 gap-4 bg-surface-subtle p-4">
       <nav
         aria-label="後台導覽"
-        className="card-float bg-rail-bg sticky top-4 flex h-[calc(100vh-2rem)] w-24 flex-none flex-col items-center gap-2 self-start rounded-[26px] py-4 backdrop-blur-lg"
+        className="sticky top-4 flex h-[calc(100vh-2rem)] w-24 flex-none flex-col items-center gap-2 self-start rounded-2xl border border-surface-line bg-surface py-4 shadow-card"
       >
-        <div className="bg-ink text-surface mb-2 flex h-9 w-9 items-center justify-center rounded-[11px] font-mono text-sm font-medium">
+        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-ink font-mono text-sm font-medium text-surface">
           BM
         </div>
 
@@ -59,14 +59,14 @@ export default async function DashboardLayout({
           <button
             type="submit"
             aria-label="登出"
-            className="text-ink-soft flex h-9 w-9 items-center justify-center rounded-full hover:bg-black/5"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface-subtle hover:text-ink focus:outline-none focus:ring-2 focus:ring-accent-soft"
           >
             <LogOut className="h-[15px] w-[15px]" strokeWidth={1.6} />
           </button>
         </form>
 
         <div
-          className="bg-accent mt-1 flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white"
+          className="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-bold text-white"
           title={merchant?.display_name ?? undefined}
         >
           {initial}
