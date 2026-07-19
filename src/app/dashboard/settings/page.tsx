@@ -14,15 +14,15 @@ export default async function SettingsPage() {
   if (merchant === null) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-        <p className="text-red-600">系統忙碌，請稍後再試</p>
+        <p className="text-danger">系統忙碌，請稍後再試</p>
       </main>
     );
   }
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
-      <h1 className="text-ink text-2xl font-semibold tracking-tight">帳號設定</h1>
-      <div className="card-float rounded-[24px] bg-[var(--surface)] p-6">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink">帳號設定</h1>
+      <div className="rounded-2xl border border-surface-line bg-surface p-6 shadow-card">
         <SettingsForm
           initialDisplayName={merchant.display_name}
           initialSlug={merchant.public_slug}

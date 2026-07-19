@@ -8,6 +8,10 @@ import {
 } from "@/shared/constants/categories.ts";
 import type { CaseCategory } from "@/shared/types/domain.types";
 
+/** 表單五個欄位共用的輸入框樣式（select 與 input 一致）。 */
+const FIELD_CLASS =
+  "h-10 rounded-xl border border-surface-line bg-surface px-3 text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft";
+
 export function NewServiceForm() {
   const router = useRouter();
   const [category, setCategory] = useState<CaseCategory>(CASE_CATEGORIES[0]);
@@ -57,14 +61,14 @@ export function NewServiceForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <h2 className="text-lg font-medium">新增服務項目</h2>
+      <h2 className="text-lg font-medium text-ink">新增服務項目</h2>
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm text-ink-soft">
           分類
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value as CaseCategory)}
-            className="rounded-[10px] border px-2 py-1"
+            className={FIELD_CLASS}
           >
             {CASE_CATEGORIES.map((value) => (
               <option key={value} value={value}>
@@ -73,25 +77,25 @@ export function NewServiceForm() {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm text-ink-soft">
           子類型
           <input
             required
             value={subtype}
             onChange={(event) => setSubtype(event.target.value)}
-            className="rounded-[10px] border px-2 py-1"
+            className={FIELD_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm text-ink-soft">
           單位
           <input
             required
             value={unit}
             onChange={(event) => setUnit(event.target.value)}
-            className="rounded-[10px] border px-2 py-1"
+            className={FIELD_CLASS}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-sm text-ink-soft">
           基礎價格
           <input
             required
@@ -99,27 +103,27 @@ export function NewServiceForm() {
             min="1"
             value={basePrice}
             onChange={(event) => setBasePrice(event.target.value)}
-            className="rounded-[10px] border px-2 py-1"
+            className={FIELD_CLASS}
           />
         </label>
-        <label className="col-span-2 flex flex-col gap-1 text-sm">
+        <label className="col-span-2 flex flex-col gap-1 text-sm text-ink-soft">
           包含服務（選填）
           <input
             value={includes}
             onChange={(event) => setIncludes(event.target.value)}
-            className="rounded-[10px] border px-2 py-1"
+            className={FIELD_CLASS}
           />
         </label>
       </div>
       {error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
       <button
         type="submit"
         disabled={isPending}
-        className="self-start rounded-full bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="inline-flex h-10 items-center justify-center self-start rounded-xl bg-accent px-5 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
       >
         {isPending ? "新增中…" : "新增"}
       </button>

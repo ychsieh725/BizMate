@@ -18,32 +18,32 @@ export default async function ServicesPage() {
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4">
-      <h1 className="text-ink text-2xl font-semibold tracking-tight">服務項目管理</h1>
-      <div className="card-float rounded-[24px] bg-[var(--surface)] p-6">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink">服務項目管理</h1>
+      <div className="rounded-2xl border border-surface-line bg-surface p-6 shadow-card">
         <NewServiceForm />
       </div>
-      <div className="card-float rounded-[24px] bg-[var(--surface)] p-6">
+      <div className="overflow-x-auto rounded-2xl border border-surface-line bg-surface p-6 shadow-card">
         <ServicesTable initialItems={items} />
       </div>
-      <section className="card-float flex flex-col gap-2 rounded-[24px] bg-[var(--surface)] p-6 text-xs">
-        <h2 className="text-ink-soft font-medium">加成規則（唯讀）</h2>
+      <section className="flex flex-col gap-2 rounded-2xl border border-surface-line bg-surface p-6 text-xs shadow-card">
+        <h2 className="font-medium text-ink-soft">加成規則（唯讀）</h2>
         {modifiers.length === 0 ? (
-          <p className="text-sm text-gray-600">尚無加成規則</p>
+          <p className="text-sm text-ink-soft">尚無加成規則</p>
         ) : (
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b text-left">
-                <th className="py-2">名稱</th>
-                <th className="py-2">觸發條件</th>
-                <th className="py-2">幅度</th>
+              <tr className="border-b border-surface-line text-left">
+                <th className="py-2 font-normal text-ink-soft">名稱</th>
+                <th className="py-2 font-normal text-ink-soft">觸發條件</th>
+                <th className="py-2 font-normal text-ink-soft">幅度</th>
               </tr>
             </thead>
             <tbody>
               {modifiers.map((modifier) => (
-                <tr key={modifier.id} className="border-b">
-                  <td className="py-2">{modifier.modifier_name}</td>
-                  <td className="py-2">{modifier.trigger_condition}</td>
-                  <td className="py-2">
+                <tr key={modifier.id} className="border-b border-surface-line">
+                  <td className="py-2 text-ink">{modifier.modifier_name}</td>
+                  <td className="py-2 text-ink-soft">{modifier.trigger_condition}</td>
+                  <td className="py-2 font-mono tabular-nums text-ink">
                     {modifier.range_min}–{modifier.range_max}
                   </td>
                 </tr>

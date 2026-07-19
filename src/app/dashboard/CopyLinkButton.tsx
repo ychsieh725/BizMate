@@ -16,7 +16,7 @@ export function CopyLinkButton({ slug }: { slug: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="rounded border px-4 py-2 text-sm"
+      className="w-fit rounded-xl border border-surface-line px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-accent hover:bg-surface-subtle focus:outline-none focus:ring-2 focus:ring-accent-soft"
     >
       {copied ? "已複製！" : `複製分享連結 /q/${slug}`}
     </button>

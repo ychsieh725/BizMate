@@ -41,7 +41,7 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md">
       <div className="flex flex-col gap-1">
-        <label htmlFor="display_name" className="text-sm font-medium">
+        <label htmlFor="display_name" className="text-sm font-medium text-ink">
           商家名稱
         </label>
         <input
@@ -49,12 +49,12 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
           value={displayName}
           onChange={(event) => setDisplayName(event.target.value)}
           disabled={saving}
-          className="rounded-[10px] border border-[var(--surface-line)] px-3 py-2 disabled:opacity-50"
+          className="h-10 rounded-xl border border-surface-line bg-surface px-3 text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="public_slug" className="text-sm font-medium">
+        <label htmlFor="public_slug" className="text-sm font-medium text-ink">
           分享連結代號
         </label>
         <input
@@ -63,24 +63,24 @@ export function SettingsForm({ initialDisplayName, initialSlug }: Props) {
           onChange={(event) => setSlug(event.target.value)}
           disabled={saving}
           aria-describedby="slug-preview"
-          className="rounded-[10px] border border-[var(--surface-line)] px-3 py-2 disabled:opacity-50"
+          className="h-10 rounded-xl border border-surface-line bg-surface px-3 text-ink transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
         />
-        <p id="slug-preview" className="text-xs text-gray-500">
+        <p id="slug-preview" className="text-xs text-ink-faint">
           目前連結：{PAGE_ROUTES.quoteWizard(savedSlug)}
         </p>
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
-      {success && <p className="text-sm text-green-600">已儲存</p>}
+      {success && <p className="text-sm text-status-sent-fg">已儲存</p>}
 
       <button
         type="submit"
         disabled={saving}
-        className="rounded-full bg-[var(--ink)] px-4 py-2 text-[var(--surface)] disabled:opacity-50"
+        className="inline-flex h-10 items-center justify-center self-start rounded-xl bg-accent px-5 text-sm font-medium text-white transition-colors hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-50"
       >
         {saving ? "儲存中…" : "儲存"}
       </button>
