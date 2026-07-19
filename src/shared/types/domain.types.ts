@@ -22,7 +22,14 @@ export type SessionStatus =
   | "abandoned";
 
 /** 報價狀態（對應 DB enum quote_status） */
-export type QuoteStatus = "draft" | "awaiting_review" | "confirmed" | "sent";
+export type QuoteStatus =
+  | "draft"
+  | "awaiting_review"
+  | "confirmed"
+  | "sent"
+  /** 商家婉拒（或未來的逾時）。與 SessionStatus 同名，讓 advance_quote_status
+   *  單一 p_to_status 參數能同時 cast 成兩種 enum（見 migration 0008）。 */
+  | "abandoned";
 
 /** 商家（tenant 根，1:1 對應 auth.users；public_slug 即專屬報價連結 /q/{slug}） */
 export type Merchant = {

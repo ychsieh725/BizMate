@@ -1,0 +1,27 @@
+-- ── quote_status 新增 'abandoned'：支援商家主動婉拒報價 ──────────────
+-- 動機：後台需要「婉拒」動作，把不接的案子從待處理清單移除。原始需求是
+--       「移除該筆報價」，但 quotes/sessions 的所有子表 FK 皆為 CASCADE，
+--       真實 DELETE 會連帶永久銷毀費用明細、抽取欄位、澄清歷程、原始描述，
+--       且客戶端輪詢 /api/sessions/{id}/status 會轉為 404 →
+--       StepResult 的 `if (result.ok)` 守衛使畫面永遠停在「等待商家確認中」，
+--       客戶不會知道已被婉拒。故改為狀態標記（沿用 5.5 服務項目軟刪除的判斷）。
+--
+-- 為何值用 'abandoned' 而非 'declined'：
+--       advance_quote_status（0006）以單一 p_to_status 參數同時 cast 成
+--       quote_status 與 session_status 兩種 enum，其前提是「兩表狀態值同名」。
+--       session_status 早已有終態 'abandoned'（0001），若 quotes 改用
+--       'declined' 就必須拆參數或另開一支近乎相同的 RPC——與 0006 註解確立的
+--       「重用而非新建近乎相同的 RPC」原則相違。取 'abandoned' 則現有 RPC
+--       零改動可用。顯示語意由前端各自決定：後台「已婉拒」、客戶端沿用
+--       既有的「此報價已取消」文案。
+--
+-- 已知取捨：timeout 逾時（events.ts 已定義但尚無觸發點）未來若實作，
+--       其產生的 abandoned 與商家主動婉拒在資料上無法區分。目前不需要區分
+--       （YAGNI），真要區分時再加 abandoned_reason 欄位即可，不影響本次設計。
+--
+-- 影響：純新增 enum 值，無資料異動、無破壞性。既有 4 個狀態的行為完全不變。
+--       ALTER TYPE ... ADD VALUE 不可逆（Postgres 不支援移除 enum 值）。
+
+-- 注意：不包在 BEGIN/COMMIT 內。Postgres 允許在 transaction 中 ADD VALUE，
+--       但新值在同一 transaction 內不可被使用；獨立執行最單純且無此限制。
+ALTER TYPE quote_status ADD VALUE IF NOT EXISTS 'abandoned';

@@ -33,6 +33,9 @@ export const TRANSITIONS: Readonly<
   },
   awaiting_review: {
     quote_confirmed: "confirmed",
+    // 商家婉拒只在待審階段開放：一旦 confirmed 就已對客戶承諾，要反悔是
+    // 另一種需通知客戶的行為，不與「還沒答應就回絕」共用同一個事件。
+    quote_declined: "abandoned",
     timeout: "abandoned",
   },
   confirmed: {

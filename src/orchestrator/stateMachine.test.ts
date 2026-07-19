@@ -26,6 +26,7 @@ const EXPECTED_TRANSITIONS: ReadonlyArray<
   ["awaiting_clarification", "timeout", "abandoned"],
   ["pricing", "pricing_done", "awaiting_review"],
   ["awaiting_review", "quote_confirmed", "confirmed"],
+  ["awaiting_review", "quote_declined", "abandoned"],
   ["awaiting_review", "timeout", "abandoned"],
   ["confirmed", "email_sent", "sent"],
 ];
@@ -49,6 +50,7 @@ const ALL_EVENTS: readonly SessionEvent[] = [
   "clarification_exhausted",
   "pricing_done",
   "quote_confirmed",
+  "quote_declined",
   "email_sent",
   "timeout",
 ];
@@ -132,7 +134,7 @@ describe("availableEvents", () => {
       ["describe_submitted", "timeout"].sort(),
     );
     expect([...availableEvents("awaiting_review")].sort()).toEqual(
-      ["quote_confirmed", "timeout"].sort(),
+      ["quote_confirmed", "quote_declined", "timeout"].sort(),
     );
   });
 

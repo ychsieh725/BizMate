@@ -38,7 +38,12 @@ import { getQuoteDetail } from "./quoteReviewService.ts";
 import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
 import { renderQuoteEmail } from "@/lib/email/renderQuoteEmail.ts";
 import { sendEmail } from "@/lib/email/resendClient.ts";
-import { adjustQuoteAmount, confirmQuote, sendQuoteEmail } from "./quoteActionsService.ts";
+import {
+  adjustQuoteAmount,
+  confirmQuote,
+  declineQuote,
+  sendQuoteEmail,
+} from "./quoteActionsService.ts";
 
 const repo = vi.mocked(quoteReviewRepository);
 const mockAdvance = vi.mocked(callAdvanceQuoteStatus);
@@ -273,6 +278,91 @@ describe("confirmQuote", () => {
       merchantId: MERCHANT_A,
       fromStatus: "awaiting_review",
       toStatus: "confirmed",
+      setSentAt: false,
+    });
+  });
+});
+
+describe("declineQuote", () => {
+  it("跨租戶：B 婉拒 A 的報價 → not_found，且不呼叫 RPC", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+
+    const result = await declineQuote({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_B,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "not_found" });
+    expect(repo.findSessionById).not.toHaveBeenCalled();
+    expect(mockAdvance).not.toHaveBeenCalled();
+  });
+
+  it("session 屬於其他商家 → not_found", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue({
+      ...SESSION_A,
+      merchant_id: MERCHANT_B,
+    });
+
+    const result = await declineQuote({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "not_found" });
+    expect(mockAdvance).not.toHaveBeenCalled();
+  });
+
+  // 已確認的報價不可婉拒——商家已對客戶承諾，要取消是另一件事（需通知客戶），
+  // 不該與「還沒答應就回絕」共用同一個動作。狀態機負責擋下。
+  it("session 已 confirmed（狀態機不接受 quote_declined）→ conflict", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue({
+      ...SESSION_A,
+      status: "confirmed",
+    });
+
+    const result = await declineQuote({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "conflict" });
+    expect(mockAdvance).not.toHaveBeenCalled();
+  });
+
+  it("RPC 回 false（併發下被搶先）→ conflict", async () => {
+    repo.findById.mockResolvedValue(QUOTE_A);
+    repo.findSessionById.mockResolvedValue(SESSION_A);
+    mockAdvance.mockResolvedValue(false);
+
+    const result = await declineQuote({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+    });
+
+    expect(result).toEqual({ ok: false, reason: "conflict" });
+  });
+
+  it("成功 → 推進到 abandoned（兩表同值，沿用既有 RPC），回傳婉拒後的報價", async () => {
+    const declined = { ...QUOTE_A, status: "abandoned" as const };
+    repo.findById
+      .mockResolvedValueOnce(QUOTE_A)
+      .mockResolvedValueOnce(declined);
+    repo.findSessionById.mockResolvedValue(SESSION_A);
+    mockAdvance.mockResolvedValue(true);
+
+    const result = await declineQuote({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+    });
+
+    expect(result).toEqual({ ok: true, quote: declined });
+    expect(mockAdvance).toHaveBeenCalledWith({
+      quoteId: QUOTE_ID,
+      merchantId: MERCHANT_A,
+      fromStatus: "awaiting_review",
+      toStatus: "abandoned",
       setSentAt: false,
     });
   });
