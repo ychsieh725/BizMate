@@ -1,3 +1,4 @@
+import { authOkFixture } from "@/lib/auth/requireMerchantFixtures.ts";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 
@@ -68,7 +69,7 @@ describe("GET /api/dashboard/services", () => {
   });
 
   it("成功 → 回傳 items + modifiers", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindAllByMerchant.mockResolvedValue([ITEM]);
     mockFindModifiersByMerchant.mockResolvedValue([]);
 
@@ -92,7 +93,7 @@ describe("POST /api/dashboard/services", () => {
   });
 
   it("body 驗證失敗 → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await POST(postRequest({ category: "illustration" }));
 
@@ -101,7 +102,7 @@ describe("POST /api/dashboard/services", () => {
   });
 
   it("新增成功 → 201", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockCreate.mockResolvedValue(ITEM);
 
     const res = await POST(
@@ -128,7 +129,7 @@ describe("POST /api/dashboard/services", () => {
   });
 
   it("UNIQUE 撞號（category+subtype 重複）→ 409", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockCreate.mockRejectedValue(
       new Error("duplicate key value violates unique constraint"),
     );

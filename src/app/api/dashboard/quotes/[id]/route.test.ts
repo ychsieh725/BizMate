@@ -1,3 +1,4 @@
+import { authOkFixture } from "@/lib/auth/requireMerchantFixtures.ts";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { QuoteDetail } from "@/domains/pricing/quoteReviewTypes.ts";
 
@@ -99,7 +100,7 @@ describe("GET /api/dashboard/quotes/[id]", () => {
   });
 
   it("id 非 UUID → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await GET(getRequest(), routeParams("not-a-uuid"));
 
@@ -108,7 +109,7 @@ describe("GET /api/dashboard/quotes/[id]", () => {
   });
 
   it("查無報價（或跨租戶）→ 404", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockGetQuoteDetail.mockResolvedValue(null);
 
     const res = await GET(getRequest(), routeParams(QUOTE_ID));
@@ -117,7 +118,7 @@ describe("GET /api/dashboard/quotes/[id]", () => {
   });
 
   it("成功 → 200 帶完整 detail", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockGetQuoteDetail.mockResolvedValue(DETAIL);
 
     const res = await GET(getRequest(), routeParams(QUOTE_ID));
@@ -129,7 +130,7 @@ describe("GET /api/dashboard/quotes/[id]", () => {
   });
 
   it("service 拋錯 → 500", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockGetQuoteDetail.mockRejectedValue(new Error("db down"));
     vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -158,7 +159,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("id 非 UUID → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams("bad-id"));
 
@@ -167,7 +168,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("body 非合法 JSON → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest("{not json", true), routeParams(QUOTE_ID));
 
@@ -175,7 +176,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("金額非正數 → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest({ final_amount: -1 }), routeParams(QUOTE_ID));
 
@@ -184,7 +185,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("跨租戶或不存在 → 404", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockAdjustQuoteAmount.mockResolvedValue({ ok: false, reason: "not_found" });
 
     const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
@@ -193,7 +194,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("報價已確認/已寄出 → 409", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockAdjustQuoteAmount.mockResolvedValue({ ok: false, reason: "conflict" });
 
     const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
@@ -202,7 +203,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("成功 → 200，回傳更新後的報價", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockAdjustQuoteAmount.mockResolvedValue({ ok: true, quote: UPDATED_QUOTE });
 
     const res = await PATCH(patchRequest({ final_amount: 9000 }), routeParams(QUOTE_ID));
@@ -218,7 +219,7 @@ describe("PATCH /api/dashboard/quotes/[id]", () => {
   });
 
   it("service 拋錯 → 500", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockAdjustQuoteAmount.mockRejectedValue(new Error("db down"));
     vi.spyOn(console, "error").mockImplementation(() => {});
 

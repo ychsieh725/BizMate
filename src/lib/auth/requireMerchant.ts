@@ -1,9 +1,10 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/serverClient.ts";
 import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
+import type { Tables } from "@/lib/supabase/database.types.ts";
 
 export type RequireMerchantResult =
-  | { ok: true; merchantId: string }
+  | { ok: true; merchantId: string; merchant: Tables<"merchants"> }
   | { ok: false; status: 401 | 403 };
 
 /**
@@ -33,7 +34,9 @@ export const requireMerchant = cache(
         return { ok: false, status: 403 };
       }
 
-      return { ok: true, merchantId: user.id };
+      // merchant 本體一併回傳：這裡已查過該筆資料，呼叫端（如 layout 要
+      // display_name）不必為此再打一次 DB——每次導覽都省一次序列往返。
+      return { ok: true, merchantId: user.id, merchant };
     } catch {
       return { ok: false, status: 401 };
     }

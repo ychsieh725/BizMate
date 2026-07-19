@@ -1,3 +1,4 @@
+import { authOkFixture } from "@/lib/auth/requireMerchantFixtures.ts";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 
@@ -66,7 +67,7 @@ describe("POST /api/dashboard/quotes/[id]/confirm", () => {
   });
 
   it("id 非 UUID → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await POST(postRequest(), routeParams("bad-id"));
 
@@ -75,7 +76,7 @@ describe("POST /api/dashboard/quotes/[id]/confirm", () => {
   });
 
   it("跨租戶或不存在 → 404", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockConfirmQuote.mockResolvedValue({ ok: false, reason: "not_found" });
 
     const res = await POST(postRequest(), routeParams(QUOTE_ID));
@@ -84,7 +85,7 @@ describe("POST /api/dashboard/quotes/[id]/confirm", () => {
   });
 
   it("已確認過（狀態機不接受）→ 409", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockConfirmQuote.mockResolvedValue({ ok: false, reason: "conflict" });
 
     const res = await POST(postRequest(), routeParams(QUOTE_ID));
@@ -93,7 +94,7 @@ describe("POST /api/dashboard/quotes/[id]/confirm", () => {
   });
 
   it("成功 → 200，報價狀態為 confirmed", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockConfirmQuote.mockResolvedValue({ ok: true, quote: CONFIRMED_QUOTE });
 
     const res = await POST(postRequest(), routeParams(QUOTE_ID));
@@ -108,7 +109,7 @@ describe("POST /api/dashboard/quotes/[id]/confirm", () => {
   });
 
   it("service 拋錯 → 500", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockConfirmQuote.mockRejectedValue(new Error("db down"));
     vi.spyOn(console, "error").mockImplementation(() => {});
 

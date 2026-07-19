@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireMerchant } from "@/lib/auth/requireMerchant.ts";
-import { merchantsRepository } from "@/domains/merchant/repositories/merchantsRepository.ts";
 import { quotesRepository } from "@/domains/pricing/repositories/quotesRepository.ts";
 import { PAGE_ROUTES } from "@/shared/constants/routes.ts";
 import { CopyLinkButton } from "./CopyLinkButton.tsx";
@@ -11,10 +10,12 @@ export default async function DashboardPage() {
     return null;
   }
 
-  const [merchant, pendingCount] = await Promise.all([
-    merchantsRepository.findById(auth.merchantId),
-    quotesRepository.countByStatus(auth.merchantId, "awaiting_review"),
-  ]);
+  // merchant 直接取自 requireMerchant（同請求內已查過），不再重打 DB。
+  const { merchant } = auth;
+  const pendingCount = await quotesRepository.countByStatus(
+    auth.merchantId,
+    "awaiting_review",
+  );
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4">
@@ -37,14 +38,10 @@ export default async function DashboardPage() {
           <span className="text-xs font-medium tracking-wide text-ink-soft uppercase">
             分享連結
           </span>
-          {merchant !== null && (
-            <>
-              <p className="text-sm text-ink-soft">
-                把這個連結傳給客戶，他們的需求會出現在待審報價裡。
-              </p>
-              <CopyLinkButton slug={merchant.public_slug} />
-            </>
-          )}
+          <p className="text-sm text-ink-soft">
+            把這個連結傳給客戶，他們的需求會出現在待審報價裡。
+          </p>
+          <CopyLinkButton slug={merchant.public_slug} />
         </div>
       </div>
     </main>

@@ -1,3 +1,4 @@
+import { authOkFixture } from "@/lib/auth/requireMerchantFixtures.ts";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Tables } from "@/lib/supabase/database.types.ts";
 
@@ -62,7 +63,7 @@ describe("GET /api/dashboard/settings", () => {
   });
 
   it("成功 → 回傳 display_name + public_slug", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue(MERCHANT);
 
     const res = await GET();
@@ -76,7 +77,7 @@ describe("GET /api/dashboard/settings", () => {
   });
 
   it("merchant 查無（資料不一致）→ 500", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockFindById.mockResolvedValue(null);
 
     const res = await GET();
@@ -96,7 +97,7 @@ describe("PATCH /api/dashboard/settings", () => {
   });
 
   it("body 驗證失敗（空物件）→ 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest({}));
 
@@ -105,7 +106,7 @@ describe("PATCH /api/dashboard/settings", () => {
   });
 
   it("public_slug 格式不合法 → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest({ public_slug: "Bad Slug!" }));
 
@@ -114,7 +115,7 @@ describe("PATCH /api/dashboard/settings", () => {
   });
 
   it("非 JSON 主體 → 400", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
 
     const res = await PATCH(patchRequest("這不是 JSON{{", true));
 
@@ -123,7 +124,7 @@ describe("PATCH /api/dashboard/settings", () => {
   });
 
   it("更新成功 → 200 + 更新後資料", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     const updated = { ...MERCHANT, display_name: "新名稱" };
     mockUpdate.mockResolvedValue(updated);
 
@@ -139,7 +140,7 @@ describe("PATCH /api/dashboard/settings", () => {
   });
 
   it("slug 撞號（UNIQUE 違反）→ 409", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockUpdate.mockRejectedValue(
       new Error("duplicate key value violates unique constraint"),
     );
@@ -152,7 +153,7 @@ describe("PATCH /api/dashboard/settings", () => {
   });
 
   it("其他錯誤 → 500 且不洩漏內部細節", async () => {
-    mockRequireMerchant.mockResolvedValue({ ok: true, merchantId: MERCHANT_ID });
+    mockRequireMerchant.mockResolvedValue(authOkFixture(MERCHANT_ID));
     mockUpdate.mockRejectedValue(new Error("DB connection refused"));
 
     const res = await PATCH(patchRequest({ display_name: "新名稱" }));
