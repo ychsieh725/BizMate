@@ -118,7 +118,7 @@ Expected: 無錯誤（CSS 檔案不受 ESLint 檢查，此步驟主要確認未�
 ```bash
 git add src/app/globals.css
 git commit -m "$(cat <<'EOF'
-style: 重寫 globals.css 為簡約 SaaS 色彩系統
+feat(ui): 重寫 globals.css 為簡約 SaaS 色彩系統
 
 WHY：landing/登入/註冊/onboarding 用 Tailwind 預設 zinc 灰階，與後台既有
 暖色系不一致；使用者決定全站改採簡約專業風格（黑白無彩色+單一深藍強調色）。
@@ -230,7 +230,7 @@ Expected: 無錯誤
 ```bash
 git add src/app/page.tsx
 git commit -m "$(cat <<'EOF'
-style: 首頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
+feat(ui): 首頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
 
 WHY：首頁沿用 Tailwind 預設 zinc 灰階與裝飾性大寫字排版，與新定案的簡約
 SaaS 方向不符。
@@ -355,7 +355,7 @@ Expected: 全數通過（`actions.test.ts` 不測 markup，樣式改動不影響
 ```bash
 git add src/app/login/page.tsx src/app/login/LoginForm.tsx
 git commit -m "$(cat <<'EOF'
-style: 登入頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
+feat(ui): 登入頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
 
 WHY：延續首頁與 Task 1 的新色彩系統，登入頁沿用舊 zinc/黑色按鈕與無圓角
 輸入框，風格不一致。
@@ -492,7 +492,7 @@ Expected: 全數通過
 ```bash
 git add src/app/signup/page.tsx src/app/signup/SignupForm.tsx
 git commit -m "$(cat <<'EOF'
-style: 註冊頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
+feat(ui): 註冊頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
 
 WHY：與登入頁相同問題，延續一致的表單視覺規範。
 
@@ -623,7 +623,7 @@ Expected: 全數通過（此為 Phase 1 最後一個檔案改動，跑全套作�
 ```bash
 git add src/app/onboarding/page.tsx src/app/onboarding/OnboardingForm.tsx
 git commit -m "$(cat <<'EOF'
-style: onboarding 頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
+feat(ui): onboarding 頁套用簡約 SaaS 視覺（WBS 視覺重設計 Phase 1）
 
 WHY：與登入/註冊頁相同問題，完成 Phase 1 最後一個頁面的視覺統一。
 
