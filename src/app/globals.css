@@ -2,22 +2,29 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f1115;
 
-  --ink: #1a1a18;
-  --ink-soft: #6b6b64;
-  --ink-faint: #8a897f;
-  --surface: #fbfaf7;
-  --surface-line: #e2e2dd;
-  --rail-bg: rgba(255, 255, 255, 0.72);
-  --accent: #e2664a;
+  --ink: #0f1115;
+  --ink-soft: #5b6270;
+  --ink-faint: #71767f;
+  --surface: #ffffff;
+  --surface-subtle: #f7f8fa;
+  --surface-line: #e3e5e9;
   --accent-ink: #1b1a20;
-  --status-review-bg: #fbead0;
-  --status-review-fg: #9a6300;
-  --status-confirmed-bg: #dfe9ff;
-  --status-confirmed-fg: #2c4fb0;
-  --status-sent-bg: #dcf0e6;
-  --status-sent-fg: #16794f;
+
+  --accent: #2451c4;
+  --accent-hover: #1c3f9e;
+  --accent-soft: #e8edfb;
+
+  --danger: #c4322c;
+  --danger-soft: #fbe9e8;
+
+  --status-review-bg: #fdf3e3;
+  --status-review-fg: #92661a;
+  --status-confirmed-bg: #e8edfb;
+  --status-confirmed-fg: #2451c4;
+  --status-sent-bg: #e6f4ec;
+  --status-sent-fg: #1a7a4c;
 }
 
 @theme inline {
@@ -27,15 +34,21 @@
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
   --color-surface-line: var(--surface-line);
-  --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-status-review-bg: var(--status-review-bg);
   --color-status-review-fg: var(--status-review-fg);
   --color-status-confirmed-bg: var(--status-confirmed-bg);
   --color-status-confirmed-fg: var(--status-confirmed-fg);
   --color-status-sent-bg: var(--status-sent-bg);
   --color-status-sent-fg: var(--status-sent-fg);
+  --shadow-card: 0 1px 2px rgba(15, 17, 21, 0.04), 0 1px 8px rgba(15, 17, 21, 0.06);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -50,20 +63,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.aura-bg {
-  background:
-    radial-gradient(ellipse 620px 480px at 6% -6%, rgba(246, 208, 164, 0.85), transparent 60%),
-    radial-gradient(ellipse 520px 420px at 34% 6%, rgba(247, 196, 196, 0.55), transparent 60%),
-    radial-gradient(ellipse 640px 560px at 100% 96%, rgba(196, 209, 244, 0.85), transparent 62%),
-    radial-gradient(ellipse 460px 380px at 78% 60%, rgba(222, 231, 248, 0.55), transparent 65%),
-    #f7f4ee;
-}
-
-.card-float {
-  box-shadow:
-    0 20px 46px -26px rgba(35, 26, 15, 0.28),
-    0 2px 10px rgba(35, 26, 15, 0.05);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }

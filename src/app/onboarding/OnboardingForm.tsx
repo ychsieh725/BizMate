@@ -37,8 +37,8 @@ export function OnboardingForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="display_name" className="text-sm font-medium">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="display_name" className="text-sm font-medium text-ink">
           商家名稱
         </label>
         <input
@@ -48,11 +48,11 @@ export function OnboardingForm() {
           required
           value={displayName}
           onChange={(event) => setDisplayName(event.target.value)}
-          className="rounded border px-3 py-2"
+          className="rounded-xl border border-surface-line px-3 py-2.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent-soft"
         />
       </div>
       {error !== null && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}
@@ -60,7 +60,7 @@ export function OnboardingForm() {
         type="submit"
         data-testid="onboarding-submit"
         disabled={isPending}
-        className="rounded bg-black px-4 py-2 text-white disabled:opacity-50"
+        className="rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
       >
         {isPending ? "建立中…" : "開始使用"}
       </button>
