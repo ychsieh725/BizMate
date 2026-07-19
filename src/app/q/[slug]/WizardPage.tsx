@@ -172,13 +172,21 @@ export function WizardPage({
             </Link>
           )}
           {step === "result" && (
-            <button
-              type="button"
-              onClick={handleRestart}
-              className="text-sm font-medium text-ink-soft hover:text-accent"
-            >
-              重新開始一筆新報價
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={handleRestart}
+                className="text-sm font-medium text-ink-soft hover:text-accent"
+              >
+                重新開始一筆新報價
+              </button>
+              <Link
+                href={PAGE_ROUTES.home}
+                className="text-sm font-medium text-ink-soft hover:text-accent"
+              >
+                回首頁
+              </Link>
+            </div>
           )}
         </div>
       </div>
