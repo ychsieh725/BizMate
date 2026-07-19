@@ -12,12 +12,16 @@ vi.mock("@/domains/intake/repositories/extractedFieldsRepository.ts", () => ({
   extractedFieldsRepository: { upsertMany: vi.fn() },
 }));
 vi.mock("@/domains/intake/parserAgent.ts", () => ({ parseIntake: vi.fn() }));
+vi.mock("@/domains/pricing/repositories/rateCardRepository.ts", () => ({
+  rateCardRepository: { findActiveSubtypes: vi.fn() },
+}));
 vi.mock("@/orchestrator/resolveAfterParse.ts", () => ({ resolveAfterParse: vi.fn() }));
 
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { rawInputsRepository } from "@/domains/intake/repositories/rawInputsRepository.ts";
 import { extractedFieldsRepository } from "@/domains/intake/repositories/extractedFieldsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
+import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { resolveAfterParse } from "@/orchestrator/resolveAfterParse.ts";
 import { handleDescribe } from "@/orchestrator/describeFlow.ts";
 
@@ -46,11 +50,14 @@ function fakeSession(
 
 const CALL = { sessionId: "s1", rawText: "幫我畫一個角色", contactEmail: "c@example.com" };
 
+const mockFindSubtypes = vi.mocked(rateCardRepository.findActiveSubtypes);
+
 beforeEach(() => {
   vi.clearAllMocks();
   mockUpdate.mockResolvedValue(fakeSession("created"));
   mockRawCreate.mockResolvedValue({} as never);
   mockUpsert.mockResolvedValue(undefined);
+  mockFindSubtypes.mockResolvedValue(["角色設計", "單張插畫"]);
   mockParse.mockResolvedValue({
     fields: { subtype: { value: "角色設計", confidence: 0.9, source_span: "角色" } },
     missingRequiredFields: [],

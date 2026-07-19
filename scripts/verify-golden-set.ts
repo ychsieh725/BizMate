@@ -17,6 +17,7 @@
 import { sessionsRepository } from "@/domains/intake/repositories/sessionsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
 import { normalizeLicenseScope } from "@/domains/pricing/basePricing.ts";
+import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { GOLDEN_CASES } from "@/domains/eval/goldenSet.ts";
 import { DATASET_VERSION } from "@/domains/eval/goldenSet.types.ts";
 import type { GoldenCase } from "@/domains/eval/goldenSet.types.ts";
@@ -97,10 +98,15 @@ async function runCase(
     category: goldenCase.category,
     merchant_id: merchantId,
   });
+  const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+    merchantId,
+    goldenCase.category,
+  );
   const result = await parseIntake({
     sessionId: session.id,
     category: goldenCase.category,
     rawText: goldenCase.rawText,
+    allowedSubtypes,
   });
 
   const diffs: string[] = [];

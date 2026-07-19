@@ -4,6 +4,7 @@ import { sessionsRepository } from "@/domains/intake/repositories/sessionsReposi
 import { rawInputsRepository } from "@/domains/intake/repositories/rawInputsRepository.ts";
 import { extractedFieldsRepository } from "@/domains/intake/repositories/extractedFieldsRepository.ts";
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
+import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { resolveAfterParse, type FlowOutcome } from "@/orchestrator/resolveAfterParse.ts";
 
 export type DescribeResult =
@@ -49,10 +50,18 @@ export async function handleDescribe(params: {
     status: toParsing.state,
   });
 
+  // subtype 的合法值域取自該商家的 rate card（WBS 6.8）。由 orchestrator 查後傳入，
+  // 讓 parserAgent 不必依賴 pricing domain——跨域組裝本就是 orchestrator 的職責。
+  const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+    session.merchant_id,
+    session.category,
+  );
+
   const parsed = await parseIntake({
     sessionId,
     category: session.category,
     rawText,
+    allowedSubtypes,
   });
 
   await extractedFieldsRepository.upsertMany(

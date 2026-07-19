@@ -32,6 +32,30 @@ export class RateCardRepository {
     return data ?? null;
   }
 
+  /**
+   * 取該商家該 category 目前在售（is_active）的子類型清單（WBS 6.8）。
+   * 供 Parser 作為 subtype 的合法值域——只回在售項目，停售的服務不該被抽出來報價。
+   */
+  async findActiveSubtypes(
+    merchantId: string,
+    category: CaseCategory,
+  ): Promise<string[]> {
+    const { data, error } = await this.client
+      .from("rate_card_base")
+      .select("subtype")
+      .eq("merchant_id", merchantId)
+      .eq("category", category)
+      .eq("is_active", true);
+    if (error) {
+      throw new RepositoryError(
+        "rate_card_base",
+        "findActiveSubtypes",
+        error.message,
+      );
+    }
+    return (data ?? []).map((row) => row.subtype);
+  }
+
   /** 取該商家該 category 適用的加成係數：專屬（category=給定）+ 共用（category IS NULL）。 */
   async findModifiers(
     merchantId: string,
