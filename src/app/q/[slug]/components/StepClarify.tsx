@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { ClarificationItem } from "../lib/wizardTypes.ts";
-import { StepProgress } from "./StepProgress.tsx";
 
 /**
  * Wizard Step 3：一次回答本輪的所有反問（批次，FR-CL-1）。
@@ -47,11 +46,10 @@ export function StepClarify({
     <section
       data-testid="clarify-question"
       aria-labelledby="step-clarify-heading"
-      className="flex flex-col gap-6"
+      className="mx-auto flex w-full max-w-md flex-col gap-6"
     >
       <header className="flex flex-col gap-3">
-        <StepProgress current={3} />
-        <h1 id="step-clarify-heading" className="text-2xl font-semibold tracking-tight text-ink">
+        <h1 id="step-clarify-heading" className="text-3xl font-semibold tracking-tight text-ink">
           還差幾項資訊
         </h1>
         <p className="text-sm text-ink-soft">

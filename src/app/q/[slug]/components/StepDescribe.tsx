@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { StepProgress } from "./StepProgress.tsx";
 
 /**
  * Wizard Step 2：口語描述 + 聯絡 email（FR-CW-2）。
@@ -43,11 +42,10 @@ export function StepDescribe({
   }
 
   return (
-    <section aria-labelledby="step-describe-heading" className="flex flex-col gap-6">
+    <section aria-labelledby="step-describe-heading" className="mx-auto flex w-full max-w-md flex-col gap-6">
       <header className="flex flex-col gap-3">
-        <StepProgress current={2} />
         <p className="text-sm font-medium text-ink-soft">{categoryLabel}</p>
-        <h1 id="step-describe-heading" className="text-2xl font-semibold tracking-tight text-ink">
+        <h1 id="step-describe-heading" className="text-3xl font-semibold tracking-tight text-ink">
           用你的話描述需求
         </h1>
         <p className="text-sm text-ink-soft">
