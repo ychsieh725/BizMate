@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  /* 全站只提供淺色主題。原本的 @media (prefers-color-scheme: dark) 只覆寫
+     --background / --foreground 兩個值（create-next-app 樣板遺留），但全站元件用的是
+     --ink / --surface 等自訂 token，那些始終是淺色值——結果在深色系統下變成
+     深底配深字。與其補一整套深色 token，不如明確宣告只支援淺色：
+     color-scheme 讓捲軸與表單控制項也跟著用淺色樣式，不會出現深色控制項配白底。 */
+  color-scheme: light;
+
   --background: #ffffff;
   --foreground: #0f1115;
 
@@ -15,6 +22,12 @@
   --accent: #2451c4;
   --accent-hover: #1c3f9e;
   --accent-soft: #e8edfb;
+
+  /* 品牌藍取自 logo（#3068ef），比 --accent 亮。刻意與互動色分離：
+     #3068ef 配白字僅約 3.9:1，不足 WCAG AA 的 4.5:1，故按鈕等文字承載元素
+     一律用較深的 --accent，品牌藍只用於 logo 與大面積裝飾（不承載小字）。 */
+  --brand: #3068ef;
+  --brand-glow: rgba(48, 104, 239, 0.14);
 
   --danger: #c4322c;
   --danger-soft: #fbe9e8;
@@ -48,16 +61,13 @@
   --color-status-confirmed-fg: var(--status-confirmed-fg);
   --color-status-sent-bg: var(--status-sent-bg);
   --color-status-sent-fg: var(--status-sent-fg);
+  --color-brand: var(--brand);
+  --color-brand-glow: var(--brand-glow);
   --shadow-card: 0 1px 2px rgba(15, 17, 21, 0.04), 0 1px 8px rgba(15, 17, 21, 0.06);
-  --font-sans: var(--font-geist-sans);
+  --shadow-lift: 0 1px 2px rgba(15, 17, 21, 0.04), 0 12px 32px -8px rgba(15, 17, 21, 0.12);
+  /* Geist 不含中文字，中文由 Noto Sans TC 承接；順序決定拉丁字優先用 Geist。 */
+  --font-sans: var(--font-geist-sans), var(--font-noto-sans-tc);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
