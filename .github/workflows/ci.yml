@@ -1,0 +1,43 @@
+name: CI
+
+# 三道靜態閘門：ESLint、TypeScript 型別檢查、單元測試 + 覆蓋率門檻。
+# 刻意不含 verify:* 與 pnpm eval——那兩者需要真實 Supabase / Gemini 金鑰，
+# 屬於 WBS 8.5 的「真實依賴閘門」，需先在 repo 設定 Secrets 才能接上。
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Lint / Types / Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      # 覆蓋率門檻（80%）寫在 vitest.config.ts，未達標會讓這一步失敗。
+      - name: Unit tests + coverage
+        run: pnpm test:coverage
