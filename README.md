@@ -13,6 +13,10 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6)
 
+<br>
+
+<img src="docs/assets/screenshot-landing.png" alt="BizMate 首頁：左側為產品訴求與行動呼籲，右側示意「口語輸入 → AI 抽取欄位 → 確定性計價」的完整流程" width="880">
+
 </div>
 
 ---
