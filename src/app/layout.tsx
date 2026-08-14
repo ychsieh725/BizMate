@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -10,6 +10,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+/**
+ * 中文字型。先前未指定任何中文字型，中文一律 fallback 到各作業系統的預設
+ * （macOS 蘋方 / Windows 微軟正黑），字重與字面大小在平台間不一致——這是
+ * 介面質感最明顯的落差來源。Noto Sans TC 與 Geist 的幾何感相容，
+ * 由 next/font 自動 subset 與 self-host，不額外增加第三方請求。
+ */
+const notoSansTC = Noto_Sans_TC({
+  variable: "--font-noto-sans-tc",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
 });
 
 /**
@@ -44,7 +56,7 @@ export default function RootLayout({
   return (
     <html
       lang="zh-Hant"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoSansTC.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
