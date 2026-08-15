@@ -212,13 +212,26 @@ tsx --env-file=.env.production.local scripts/seed-rate-card.ts
 
 ## 上線前檢查清單
 
-- [ ] **確認 Fluid compute 已啟用**（Vercel → Project Settings → Functions）
-      未啟用會讓執行上限退回舊值，`maxDuration = 180` 將失效
+- [x] **Fluid compute** — 已由 `vercel.json` 的 `"fluid": true` 宣告，不需
+      dashboard 操作。設定優先序為 `vercel.json` > dashboard > Fluid 預設，
+      故寫在檔案裡即生效，且狀態進版控、可 review、換環境不會漏
 - [ ] 產生內部金鑰：`openssl rand -base64 32`
 - [ ] 於 Vercel 環境變數設定 `INTERNAL_SERVICE_SECRET`（**兩個 service 同值**）
-- [ ] 設定 `AGENT_SERVICE_URL=https://<你的網域>/agent-service`
+      位置：Project → **Settings → Environment Variables**
+      （`https://vercel.com/<team>/<project>/settings/environment-variables`）
+- [ ] 設定 `AGENT_SERVICE_URL=https://<你的網域>/agent-service`（同上位置）
+- [ ] 觸發一次部署——**環境變數與 fluid 設定都只對「新的部署」生效**，
+      改完不重新部署等於沒改
 - [ ] 部署後冒煙測試（見下）
 - [ ] 記錄實際冷啟動時間
+
+> **想確認 Fluid compute 實際狀態**：Project → Settings → Functions，
+> 找 **Fluid Compute** 區塊。`vercel.json` 的宣告優先於此處的開關，
+> 兩者不一致時以檔案為準。
+>
+> 註：Vercel 自 2025-04-23 起對新專案預設啟用 Fluid compute，本專案建立於
+> 2026-07，原就應為啟用狀態；`"fluid": true` 是把這件事變成明確且可驗證的
+> 宣告，而非依賴平台預設。
 
 ## 冒煙測試
 
