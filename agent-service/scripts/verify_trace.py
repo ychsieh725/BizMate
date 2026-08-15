@@ -117,7 +117,10 @@ async def main() -> int:
             return 1
         print("✓ cost_log_id 可為 NULL")
 
-        # UNIQUE (run_id, step_index)：重複寫入應被擋下且不拋到呼叫端
+        # UNIQUE (run_id, step_index)：重複寫入應被擋下且不拋到呼叫端。
+        # 記錄器會 logger.exception 記下這次失敗，故底下會印出一段 traceback——
+        # 那是預期輸出，正是 best-effort 生效的證據，不是驗證失敗。
+        print("\n  ↓ 以下 traceback 為預期輸出（故意觸發重複寫入）")
         duplicate = AgentStepRecorder(
             session_id=session_id,
             repository=agent_steps_repository,
