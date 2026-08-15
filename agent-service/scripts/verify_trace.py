@@ -16,23 +16,10 @@ INTERNAL_SERVICE_SECRET。
 
 import asyncio
 import sys
-from typing import Any, cast
 
-from app.db.client import get_client
+from app.db.client import as_rows, get_client
 from app.db.repositories.agent_steps import TABLE_NAME, agent_steps_repository
 from app.trace.agent_steps import AgentStepRecorder
-
-type Row = dict[str, Any]
-
-
-def as_rows(data: object) -> list[Row]:
-    """把 supabase-py 的回傳轉成可用字串索引的列。
-
-    postgrest 宣告回傳 Sequence[JSON]，型別上不允許 row["id"]。這裡在邊界
-    做一次明確轉型，而非在每個取值點灑 type: ignore——資料形狀的假設集中在
-    一處，錯了也只需改一處。
-    """
-    return cast(list[Row], data or [])
 
 
 async def find_any_session_id() -> str | None:

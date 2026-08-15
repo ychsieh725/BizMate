@@ -13,6 +13,7 @@ TEST_SECRET = "test-internal-secret-value"
 os.environ.setdefault("INTERNAL_SERVICE_SECRET", TEST_SECRET)
 os.environ.setdefault("SUPABASE_URL", "https://supabase.test")
 os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
+os.environ.setdefault("GEMINI_API_KEY", "test-gemini-api-key")
 
 
 @pytest.fixture

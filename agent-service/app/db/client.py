@@ -7,11 +7,24 @@
 否則單元測試與 Vercel 的冷啟動都會白付代價。
 """
 
+from typing import Any, cast
+
 from supabase import AsyncClient, create_async_client
 
 from app.config import settings
 
+type Row = dict[str, Any]
+
 _client: AsyncClient | None = None
+
+
+def as_rows(data: object) -> list[Row]:
+    """把 postgrest 的回傳轉成可用字串索引的列。
+
+    postgrest 宣告回傳 Sequence[JSON]，型別上不允許 row["id"]。在此做一次
+    明確轉型，而非在每個取值點灑 type: ignore——對資料形狀的假設集中在一處。
+    """
+    return cast(list[Row], data or [])
 
 
 async def get_client() -> AsyncClient:

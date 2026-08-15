@@ -9,6 +9,7 @@ requires-python = ">=3.12"
 # eval 的統計分析相依（pandas/scipy）刻意隔離在 dev group，不進 bundle。
 dependencies = [
     "fastapi>=0.117.1",
+    "google-genai>=1.0",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
     "supabase>=2.10",
