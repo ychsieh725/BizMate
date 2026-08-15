@@ -11,6 +11,7 @@ dependencies = [
     "fastapi>=0.117.1",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
+    "supabase>=2.10",
 ]
 
 # Vercel 以此定位 ASGI app；本專案入口為 app/main.py 的頂層變數 app。
@@ -23,6 +24,7 @@ dev = [
     "httpx>=0.28",          # TestClient 需要
     "mypy>=1.13",
     "pytest>=8.3",
+    "pytest-asyncio>=1.4.0",
     "pytest-cov>=6.0",
     "ruff>=0.8",
 ]
@@ -49,6 +51,9 @@ warn_unreachable = true
 testpaths = ["tests"]
 # 覆蓋率門檻對齊 .claude/rules/testing.md 的 80%
 addopts = "--cov=app --cov-report=term-missing --cov-fail-under=80"
+# auto 模式：async def 測試不需逐個標 @pytest.mark.asyncio。
+# 本服務幾乎全部是 async（FastAPI + supabase-py），逐個標註只是噪音。
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 omit = ["tests/*"]

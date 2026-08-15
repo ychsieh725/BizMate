@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     # 同域不等於受保護，此值是唯一的防線（設計文件〈安全考量〉v3）。
     internal_service_secret: str = Field(min_length=MIN_SECRET_LENGTH)
 
+    # Supabase（A1 起）：軌跡與成本寫入。
+    # 與 TS 端 env.ts 同列為「核心」——缺了就無法記錄任何觀測資料，
+    # 應在部署時就炸，而不是等第一個 agent loop 跑到一半才發現寫不進去。
+    supabase_url: str = Field(min_length=1)
+    supabase_service_role_key: str = Field(min_length=1)
+
     # 服務識別，供 /health 與 echo 回報；有預設值故不需逐環境設定。
     service_name: str = "agent-service"
     service_version: str = "0.1.0"

@@ -11,7 +11,8 @@ import pytest
 TEST_SECRET = "test-internal-secret-value"
 
 os.environ.setdefault("INTERNAL_SERVICE_SECRET", TEST_SECRET)
-os.environ.setdefault("WEB_SERVICE_URL", "https://example.test")
+os.environ.setdefault("SUPABASE_URL", "https://supabase.test")
+os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
 
 
 @pytest.fixture

@@ -73,7 +73,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy app
+        run: uv run mypy app scripts
 
       # 覆蓋率門檻（80%）寫在 pyproject.toml 的 addopts，未達標會讓這一步失敗。
       - name: Unit tests + coverage

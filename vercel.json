@@ -13,7 +13,7 @@
   },
   "functions": {
     "agent-service/app/main.py": {
-      "excludeFiles": "{agent-service/eval/**,agent-service/tests/**,agent-service/**/test_*.py,agent-service/.venv/**}"
+      "excludeFiles": "{agent-service/eval/**,agent-service/tests/**,agent-service/scripts/**,agent-service/**/test_*.py,agent-service/.venv/**}"
     }
   }
 }
