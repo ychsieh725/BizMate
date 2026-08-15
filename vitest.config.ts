@@ -27,6 +27,7 @@ export default defineConfig({
         "src/domains/intake/clarificationFields.ts",
         "src/lib/api/**/*.ts",
         "src/lib/rateLimit/**/*.ts",
+        "src/lib/agentService.ts",
         "src/app/api/**/route.ts",
         "src/app/wizard/lib/wizardApi.ts",
         "src/domains/pricing/basePricing.ts",

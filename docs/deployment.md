@@ -187,3 +187,87 @@ tsx --env-file=.env.production.local scripts/seed-rate-card.ts
 | `docs/deployment.md` | 新增本文件 | 部署 runbook |
 
 > Node 版本、Region、環境變數**刻意不寫進 repo**——它們屬部署環境設定，於 Vercel Dashboard 設定（見 Step 5），避免與本機開發環境衝突、也避免密鑰進版控。
+
+---
+---
+
+# agent-service（Python）部署 — A0 增補
+
+> 對應設計文件 v3〈部署架構〉。本節在既有 Vercel 部署上**疊加**一個 Python
+> 服務，不取代上述任何步驟。
+
+## 架構：單一 project + Services
+
+根目錄 [`vercel.json`](../vercel.json) 用 `experimentalServices` 宣告兩個服務，
+共用同一個 domain，依路徑前綴路由：
+
+| service | src | 路徑 | 內容 |
+| :--- | :--- | :--- | :--- |
+| `web` | `.` | `/` | Next.js 16（既有） |
+| `agent` | `agent-service` | `/agent-service` | FastAPI（新增） |
+
+`functions.excludeFiles` 把 `eval/`、`tests/`、`.venv/` 排除於 function bundle
+之外——Python 無自動 tree-shaking，統計分析相依（pandas/scipy）若被打包會白吃
+500 MB 額度。
+
+## 上線前檢查清單
+
+- [ ] **確認 Fluid compute 已啟用**（Vercel → Project Settings → Functions）
+      未啟用會讓執行上限退回舊值，`maxDuration = 180` 將失效
+- [ ] 產生內部金鑰：`openssl rand -base64 32`
+- [ ] 於 Vercel 環境變數設定 `INTERNAL_SERVICE_SECRET`（**兩個 service 同值**）
+- [ ] 設定 `AGENT_SERVICE_URL=https://<你的網域>/agent-service`
+- [ ] 部署後冒煙測試（見下）
+- [ ] 記錄實際冷啟動時間
+
+## 冒煙測試
+
+```bash
+# 1. 探活（公開，應回 200）
+curl -s https://<你的網域>/agent-service/health
+
+# 期望：{"success":true,"data":{"status":"ok","service":"agent-service",...},"error":null}
+
+# 2. 未帶 secret（應回 401——同域不等於受保護）
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -X POST https://<你的網域>/agent-service/agent/echo \
+  -H 'content-type: application/json' -d '{"message":"hi"}'
+
+# 期望：401
+
+# 3. 帶 secret（應回 200 並回音）
+curl -s -X POST https://<你的網域>/agent-service/agent/echo \
+  -H 'content-type: application/json' \
+  -H "x-internal-secret: $INTERNAL_SERVICE_SECRET" \
+  -d '{"message":"來自部署驗證"}'
+
+# 期望：{"success":true,"data":{"echo":"來自部署驗證",...},"error":null}
+```
+
+**第 2 項必須是 401。** 若回 200，代表認證沒生效，任何人都能呼叫你的 AI 層並
+消耗 Gemini 額度——**立即停止部署並排查**。
+
+## 退路：拆成兩個 Vercel project
+
+`experimentalServices` 是實驗性 API（設計文件列為 HIGH 風險）。若 Vercel 變更
+規格導致部署失敗，退路成本很低：
+
+1. 於 Vercel 新建 project，Root Directory 指向 `agent-service`
+2. 該 project 設定 `INTERNAL_SERVICE_SECRET`（與 web 同值）
+3. 刪除根目錄 `vercel.json` 的 `experimentalServices` 區塊（保留 `functions`）
+4. 把 web project 的 `AGENT_SERVICE_URL` 改為新 project 的網域
+
+**程式碼一行都不用改。** 這是把服務位址放在環境變數而非寫死的理由。
+
+代價：preview deployment 的兩個服務版本不再自動對應，需自行確認前端 preview
+打到的是哪一版 agent-service。
+
+## 失效行為（不變式 I-3）
+
+agent-service 未部署、未設定、或整個掛掉時，系統**不會壞**：
+`callAgentService` 回傳 `not_configured` / `unreachable` / `timeout`，
+orchestrator 據此 fallback 到既有的 `resolveAfterParse`，產出與 agent 化之前
+完全一致的結果。
+
+> 這是刻意的設計：**agent 是加值層，不是必經路徑。**
+> 部署 agent-service 失敗不應該讓報價流程停擺。

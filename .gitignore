@@ -40,5 +40,14 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
+# Python（agent-service）
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+
 # TaskMaster session 時間戳（每次 session 都會變動，不應追蹤）
 .claude/taskmaster-data/.session-start

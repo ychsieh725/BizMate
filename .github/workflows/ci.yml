@@ -1,6 +1,9 @@
 name: CI
 
-# 三道靜態閘門：ESLint、TypeScript 型別檢查、單元測試 + 覆蓋率門檻。
+# 兩條平行 job，各自守一個語言的靜態閘門：
+#   quality        — TypeScript：ESLint、tsc、vitest + 覆蓋率
+#   python-quality — Python：ruff、mypy --strict、pytest + 覆蓋率
+#
 # 刻意不含 verify:* 與 pnpm eval——那兩者需要真實 Supabase / Gemini 金鑰，
 # 屬於 WBS 8.5 的「真實依賴閘門」，需先在 repo 設定 Secrets 才能接上。
 on:
@@ -41,3 +44,40 @@ jobs:
       # 覆蓋率門檻（80%）寫在 vitest.config.ts，未達標會讓這一步失敗。
       - name: Unit tests + coverage
         run: pnpm test:coverage
+
+  python-quality:
+    name: Python Lint / Types / Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: agent-service
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # Python 版本由 agent-service/pyproject.toml 的 requires-python 決定，
+      # 與 Vercel Python runtime 的預設（3.12）一致。
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy app
+
+      # 覆蓋率門檻（80%）寫在 pyproject.toml 的 addopts，未達標會讓這一步失敗。
+      - name: Unit tests + coverage
+        run: uv run pytest
+        env:
+          # CI 無真實金鑰；此值僅供設定載入通過，不對應任何實際服務。
+          INTERNAL_SERVICE_SECRET: ci-placeholder-secret-value
