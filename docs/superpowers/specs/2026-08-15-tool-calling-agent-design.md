@@ -7,7 +7,8 @@
 
 > **修訂記錄**
 > v1（同日）：全 TypeScript 方案。
-> **v2（本版）**：AI 層改以獨立 Python 服務實作。三條不變式、終止條件、trajectory 指標設計沿用；架構、技術路線、里程碑、部署與測試策略改寫。變更動機見〈為什麼拆成 Python 服務〉。
+> v2（同日）：AI 層改以獨立 Python 服務實作。變更動機見〈為什麼拆成 Python 服務〉。
+> **v3（本版）**：修正 v2 的部署評估錯誤。v2 誤判 Vercel 無法承載 Python 服務而規劃第三方平台（Railway/Render/Fly.io），並據此把冷啟動列為 CRITICAL 風險、以 Vercel Hobby 60s 上限推導延遲預算。**兩項前提皆與官方文件不符**：Vercel 原生支援 FastAPI，且提供 Services 機制讓 Python 與 Next.js 共存於同一 project；Hobby 方案在 Fluid compute 下的執行上限為 300s。本版據此改寫部署架構、延遲預算、風險表與 A0。查證來源見文末。
 
 ---
 
@@ -54,7 +55,7 @@
 > **I-3｜agent 失控必須退回現行路徑。**
 > 預算用盡、偵測到迴圈、tool 連續失敗、**Python 服務無回應** → TypeScript 端 fallback 到現有的 `resolveAfterParse`，產出與今天完全一致的結果。**agent 是加值層，不是必經路徑。**
 
-I-3 在 v2 有額外份量：跨服務呼叫多了網路失敗與冷啟動兩種失效模式，fallback 從「品質保險」升級為「可用性保險」。
+I-3 在 v2 起有額外份量：跨服務呼叫多了網路失敗與冷啟動兩種失效模式，fallback 從「品質保險」升級為「可用性保險」。（v3：冷啟動在 Vercel 上約 1 秒量級，威脅程度遠低於 v2 假設的容器休眠平台，但失效模式本身仍存在，fallback 設計不變。）
 
 ---
 
@@ -73,7 +74,9 @@ I-3 在 v2 有額外份量：跨服務呼叫多了網路失敗與冷啟動兩種
 4. eval 的統計分析（顯著性檢定、信賴區間）在 Python 生態近乎免費，見〈Eval 統計層〉
 5. 服務邊界讓 I-1 從約定升級為架構保證
 
-**不誇大**：這次拆分會讓系統變慢、部署變複雜、跨語言邊界失去編譯期型別保護。若純以產品 ROI 衡量，單體 TypeScript 是更務實的選擇。取捨理由是上述 1、2，應誠實表述。
+**不誇大**：這次拆分會讓系統變慢、多一套建置設定、跨語言邊界失去編譯期型別保護。若純以產品 ROI 衡量，單體 TypeScript 是更務實的選擇。取捨理由是上述 1、2，應誠實表述。
+
+> **v3 修正**：v2 曾把「部署複雜度大幅上升」列為主要代價，那建立在「須引入第三方託管平台」的錯誤前提上。Vercel Services 讓兩個 runtime 共存於同一 project、共用 domain、依 service 名自動注入環境變數，實際新增的只有一套 Python 建置設定與一條 CI job。**部署複雜度不再是本方案的主要代價**；真正的固有成本是跨語言型別邊界與本機需同時啟動兩個服務。
 
 ### 為什麼不是全端 Python
 
@@ -106,51 +109,91 @@ Python 生態下 LangGraph 是必須認真評估的選項（v1 的「不用框�
 | :--- | :--- | :--- |
 | 協定 | HTTP + JSON | 唯一合理選擇；gRPC 對兩個服務的規模是過度設計 |
 | 型別對齊 | FastAPI 自動產生 OpenAPI → 生成 TS 型別 | 跨語言邊界失去編譯期保護，OpenAPI 是最低成本的補償 |
-| 認證 | 雙向 shared secret header | 兩個服務都不對公網開放業務端點 |
-| 逾時 | TS 端 45s（Vercel `maxDuration = 60` 留 15s 餘裕） | 見〈延遲預算〉 |
+| 認證 | 雙向 shared secret header | 即使同域，Python 端點仍可被外部直接請求，不可只靠網路位置當防線 |
+| 逾時 | TS 端 90s（Hobby 上限 300s，餘裕充足） | 見〈延遲預算〉 |
+
+---
+
+## 部署架構（v3 改寫）
+
+### 平台決策：單一 Vercel project + Services
+
+Vercel 原生支援 Python runtime，FastAPI 為零設定部署（整個 app 成為一個 Vercel Function）。官方提供 **Services** 機制讓 Python 後端與前端共存於同一 project：各自獨立 build、共用 domain、依 URL 路徑前綴自動路由，並**依 service 名稱自動注入環境變數**。
+
+| 方案 | 單一 project（Services）✅ 採用 | 兩個 project |
+| :--- | :--- | :--- |
+| Domain | 一個，Python 掛路徑前綴 | 兩個獨立 URL |
+| 部署 | 一次 push 兩邊同時上 | 各自獨立 |
+| 環境變數 | 依 service 名自動注入 | 手動維護兩套 |
+| **Preview deployment** | **兩邊同一快照，PR 即完整系統** | 需自行處理版本對應 |
+| API 穩定性 | ⚠️ `experimentalServices`，實驗性 | 標準做法 |
+| 失敗隔離 | 一邊 build 失敗擋住整個部署 | 互不影響 |
+| 獨立 rollback | 不行 | 可以 |
+
+**採用單一 project**，決定性理由是**遷移成本不對稱**：單一 → 兩個只需改一個 URL 環境變數，很便宜；反之則一開始就得承擔 preview 版本不同步的維運負擔。先取簡單解，不行再拆。
+
+Preview deployment 一致性對本專案特別重要：作品集需要一個「點連結就是完整可玩系統」的快照。
+
+> **I-1 在兩種方案下都成立。** Services 是各自獨立 build 的不同 function，Python 仍只能透過 HTTP 呼叫 pricing API，行程層級的隔離不因共用 domain 而消失。
+
+### 平台限制（官方文件，2026-07 查證）
+
+| 項目 | Hobby 方案（Fluid compute） |
+| :--- | :--- |
+| 最大執行時間 | **300s**（預設即 300s） |
+| Python bundle 上限 | **500 MB**（其他 runtime 為 250 MB） |
+| 記憶體 | 2 GB / 1 vCPU |
+| Request/Response body | 4.5 MB |
+| 冷啟動 | 約 0.8–1.5s 量級 |
+| 計費 | **active CPU time；等待 I/O 不計費** |
+
+最後一項對本案特別有利：agent loop 大部分時間在等 Gemini 回應，這段等待不計入計費。
+
+> ⚠️ **前提**：上述數字須在 **Fluid compute 啟用**下才成立。官方稱新專案預設啟用，但本專案的 Vercel project 為既有專案，**須於 A0 在 dashboard 確認**。
+>
+> ⚠️ **既有程式碼的過期註解**：[`describe/route.ts`](../../../src/app/api/sessions/[id]/describe/route.ts) 的 `maxDuration = 60` 註解寫著「60 為 Hobby 上限，取滿」，該上限現已為 300s，需一併更正。
+
+### 服務拓撲
+
+```
+        ┌───────────────── 單一 Vercel Project ──────────────────┐
+        │                                                        │
+        │  ┌── service: web（Next.js 16）──────────────────────┐ │
+瀏覽器 ─▶│  │   /q/{slug} wizard（不動）                        │ │
+        │  │   /api/sessions/{id}/describe ─┐                  │ │
+        │  │   /api/sessions/{id}/answer   ─┤                  │ │
+        │  │   orchestrator/                │                  │ │
+        │  │     transitions.ts（不動）     │                  │ │
+        │  │     describeFlow.ts ───────────┼──┐               │ │
+        │  │     resolveAfterParse.ts（fallback 保留）         │ │
+        │  │   /api/internal/pricing/compute ◀─┼──┐ ← 新增      │ │
+        │  │   domains/pricing/（不動，I-1）   │  │            │ │
+        │  └───────────────────────────────────┼──┼────────────┘ │
+        │                  HTTP + shared secret│  │HTTP          │
+        │  ┌── service: agent（FastAPI）───────▼──┴────────────┐ │
+        │  │   POST /agent/resolve                             │ │
+        │  │     agent/loop.py ← tool-calling loop（8 steps）  │ │
+        │  │       tools: lookup_rate_card, record_fields,     │ │
+        │  │              ask_customer, compute_quote          │ │
+        │  │     llm/gemini.py ← google-genai + cost_logs      │ │
+        │  │     trace/agent_steps.py                          │ │
+        │  └────────────────────┬──────────────────────────────┘ │
+        └───────────────────────┼────────────────────────────────┘
+                                ▼
+                          Supabase（共用）
+```
 
 ---
 
 ## 架構
 
-### 服務拓撲
-
-```
-        ┌──────────────────────── Vercel ────────────────────────┐
-瀏覽器 ─▶│ Next.js 16                                            │
-        │   /q/{slug} wizard（不動）                             │
-        │   /api/sessions/{id}/describe  ─┐                      │
-        │   /api/sessions/{id}/answer    ─┤                      │
-        │   orchestrator/                 │                      │
-        │     transitions.ts（不動）      │                      │
-        │     describeFlow.ts ────────────┼──┐                   │
-        │     resolveAfterParse.ts（fallback 保留）              │
-        │   /api/internal/pricing/compute ◀─┼──┐  ← 新增          │
-        │   domains/pricing/（不動，I-1）   │  │                  │
-        └───────────────────────────────────┼──┼──────────────────┘
-                                            │  │
-                        HTTP + shared secret│  │HTTP
-                                            ▼  │
-        ┌──────────── Railway / Render / Fly.io ┴─────────────────┐
-        │ FastAPI  agent-service                                  │
-        │   POST /agent/resolve                                   │
-        │     agent/loop.py  ← tool-calling loop（budget 8 steps）│
-        │       tools: lookup_rate_card, record_fields,           │
-        │              ask_customer, compute_quote ───────────────┘
-        │     llm/gemini.py  ← google-genai + cost_logs
-        │     trace/agent_steps.py
-        └─────────────────────┬───────────────────────────────────┘
-                              ▼
-                        Supabase（共用）
-```
-
 ### Python 服務結構
 
 ```
 agent-service/
-  pyproject.toml            uv / poetry；ruff + mypy + pytest
+  pyproject.toml            依賴 + [tool.vercel] entrypoint；ruff + mypy + pytest
   app/
-    main.py                 FastAPI entry、lifespan、健康檢查
+    main.py                 FastAPI entry（頂層變數須命名 app）、lifespan、健康檢查
     config.py               Pydantic Settings（對應 TS 的 env.ts，啟動時 fail-fast）
     api/
       routes.py             POST /agent/resolve、GET /health
@@ -181,6 +224,10 @@ agent-service/
     analysis.py             pandas + scipy：顯著性檢定、信賴區間
   tests/
 ```
+
+**Vercel 慣例對應**：entrypoint 檔名須為 `app.py` / `index.py` / `server.py` / `main.py` / `wsgi.py` / `asgi.py` 之一（可置於 `app/` 或 `src/` 下），且頂層變數命名為 `app`；本結構的 `app/main.py` 直接符合，無需額外設定。若之後調整路徑，改以 `pyproject.toml` 的 `[tool.vercel] entrypoint = "module:variable"` 指定。
+
+**Bundle 控制**：Python 無自動 tree-shaking，預設打包所有 build 時可達的檔案。`eval/`（含 golden set、pandas/scipy 分析層）**僅離線執行、不應進 function bundle**，須於 `vercel.json` 的 `functions.excludeFiles` 排除。這也是把統計分析相依（pandas、scipy）與服務執行期相依分開宣告的理由。
 
 ### TypeScript 端改動
 
@@ -268,25 +315,29 @@ class ComputeQuoteInput(BaseModel):
 | :--- | :--- | :--- | :--- |
 | 1 | 呼叫終止類 tool | — | 正常結束，回傳對應事件 |
 | 2 | step 數達上限 | `MAX_AGENT_STEPS = 8` | fallback |
-| 3 | 累積延遲超上限 | `MAX_AGENT_LATENCY_MS = 35_000` | fallback |
+| 3 | 累積延遲超上限 | `MAX_AGENT_LATENCY_MS = 60_000` | fallback |
 | 4 | 累積成本超上限 | `MAX_AGENT_COST_USD = 0.01` | fallback |
 | 5 | 連續 2 次相同 tool + 相同參數 | — | 判定卡住，fallback |
-| 6 | **TS 端呼叫 Python 逾時/失敗** | TS `AGENT_TIMEOUT_MS = 45_000` | **TS 端** fallback（v2 新增） |
+| 6 | **TS 端呼叫 Python 逾時/失敗** | TS `AGENT_TIMEOUT_MS = 90_000` | **TS 端** fallback（v2 新增） |
 
 條件 6 是 v2 才有的：Python 服務不可用時，TypeScript 端必須能獨立完成流程。這也是保留 `resolveAfterParse.ts` 不刪的原因。
 
-### 延遲預算（v2 收緊）
+### 延遲預算（v3 重算）
+
+v2 的分層預算（45s / 35s）建立在「Hobby 上限 60s」的錯誤前提上。實際上限為 300s，預算大幅放寬：
 
 ```
-Vercel maxDuration = 60s（Hobby 上限，describe route 已設定）
-  └─ TS → Python 呼叫逾時 45s
-       └─ Python agent loop 預算 35s
-            └─ 單次 Gemini 呼叫 ~1.3s × 最多 8 步 ≈ 10s（正常）
-       └─ 餘裕 10s：網路往返、冷啟動、pricing 回呼
-  └─ 餘裕 15s：TS 端 fallback 完整跑一次 resolveAfterParse
+Vercel maxDuration = 180s（describe route 調整；Hobby 上限 300s）
+  └─ TS → Python 呼叫逾時 90s
+       └─ Python agent loop 預算 60s
+            └─ 單次 Gemini 呼叫 ~1.3s × 最多 8 步 ≈ 10s（正常情形）
+       └─ 餘裕 30s：網路往返、冷啟動、pricing 回呼、重試退避
+  └─ 餘裕 90s：TS 端 fallback 完整跑一次 resolveAfterParse
 ```
 
-最後 15s 的餘裕是關鍵：**逾時後還要有時間走完 fallback**，否則條件 6 形同虛設。
+設計原則不變：**逾時後必須還有時間走完 fallback**，否則條件 6 形同虛設。v3 的差別是餘裕從勉強的 15s 變成寬鬆的 90s。
+
+> **但預算寬鬆不等於可以慢。** 300s 是平台上限，不是使用者的耐心上限——客戶在 wizard 前面等待，超過 10 秒體驗就已經很差。真正的延遲約束來自 eval 的 P95 門檻（見〈基準線重建〉），而非平台限制。**平台上限只是安全網，不是目標值。**
 
 ### Fallback 語意
 
@@ -387,7 +438,7 @@ Migration 由 TypeScript 端管理（沿用既有 `supabase/migrations/` 與手�
 | 欄位抽取準確率 | 97.5% | ? | 不得顯著低於 baseline（McNemar p ≥ 0.05） |
 | 幻覺率 | 0% | ? | **必須維持 0%** |
 | 每案成本 | $0.000442 | ? | 可接受上升，需記錄倍數 |
-| P95 延遲 | 1717ms | ? | 不得超過 20,000ms（含跨服務往返） |
+| P95 延遲 | 1717ms | ? | **不得超過 10,000ms**（含跨服務往返）——依使用者耐心設定，非平台上限 |
 | 客戶平均被問題數 | （**待補量**） | ? | 期望**下降** |
 
 「客戶平均被問題數」是本次改動的**產品價值指標**，目前沒量過，需在 baseline 側補測，否則無法證明體驗改善。
@@ -399,7 +450,7 @@ Migration 由 TypeScript 端管理（沿用既有 `supabase/migrations/` 與手�
 | 情境 | 處置 |
 | :--- | :--- |
 | **Python 服務無回應 / 逾時**（v2 新增） | TS 端 fallback 到 `resolveAfterParse`，記錄告警 |
-| **Python 服務冷啟動**（v2 新增） | 見〈風險〉；health check 保溫 + 首呼叫容忍較長逾時 |
+| **Python 服務冷啟動**（v2 新增） | Vercel 冷啟動約 1s 量級，已含在 90s 逾時餘裕內，無需保溫機制 |
 | **pricing 內部 API 呼叫失敗**（v2 新增） | Python 回傳 `pricing_unavailable`，TS 端接手用本地 `computeBasePricing` 完成 |
 | Gemini 呼叫失敗 | 重試 1 次 + 指數退避（沿用現行策略）；仍失敗 → fallback |
 | tool 參數不合 Pydantic schema | 回 `rejected` 給 agent 重試，計入 step 預算；連續 2 次 → fallback |
@@ -431,7 +482,8 @@ Migration 由 TypeScript 端管理（沿用既有 `supabase/migrations/` 與手�
 | Python 服務端點暴露於公網 | 業務端點一律要求 shared secret header；只開放 `/health` 匿名 |
 | 內部 pricing API 被外部呼叫 | 同上，雙向驗證；`/api/internal/**` 於 middleware 拒絕無 secret 的請求 |
 | 服務間流量明文 | 兩端皆強制 HTTPS |
-| secret 外洩 | 走各平台 secret manager（Vercel env / Railway variables），不進版控；`.env.example` 只列名稱 |
+| secret 外洩 | 走 Vercel 環境變數（Services 依 service 名自動注入），不進版控；`.env.example` 只列名稱 |
+| **同域造成的誤判**（v3 新增） | 共用 domain 不代表 Python 端點受保護——它仍可被外部直接請求。shared secret 驗證**不因同域而省略** |
 
 `verify:security` 新增兩項檢查：注入樣本無法產生 `conservative = false` 的異常報價；無 secret 的 `/api/internal/**` 請求回 401。
 
@@ -470,10 +522,13 @@ jobs:
 
 | 風險 | 嚴重度 | 緩解 |
 | :--- | :--- | :--- |
-| **免費層冷啟動**（Render/Railway 閒置休眠，首次喚醒可達 30s+） | **CRITICAL** | 作品集 demo 的致命傷。緩解：選有常駐免費額度的平台（Fly.io）或設外部 cron 保溫；`/health` 輕量端點；首呼叫容忍較長逾時。**A0 必須實測冷啟動時間並記錄** |
-| 跨服務延遲吃掉 Vercel 60s 預算 | **HIGH** | 分層逾時（45s / 35s）+ 15s fallback 餘裕；eval 監看 P95 |
+| **`experimentalServices` 為實驗性 API**（v3 新增） | **HIGH** | 作品集需長期可用，Vercel 若變更 API 而未察覺，訪客會看到部署失敗。緩解：A0 將部署驗證寫成可重跑的檢查；`docs/deployment.md` 記錄「拆成兩個 project」的退路步驟（成本僅為改一個 URL 環境變數） |
+| **Fluid compute 未啟用**（v3 新增） | MEDIUM | 既有 project 可能未啟用，導致執行上限退回舊值。A0 於 dashboard 確認並記錄 |
+| 冷啟動 | LOW | Vercel 冷啟動約 0.8–1.5s，已含在逾時餘裕內。**（v2 誤列為 CRITICAL，前提是容器平台休眠；平台改為 Vercel 後此風險降級）** |
+| 使用者感知延遲（非平台限制） | **HIGH** | 平台容許 300s，但客戶在 wizard 等待超過 10s 體驗即劣化。真正的約束是 eval P95 門檻，不是平台上限 |
 | 跨語言型別漂移 | **HIGH** | OpenAPI 生成 TS 型別 + CI 契約測試擋 |
-| 部署複雜度（兩處環境變數、兩條 CI） | MEDIUM | A0 一次做完並寫進 `docs/deployment.md` |
+| 部署設定（Python 建置 + 一條 CI job） | LOW | 單一 project + Services 下環境變數自動注入；A0 一次做完並寫進 `docs/deployment.md` |
+| Bundle 誤含 eval 相依（pandas/scipy） | MEDIUM | `vercel.json` 的 `excludeFiles` 排除 `eval/`；A0 驗證 bundle 大小 |
 | agent 品質低於單步 baseline | MEDIUM | Feature flag 可即時關閉；A6 對照表是 go/no-go 依據 |
 | 幻覺率因多輪對話上升 | **HIGH** | eval 硬門檻：**幻覺率非 0 即不得開 flag** |
 | golden set 移植 + trajectory 標註 | LOW | 36 則，預估 2–3 小時 |
@@ -488,7 +543,7 @@ jobs:
 
 | # | 內容 | 驗收 |
 | :--- | :--- | :--- |
-| **A0** | Python 服務骨架：FastAPI + config + `/health` + 部署 + shared secret + TS 端 client 打通一條 echo 呼叫鏈 | 線上可呼叫；**冷啟動時間實測並記錄**；CI 兩條 job 綠 |
+| **A0** | Python 服務骨架：FastAPI + config + `/health` + `experimentalServices` 設定 + shared secret + TS 端 client 打通一條 echo 呼叫鏈 | 線上可呼叫；**Fluid compute 已啟用（dashboard 確認）**；Services 路由與環境變數注入正常；bundle 已排除 `eval/` 且在限額內；`describe/route.ts` 過期註解已更正；退路步驟寫入 `docs/deployment.md`；CI 兩條 job 綠 |
 | **A1** | `agent_steps` migration + Python repository + trace 寫入 | 寫入失敗不中斷主流程 |
 | **A2** | `llm/gemini.py`：`generate_structured` 移植 + `generate_with_tools` | 單元測試綠；token 用量正確寫入 `cost_logs` |
 | **A3** | 4 個 tool + registry；`/api/internal/pricing/compute`（TS 側） | 各 tool 測試綠；`record_fields` 拒絕自創欄位 |
@@ -499,15 +554,29 @@ jobs:
 | **A8** | 開 flag + 案例研究文件 | `docs/agent-trajectory-case-study.md` |
 | **A9**（選配） | LangGraph 平行實作 + 對照分析 | 同一 golden set 的雙實作對照表 |
 
-**A0 是本版新增的前置關卡**，且其冷啟動實測結果可能推翻平台選擇——若無法壓到可接受範圍，需回頭評估是否改用 Vercel Python Functions 或退回單體 TypeScript。
+**A0 是 v2 新增的前置關卡**。v3 收斂其風險範圍：平台已確定為 Vercel，A0 不再承擔「可能推翻平台選擇」的不確定性，改為驗證 Services 設定是否如文件所述運作。若 `experimentalServices` 不可用，退路是拆成兩個 Vercel project（改一個 URL 環境變數即可），**不影響本文件其餘任何設計**。
 **A6 是 go/no-go 關卡**：指標未達標就停在 flag 關閉狀態，不硬推。
 
 ---
 
 ## 待確認事項
 
-1. **Python 服務託管平台**：Fly.io / Railway / Render 的免費層冷啟動行為需在 A0 實測後定案
-2. `MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 35_000` 為估計值，需依 A4 實測調整
+1. ~~Python 服務託管平台~~ → **v3 定案：單一 Vercel project + Services**，退路為兩個 Vercel project
+2. `MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 60_000` 為估計值，需依 A4 實測調整
 3. 「客戶平均被問題數」的 baseline 尚未量測，需在 A5 補測 flag 關閉側
 4. `tool_sequence_match_rate` 的比對規則（嚴格順序 vs 忽略查詢類重複）需在 A5 定案
-5. 套件管理器：`uv`（快、新）vs `poetry`（穩、普及）——A0 定案
+5. 套件管理器：`uv`（快、新，Vercel 明確支援 `uv.lock`）vs `poetry`（穩、普及）——A0 定案
+6. `describe/route.ts` 的 `maxDuration` 實際要設多少（180s 為提案值，須權衡「安全網」與「壞掉時使用者要等多久才看到錯誤」）——A0 定案
+
+---
+
+## 查證來源（v3）
+
+平台限制與 Services 機制皆取自 Vercel 官方文件，2026-08-15 查證：
+
+- [Using the Python Runtime with Vercel Functions](https://vercel.com/docs/functions/runtimes/python)（entrypoint 慣例、bundle 控制、Services 指引）
+- [Vercel Functions Limits](https://vercel.com/docs/functions/limitations)（300s 上限、500 MB Python bundle、active CPU 計費）
+- [Deploy a FastAPI app on Vercel](https://vercel.com/docs/frameworks/backend/fastapi)（零設定部署）
+- [Static Configuration with vercel.json](https://vercel.com/docs/project-configuration/vercel-json)（`experimentalServices`、`functions.excludeFiles`）
+
+> Vercel 的限制數字會隨方案與平台演進調整（v2 的錯誤正是源自過期資訊）。**A0 應重新核對一次上表，不要直接沿用本文件的數字。**
