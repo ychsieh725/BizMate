@@ -8,7 +8,7 @@
 
 import pytest
 
-from app.agent.fields import FieldExtraction
+from app.agent.fields import LICENSE_SCOPE_DOMAIN, FieldExtraction
 from app.agent.tools.ask_customer import MAX_CLARIFICATION_ROUNDS, AskCustomerTool
 from app.agent.tools.base import ToolContext
 from app.agent.tools.compute_quote import ComputeQuoteTool
@@ -90,7 +90,10 @@ class TestLookupRateCard:
         outcome = await tool.execute({}, context())
 
         options = outcome.result["field_options"]
-        assert options["license_scope"] == ["個人", "商業", "獨家買斷", "有限期限"]
+        # 引用常數而非重打一份字面值：值域是否正確由 test_field_contract 對
+        # TypeScript 的匯出檔把關，這裡只驗「有把值域交給模型」。
+        # （原本這行寫死了錯誤的值域，反而讓 A3 的移植錯誤看起來是綠的。）
+        assert options["license_scope"] == list(LICENSE_SCOPE_DOMAIN)
         assert options["subtype"] == SUBTYPES
 
     async def test_boolean_fields_get_domain_by_prefix(self):

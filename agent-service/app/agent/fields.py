@@ -1,8 +1,15 @@
 """必要欄位定義與缺漏判定。
 
-由 TypeScript 端 src/domains/intake/parserFields.ts 移植。**兩邊必須一致**——
-A6 會在同一份 golden set 上比較 agent 與單步 baseline，欄位清單或門檻不同就
-沒有可比性，量到的差異會是設定差異而非能力差異。
+由 TypeScript 端 src/domains/intake/parserFields.ts 與
+src/shared/constants/fieldDomains.ts 移植。**兩邊必須一致**——A6 會在同一份
+golden set 上比較 agent 與單步 baseline，欄位清單或門檻不同就沒有可比性，
+量到的差異會是設定差異而非能力差異。
+
+一致性由 tests/test_field_contract.py 對 eval/contracts/field_contract.json
+逐項比對把關（該 JSON 由 `pnpm export:contracts` 從 TypeScript 產生）。
+常數留在 Python 原始碼而非執行期讀 JSON，是為了保住型別檢查與零 IO 冷啟動；
+代價是需要這個測試——A3 移植時 coloring_complexity 的值域就抄錯過，
+人工同步兩份常數就是會出這種事。
 
 這一層是不變式 I-2 的所在：「哪些欄位還缺」由 confidence 門檻 deterministic
 算出，不交給 LLM 宣稱。
@@ -41,8 +48,8 @@ CONFIDENCE_THRESHOLD = 0.6
 
 # 值域固定、與商家無關的欄位。subtype 不在此表——它的值域是 per-merchant 的
 # rate card，由 lookup_rate_card 查得後傳入。
-LICENSE_SCOPE_DOMAIN: tuple[str, ...] = ("個人", "商業", "獨家買斷", "有限期限")
-COLORING_COMPLEXITY_DOMAIN: tuple[str, ...] = ("線稿", "平塗", "厚塗")
+LICENSE_SCOPE_DOMAIN: tuple[str, ...] = ("個人使用", "商業使用", "獨家買斷")
+COLORING_COMPLEXITY_DOMAIN: tuple[str, ...] = ("精緻上色", "簡易上色", "線稿")
 BOOLEAN_DOMAIN: tuple[str, ...] = ("是", "否")
 
 STATIC_FIELD_DOMAINS: dict[str, tuple[str, ...]] = {
