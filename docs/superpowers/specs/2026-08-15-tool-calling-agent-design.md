@@ -563,8 +563,8 @@ jobs:
 
 1. ~~Python 服務託管平台~~ → **v3 定案：單一 Vercel project + Services**，退路為兩個 Vercel project
 2. ~~`MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 60_000` 為估計值~~ → **A4 實測完成，維持不變**（實測見下方〈A4 實測〉）
-3. 「客戶平均被問題數」的 baseline 尚未量測，需在 A5 補測 flag 關閉側
-4. `tool_sequence_match_rate` 的比對規則（嚴格順序 vs 忽略查詢類重複）需在 A5 定案
+3. 「客戶平均被問題數」的 baseline 尚未量測，需在 **A6** 補測 flag 關閉側（A5 已備妥兩側可比的指標管道）
+4. ~~`tool_sequence_match_rate` 的比對規則~~ → **A5 定案：忽略查詢類 tool 的連續重複，其餘嚴格比對順序**（理由見下方〈A5 決策〉）
 5. 套件管理器：`uv`（快、新，Vercel 明確支援 `uv.lock`）vs `poetry`（穩、普及）——A0 定案
 6. `describe/route.ts` 的 `maxDuration` 實際要設多少（180s 為提案值，須權衡「安全網」與「壞掉時使用者要等多久才看到錯誤」）——A0 定案
 
@@ -593,6 +593,59 @@ conversation，但 Gemini 3 的 `function_call` part 帶 `thought_signature`，
 單元測試全綠是因為假 LLM 不驗簽章。改為原樣回填 `ToolTurnResult.model_content`。
 
 > 這正是本腳本存在的理由：**四個 tool 串起來會不會動，只有對真實模型跑過才知道。**
+
+---
+
+## A5 決策（2026-08-16）
+
+實作時偏離了本文件三處，都是往「少一個會壞掉的地方」的方向。
+
+### 1. 期望軌跡用推導，不用人工標註
+
+本文件原規劃人工標註 36 則的期望 tool 序列（估 2–3 小時）。實際上期望序列
+**完全由既有標註決定**：
+
+```
+lookup_rate_card → record_fields → (missing_required_fields 非空 ? ask_customer : compute_quote)
+```
+
+手標等於把 `missing_required_fields` 抄成另一種形式，多養一份會漂移的資料卻不帶
+新資訊。改為 `eval/dataset.py::expected_tool_sequence` 推導。規則本身仍是被檢驗的
+對象——agent 若跳過 `lookup_rate_card`，序列相符率就會掉。
+
+### 2. 統計層不用 pandas / scipy
+
+三件事標準庫都做得到：Wilson 區間是封閉解、McNemar 精確檢定就是 p=0.5 的二項
+檢定（`math.comb`）、常態分位數用 `statistics.NormalDist.inv_cdf`。
+**風險表的「bundle 誤含 eval 相依（pandas/scipy）」因此不成立**——不是緩解，是消除。
+
+### 3. Golden set 與欄位契約改為 TypeScript 單向匯出
+
+本文件寫「golden set 移植」，但兩份標註各自維護必然漂移，A6 的對照就會作廢。
+改為 `pnpm export:contracts` 從 TypeScript 產生 canonical JSON，CI 以 `--check` 把關。
+
+**這不是假想風險**：A3 移植 `app/agent/fields.py` 時，`coloring_complexity` 的值域被抄成
+「線稿/平塗/厚塗」（實際是「精緻上色/簡易上色/線稿」），`license_scope` 抄成
+「個人/商業/獨家買斷/有限期限」（實際不含「有限期限」且是「⋯使用」）。前者會讓
+**12 則插畫案例的該欄位全數被 `record_fields` 拒收**；後者靠下游的
+`normalizeLicenseScope` 僥倖不出錯。單元測試全綠，因為測試把錯誤的值域也寫死了一份。
+現由 `tests/test_field_contract.py` 逐項比對匯出檔把關。
+
+### 首次執行（`--limit 3`）
+
+| 指標 | 值 |
+| :--- | :--- |
+| 欄位抽取準確率 | 93.3% [70.2%, 98.8%]（14/15）|
+| tool 序列相符率 | 66.7% [20.8%, 93.9%]（2/3）|
+| fallback 率 | 0.0%（0/3）|
+| 每案成本 | $0.001186 |
+| P95 延遲 | 3140ms |
+
+唯一未通過的是 `graphic-003`：「一整套VI」未抽出 `quantity=1`，agent 因此改問而非
+出價。屬模型行為，非程式缺陷——正是這份 eval 該抓到的東西。
+
+> 3 則的區間寬到 [20.8%, 93.9%]，本身就說明了為什麼要印信賴區間。
+> 全量 36 則的基準線在 A6 建立。
 
 ---
 
