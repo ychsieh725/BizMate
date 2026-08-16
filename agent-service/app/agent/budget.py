@@ -46,11 +46,15 @@ class Budget(BaseModel):
     stuck_repeat_threshold: int = STUCK_REPEAT_THRESHOLD
 
 
-def _fingerprint(tool_name: str, args: dict[str, object]) -> str:
+def call_fingerprint(tool_name: str, args: dict[str, object]) -> str:
     """把一次 tool 呼叫壓成可比較的指紋。
 
     參數以 sort_keys 序列化——同樣的參數換個鍵順序仍算同一次呼叫，
     否則模型只要調換欄位順序就能繞過迴圈偵測。
+
+    對外公開（而非留成私有）是因為 eval 的 redundant_call_rate 必須用**完全
+    相同**的「同一次呼叫」定義。各寫一份的話，loop 判為卡住的呼叫在指標上
+    可能不算重複，兩個數字會互相矛盾而無從解釋。
     """
     return f"{tool_name}:{json.dumps(args, sort_keys=True, ensure_ascii=False)}"
 
@@ -74,7 +78,7 @@ class BudgetTracker:
         self.latency_ms += latency_ms
         self.cost_usd += cost_usd
 
-        fingerprint = _fingerprint(tool_name, args)
+        fingerprint = call_fingerprint(tool_name, args)
         if fingerprint == self._last_fingerprint:
             self._repeat_count += 1
         else:

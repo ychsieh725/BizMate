@@ -5,8 +5,11 @@ description = "BizMate 的 AI 層：tool-calling agent、parser、clarification 
 requires-python = ">=3.12"
 
 # 執行期相依，會被打包進 Vercel Function bundle。
-# Python 無自動 tree-shaking，此處只列服務真正需要的套件；
-# eval 的統計分析相依（pandas/scipy）刻意隔離在 dev group，不進 bundle。
+# Python 無自動 tree-shaking，此處只列服務真正需要的套件。
+#
+# eval 的統計層（A5）刻意不引入 pandas/scipy：Wilson 區間是封閉解、McNemar
+# 精確檢定就是 p=0.5 的二項檢定、常態分位數用 statistics.NormalDist——標準庫
+# 全部做得到。設計文件風險表的「bundle 誤含 eval 相依」因此不成立。
 dependencies = [
     "fastapi>=0.117.1",
     "google-genai>=1.0",
@@ -51,8 +54,10 @@ warn_unreachable = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# 覆蓋率門檻對齊 .claude/rules/testing.md 的 80%
-addopts = "--cov=app --cov-report=term-missing --cov-fail-under=80"
+# 覆蓋率門檻對齊 .claude/rules/testing.md 的 80%。
+# eval 一併納入分母：指標公式寫錯不會拋錯，只會安靜地給出偏移的數字，
+# 正是最需要測試把關的那種程式碼。
+addopts = "--cov=app --cov=eval --cov-report=term-missing --cov-fail-under=80"
 # auto 模式：async def 測試不需逐個標 @pytest.mark.asyncio。
 # 本服務幾乎全部是 async（FastAPI + supabase-py），逐個標註只是噪音。
 asyncio_mode = "auto"
