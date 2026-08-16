@@ -6,6 +6,7 @@ import { extractedFieldsRepository } from "@/domains/intake/repositories/extract
 import { parseIntake } from "@/domains/intake/parserAgent.ts";
 import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { resolveAfterParse, type FlowOutcome } from "@/orchestrator/resolveAfterParse.ts";
+import { isAgentLoopEnabled, runAgentOrFallback } from "@/orchestrator/agentFlow.ts";
 
 export type DescribeResult =
   | { readonly ok: true; readonly outcome: FlowOutcome }
@@ -49,6 +50,19 @@ export async function handleDescribe(params: {
     contact_email: contactEmail,
     status: toParsing.state,
   });
+
+  // Agent 路徑（A4，flag 預設關閉）。agent 自行完成抽取與決策；未能完成時
+  // runAgentOrFallback 內部退回既有流程，故此處不需要另寫錯誤處理。
+  if (isAgentLoopEnabled()) {
+    const outcome = await runAgentOrFallback({
+      sessionId,
+      merchantId: session.merchant_id,
+      category: session.category,
+      rawText,
+      completedRounds: 0,
+    });
+    return { ok: true, outcome };
+  }
 
   // subtype 的合法值域取自該商家的 rate card（WBS 6.8）。由 orchestrator 查後傳入，
   // 讓 parserAgent 不必依賴 pricing domain——跨域組裝本就是 orchestrator 的職責。

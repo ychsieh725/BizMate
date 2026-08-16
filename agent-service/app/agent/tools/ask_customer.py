@@ -122,6 +122,11 @@ class AskCustomerTool:
             event="parse_incomplete",
             result={
                 "round": round_number,
+                # 問題原文要回傳：TypeScript 端得把它交給客戶端的 wizard 顯示。
+                # 只回欄位名的話，前端就得再查一次 DB 才拿得到問句。
+                "questions": [
+                    {"target_field": field, "question": question} for field, question in items
+                ],
                 "asked_fields": [field for field, _ in items],
                 # 依「影響金額」優先序回報，供軌跡與後續分析對照
                 "remaining_after_round": order_missing_fields(

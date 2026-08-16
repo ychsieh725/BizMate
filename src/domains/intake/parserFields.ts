@@ -59,6 +59,19 @@ export const fieldExtractionSchema = z.object({
 export type FieldExtraction = z.infer<typeof fieldExtractionSchema>;
 
 /**
+ * 判斷單一欄位是否缺漏：不存在、value 為空、或 confidence 低於門檻。
+ *
+ * 放在此處而非 parserAgent：這是純函式、無 IO 依賴，而 parserAgent 會拉進
+ * Gemini client 與 env 驗證的整條依賴鏈。agentFlow 與 eval 只需要這個判斷，
+ * 不該為此付出啟動 LLM client 的代價（同 licenseScope.ts 的既有做法）。
+ */
+export function isFieldMissing(field: FieldExtraction | undefined): boolean {
+  if (field == null) return true;
+  if (field.value == null || field.value.trim() === "") return true;
+  return field.confidence < CONFIDENCE_THRESHOLD;
+}
+
+/**
  * 值域固定、與商家無關的欄位（WBS 6.8）。
  * subtype 不在此表——它的值域是 per-merchant 的 rate card，由呼叫端傳入。
  */

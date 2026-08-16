@@ -36,6 +36,10 @@ const envSchema = z.object({
   AGENT_SERVICE_URL: optional(z.string().url("必須是合法的 URL")),
   // 長度下限與 Python 端的 MIN_SECRET_LENGTH 一致，避免兩端規則漂移
   INTERNAL_SERVICE_SECRET: optional(z.string().min(16, "至少 16 字元")),
+  // Feature flag（A4 起）：是否啟用 tool-calling agent。
+  // **預設關閉**——需明確設為 "true" 才生效。A6 的指標對照通過前不開，
+  // 且未設定時系統行為與 agent 化之前完全一致。
+  AGENT_LOOP_ENABLED: optional(z.string()),
 });
 
 type Env = z.infer<typeof envSchema>;
