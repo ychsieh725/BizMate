@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     # Gemini（A2 起）：AI 層的唯一模型供應者，缺了整個服務無事可做。
     gemini_api_key: str = Field(min_length=1)
 
+    # TypeScript 服務位址（A3 起）：計價一律向它索取（不變式 I-1）。
+    # Services 模式下與本服務同域；拆成兩個 project 時改為對方的網域。
+    web_service_url: str = Field(min_length=1)
+
     # 服務識別，供 /health 與 echo 回報；有預設值故不需逐環境設定。
     service_name: str = "agent-service"
     service_version: str = "0.1.0"
