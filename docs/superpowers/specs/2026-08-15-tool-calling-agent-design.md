@@ -562,11 +562,37 @@ jobs:
 ## 待確認事項
 
 1. ~~Python 服務託管平台~~ → **v3 定案：單一 Vercel project + Services**，退路為兩個 Vercel project
-2. `MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 60_000` 為估計值，需依 A4 實測調整
+2. ~~`MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 60_000` 為估計值~~ → **A4 實測完成，維持不變**（實測見下方〈A4 實測〉）
 3. 「客戶平均被問題數」的 baseline 尚未量測，需在 A5 補測 flag 關閉側
 4. `tool_sequence_match_rate` 的比對規則（嚴格順序 vs 忽略查詢類重複）需在 A5 定案
 5. 套件管理器：`uv`（快、新，Vercel 明確支援 `uv.lock`）vs `poetry`（穩、普及）——A0 定案
 6. `describe/route.ts` 的 `maxDuration` 實際要設多少（180s 為提案值，須權衡「安全網」與「壞掉時使用者要等多久才看到錯誤」）——A0 定案
+
+---
+
+## A4 實測（2026-08-16，`agent-service/scripts/verify_agent.py`）
+
+真實 Gemini + 真實 Supabase + 真實計價 API，兩個互補情境各跑一次：
+
+| 情境 | 軌跡 | 步數 | 延遲 | 成本 | 事件 |
+| :--- | :--- | ---: | ---: | ---: | :--- |
+| 欄位不齊 | `lookup_rate_card → record_fields → ask_customer` | 3 | 3001ms | $0.001288 | `parse_incomplete` |
+| 欄位齊全 | `lookup_rate_card → record_fields → compute_quote` | 3 | 1984ms | $0.001152 | `parse_complete` |
+
+**預算常數維持不變。** 實測步數 3 對上限 8，留下的餘裕正好夠一次反問回合後的補記與重算；
+延遲與成本則距上限一個數量級以上——刻意如此，三者是防災上限而非目標值，
+壓到貼近實測會讓正常變異被誤判成失控。
+
+**成本較原估計高。** budget.py 原本寫「$0.0005 量級」，實測是 $0.0012–0.0013，
+約為現行單步流程（$0.000442）的 3 倍。多出來的是多輪 conversation 的重複輸入 token。
+這個倍數要進 A6 的 go/no-go 判斷——換到的是「少問幾題」，值不值得由指標決定，不由直覺。
+
+**過程中修掉一個真實缺陷**：loop 原本用 `tool_name`/`args` 重建模型回合再回填
+conversation，但 Gemini 3 的 `function_call` part 帶 `thought_signature`，
+少了它下一輪會被 API 以 400 INVALID_ARGUMENT 擋下——loop 每次都死在第二輪。
+單元測試全綠是因為假 LLM 不驗簽章。改為原樣回填 `ToolTurnResult.model_content`。
+
+> 這正是本腳本存在的理由：**四個 tool 串起來會不會動，只有對真實模型跑過才知道。**
 
 ---
 
