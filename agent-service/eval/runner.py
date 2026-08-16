@@ -193,14 +193,37 @@ async def run_eval_case(case: GoldenCase, merchant_id: str) -> CaseOutcome:
     )
 
 
+def select_cases(
+    cases: list[GoldenCase],
+    limit: int | None = None,
+    ids: list[str] | None = None,
+) -> list[GoldenCase]:
+    """挑出要跑的案例。
+
+    指定 id 時保持 golden set 的原始順序而非參數順序——同一組 id 的多次執行
+    才會產生可比較的軌跡（宣告順序會影響模型的選擇傾向）。
+
+    不存在的 id 直接拋錯而非靜默略過：打錯一個字就少跑一則，卻仍然印出一份
+    看起來正常的報告，那比整個失敗更糟。
+    """
+    if ids:
+        wanted = set(ids)
+        missing = wanted - {case.id for case in cases}
+        if missing:
+            raise ValueError(f"golden set 沒有這些 id：{'、'.join(sorted(missing))}")
+        return [case for case in cases if case.id in wanted]
+    return cases if limit is None else cases[:limit]
+
+
 async def run_eval(
     merchant_id: str,
     limit: int | None = None,
     delay_ms: int = DEFAULT_DELAY_MS,
+    ids: list[str] | None = None,
 ) -> EvalRunResult:
-    """跑整份（或前 N 則）golden set 並聚合指標。"""
+    """跑整份（或指定的）golden set 並聚合指標。"""
     golden_set = load_golden_set()
-    cases = golden_set.cases if limit is None else golden_set.cases[:limit]
+    cases = select_cases(golden_set.cases, limit=limit, ids=ids)
 
     outcomes: list[CaseOutcome] = []
     models: set[str] = set()
@@ -238,6 +261,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_DELAY_MS,
         help=f"每則間隔毫秒（預設 {DEFAULT_DELAY_MS}，避開免費層 15 RPM）",
     )
+    parser.add_argument(
+        "--ids",
+        type=lambda raw: [item.strip() for item in raw.split(",") if item.strip()],
+        default=None,
+        help="只跑指定 id（逗號分隔），例如只重跑上次失敗的幾則",
+    )
     return parser.parse_args()
 
 
@@ -250,7 +279,7 @@ async def main() -> int:
         return 1
 
     started_at = time.perf_counter()
-    result = await run_eval(merchant_id, limit=args.limit, delay_ms=args.delay)
+    result = await run_eval(merchant_id, limit=args.limit, delay_ms=args.delay, ids=args.ids)
     elapsed = time.perf_counter() - started_at
 
     print(format_report(result))
