@@ -6,6 +6,7 @@
 
 from typing import Any
 
+from google.genai import types
 from pydantic import BaseModel
 
 
@@ -46,6 +47,13 @@ class ToolTurnResult(BaseModel):
 
     tool_call: ToolCall | None = None
     text: str | None = None
+    # 模型這一回合的原始 Content，供 loop 原樣回填 conversation。
+    #
+    # 為什麼不讓 loop 自己用 tool_call 重建：Gemini 3 的 function_call part 帶有
+    # thought_signature，下一輪必須原樣附回，否則 API 直接回 400 INVALID_ARGUMENT。
+    # 重建出來的 part 沒有這個簽章，loop 會在第二輪就死掉——這正是
+    # scripts/verify_agent 抓到的真實缺陷（假 LLM 測不出來，因為假的不檢查簽章）。
+    model_content: types.Content | None = None
     model: str
     usage: TokenUsage
     latency_ms: int

@@ -85,18 +85,6 @@ def _function_response_content(tool_name: str, result: dict[str, object]) -> typ
     )
 
 
-def _function_call_content(tool_name: str, args: dict[str, object]) -> types.Content:
-    """把模型的 tool 呼叫回填進 conversation。
-
-    必須把模型自己說過的話放回去，否則下一輪它看不到自己剛才做了什麼，
-    會重複呼叫同一個 tool——那正是迴圈偵測會抓到、但本不該發生的情況。
-    """
-    return types.Content(
-        role="model",
-        parts=[types.Part(function_call=types.FunctionCall(name=tool_name, args=args))],
-    )
-
-
 async def run_agent_loop(
     context: ToolContext,
     initial_prompt: str,
@@ -226,6 +214,12 @@ async def run_agent_loop(
         if exhaustion is not None:
             return await abort(exhaustion, f"已用 {tracker.steps} 步")
 
-        # 查詢類 tool → 結果回填 conversation，進下一輪
-        contents.append(_function_call_content(tool_name, args))
+        # 查詢類 tool → 結果回填 conversation，進下一輪。
+        #
+        # 模型的回合原樣放回去（而非用 tool_name/args 重建）：一來下一輪它才看得到
+        # 自己剛才做了什麼，不會重複呼叫同一個 tool；二來 Gemini 3 的 function_call
+        # part 帶 thought_signature，少了它下一輪會被 API 以 400 擋下。
+        if turn.model_content is None:
+            return await abort("llm_error", "回應缺少模型回合內容，無法回填 conversation")
+        contents.append(turn.model_content)
         contents.append(_function_response_content(tool_name, outcome.result))

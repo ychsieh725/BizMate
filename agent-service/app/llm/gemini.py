@@ -86,6 +86,28 @@ def first_function_call(response: types.GenerateContentResponse) -> ToolCall | N
     return None
 
 
+def first_tool_content(
+    response: types.GenerateContentResponse,
+) -> types.Content | None:
+    """取「含 function_call 的那個候選內容」，原封不動。
+
+    走訪順序與 first_function_call 一致，兩者必然指向同一個候選——loop 回填的
+    Content 與它要執行的 tool 呼叫因此保證同源。
+
+    回原始 Content 而非重建，是因為 function_call part 上的 thought_signature
+    必須原樣附回下一輪（見 ToolTurnResult.model_content 的說明）。
+    """
+    for candidate in response.candidates or []:
+        content = candidate.content
+        if content is None:
+            continue
+        for part in content.parts or []:
+            call = part.function_call
+            if call is not None and call.name:
+                return content
+    return None
+
+
 def first_text(response: types.GenerateContentResponse) -> str | None:
     """取回應中的第一段文字。"""
     for part in _iter_parts(response):
@@ -201,6 +223,7 @@ async def generate_with_tools(
     return ToolTurnResult(
         tool_call=first_function_call(response),
         text=first_text(response),
+        model_content=first_tool_content(response),
         model=model,
         usage=extract_usage(response.usage_metadata),
         latency_ms=latency_ms,

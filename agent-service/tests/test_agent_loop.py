@@ -9,6 +9,7 @@ loop 拋出去，上層就得處理例外；回 fallback，上層只要問「能
 """
 
 import pytest
+from google.genai import types
 
 from app.agent.budget import Budget
 from app.agent.loop import run_agent_loop
@@ -36,11 +37,24 @@ def turn(
     latency_ms: int = 100,
     input_tokens: int = 100,
     output_tokens: int = 50,
+    model_content: types.Content | None = None,
 ) -> ToolTurnResult:
-    """組出一個假的模型回合。"""
+    """組出一個假的模型回合。
+
+    model_content 預設跟著 tool_call 一起給：真實回應兩者必定同時存在，
+    假回合少給就會讓 loop 走進真實情況不會發生的分支，測出來的是幻覺。
+    """
+    call = ToolCall(name=tool_name, args=args or {}) if tool_name else None
+    if model_content is None and call is not None:
+        model_content = types.Content(
+            role="model",
+            parts=[types.Part(function_call=types.FunctionCall(name=call.name, args=call.args))],
+        )
+
     return ToolTurnResult(
-        tool_call=ToolCall(name=tool_name, args=args or {}) if tool_name else None,
+        tool_call=call,
         text=text,
+        model_content=model_content,
         model=LIGHT_MODEL,
         usage=TokenUsage(
             input_tokens=input_tokens,
@@ -194,6 +208,67 @@ class TestNormalPath:
 
         # 第二輪的 conversation 應含第一輪的呼叫與結果
         assert len(captured[1]) == 3
+
+    async def test_replays_model_content_verbatim(self):
+        """模型的回合必須原樣放回，不能用 tool_name/args 重建。
+
+        重建出來的 function_call part 少了 thought_signature，Gemini 3 會直接回
+        400 INVALID_ARGUMENT——loop 於是每次都在第二輪死於 llm_error。這個缺陷
+        是 scripts/verify_agent 對真實模型跑出來的，假 LLM 不驗簽章，
+        故此處改以「送出去的物件是不是模型給的那一個」把關。
+        """
+        captured: list[list[object]] = []
+        first = turn("lookup_rate_card")
+
+        async def generate(**kwargs):
+            captured.append(list(kwargs["contents"]))
+            return (first if len(captured) == 1 else turn("compute_quote")), None
+
+        lookup = FakeTool("lookup_rate_card")
+        terminal = FakeTool(
+            "compute_quote",
+            kind="terminal",
+            outcome=ToolOutcome(status="ok", result={}, event="parse_complete"),
+        )
+
+        await run_agent_loop(
+            context(),
+            "客戶描述",
+            registry=registry_of(lookup, terminal),
+            recorder=recorder_with(RecordingTrace()),
+            generate=generate,
+        )
+
+        assert captured[1][1] is first.model_content
+
+    async def test_missing_model_content_falls_back(self):
+        """模型回合缺內容時交棒，而不是自行捏一個回填。
+
+        捏出來的內容會讓下一輪被 API 擋下，錯誤還會歸因到別的地方。
+        """
+        lookup = FakeTool("lookup_rate_card")
+        # 不走 turn()：它會自動補上 model_content，而這裡要測的正是它缺席時的行為
+        llm = FakeLLM(
+            [
+                ToolTurnResult(
+                    tool_call=ToolCall(name="lookup_rate_card", args={}),
+                    model=LIGHT_MODEL,
+                    usage=TokenUsage(input_tokens=10, output_tokens=5, total_tokens=15),
+                    latency_ms=10,
+                )
+            ]
+        )
+
+        result = await run_agent_loop(
+            context(),
+            "客戶描述",
+            registry=registry_of(lookup),
+            recorder=recorder_with(RecordingTrace()),
+            generate=llm,
+        )
+
+        assert result.outcome == "fallback"
+        assert result.fallback_reason == "llm_error"
 
     async def test_accumulates_usage(self):
         terminal = FakeTool(
