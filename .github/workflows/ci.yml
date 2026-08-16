@@ -45,6 +45,12 @@ jobs:
       - name: Unit tests + coverage
         run: pnpm test:coverage
 
+      # golden set 與欄位契約的唯一事實來源在 TypeScript，Python 側讀匯出的
+      # JSON。改了這邊卻忘了重新匯出，A6 的兩側就會跑在不同的資料上——
+      # 那種差異在指標上看起來像能力差異，極難察覺。
+      - name: Shared contracts are in sync
+        run: pnpm export:contracts --check
+
   python-quality:
     name: Python Lint / Types / Tests
     runs-on: ubuntu-latest
@@ -73,7 +79,7 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Type check
-        run: uv run mypy app scripts
+        run: uv run mypy app eval scripts
 
       # 覆蓋率門檻（80%）寫在 pyproject.toml 的 addopts，未達標會讓這一步失敗。
       - name: Unit tests + coverage
