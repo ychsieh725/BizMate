@@ -28,6 +28,7 @@ export default defineConfig({
         "src/lib/api/**/*.ts",
         "src/lib/rateLimit/**/*.ts",
         "src/lib/agentService.ts",
+        "src/lib/api/internalAuth.ts",
         "src/app/api/**/route.ts",
         "src/app/wizard/lib/wizardApi.ts",
         "src/domains/pricing/basePricing.ts",
