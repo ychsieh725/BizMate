@@ -1,0 +1,43 @@
+{
+  "confidence_threshold": 0.6,
+  "common_required_fields": [
+    "license_scope",
+    "deadline_days"
+  ],
+  "category_specific_fields": {
+    "graphic_design": [
+      "subtype",
+      "quantity",
+      "includes_pitch_rounds"
+    ],
+    "illustration": [
+      "subtype",
+      "quantity",
+      "coloring_complexity"
+    ],
+    "web_design": [
+      "subtype",
+      "page_count",
+      "feature_modules",
+      "includes_rwd",
+      "includes_cms"
+    ]
+  },
+  "boolean_field_prefix": "includes_",
+  "boolean_domain": [
+    "是",
+    "否"
+  ],
+  "static_field_domains": {
+    "license_scope": [
+      "個人使用",
+      "商業使用",
+      "獨家買斷"
+    ],
+    "coloring_complexity": [
+      "精緻上色",
+      "簡易上色",
+      "線稿"
+    ]
+  }
+}

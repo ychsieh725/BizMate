@@ -9,10 +9,16 @@ import {
 
 /**
  * Vercel function 逾時上限（Route Segment Config，僅在 Vercel 生效，本機無作用）。
- * 本路由觸發 Gemini（Parser + 計價），是全 app 最慢的呼叫之一；Vercel Hobby
- * 預設 10s 會把長 LLM 呼叫 504 截斷（SAD R-1）。60 為 Hobby 上限，取滿。
+ * 本路由觸發 Gemini（Parser + 計價），是全 app 最慢的呼叫之一，需要放寬逾時
+ * 以免長 LLM 呼叫被 504 截斷（SAD R-1）。
+ *
+ * 分層預算（設計文件〈延遲預算〉）：本值 180s > agent-service 呼叫逾時 90s
+ * > Python agent loop 預算 60s。逾時後仍須留有時間跑完 fallback，故不取滿。
+ *
+ * 註：Hobby 方案在 Fluid compute 下的上限為 300s（2026-08 查證），
+ * 並非早期的 60s。180 是刻意留餘裕的選擇，不是平台限制。
  */
-export const maxDuration = 60;
+export const maxDuration = 180;
 
 /**
  * POST /api/sessions/{id}/describe — Wizard Step 2 送出描述（SDS §5.1、FR-CW-2）。

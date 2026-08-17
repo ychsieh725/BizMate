@@ -4,7 +4,7 @@ import { generateStructuredAndLog } from "@/domains/finops/costLogger.ts";
 import {
   buildParseResponseSchema,
   requiredFieldsFor,
-  CONFIDENCE_THRESHOLD,
+  isFieldMissing,
   type FieldExtraction,
 } from "@/domains/intake/parserFields.ts";
 
@@ -60,12 +60,11 @@ function buildPrompt(
   ].join("\n");
 }
 
-/** 判斷單一欄位是否缺漏：不存在、value 為空、或 confidence 低於門檻。 */
-export function isFieldMissing(field: FieldExtraction | undefined): boolean {
-  if (field == null) return true;
-  if (field.value == null || field.value.trim() === "") return true;
-  return field.confidence < CONFIDENCE_THRESHOLD;
-}
+/**
+ * 缺漏判斷已抽至 parserFields.ts（純函式、無 IO 依賴），供 agentFlow 與 eval
+ * 重用而不必拉進 Gemini client 的依賴鏈。此處 re-export 維持既有呼叫端不變。
+ */
+export { isFieldMissing };
 
 /**
  * 從客戶口語描述抽取結構化欄位（Intake Parser Agent，FR-PA-1~2）。

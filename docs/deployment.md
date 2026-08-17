@@ -187,3 +187,93 @@ tsx --env-file=.env.production.local scripts/seed-rate-card.ts
 | `docs/deployment.md` | 新增本文件 | 部署 runbook |
 
 > Node 版本、Region、環境變數**刻意不寫進 repo**——它們屬部署環境設定，於 Vercel Dashboard 設定（見 Step 5），避免與本機開發環境衝突、也避免密鑰進版控。
+
+---
+---
+
+# agent-service（Python）部署 — 尚未上線
+
+> 對應設計文件〈部署架構〉。**現況：agent-service 只在本機執行，正式站沒有部署
+> 它。** 設計文件 v3 假設可用單一 Vercel project 同時承載 Next.js 與 Python，
+> 該假設在 2026-08-17 實測後**不成立**，詳見下節。
+
+## 實測結論：單一 project 承載兩個 runtime 目前不可行
+
+三種設定各實際部署一次，結果如下：
+
+| 設定 | 結果 |
+| :--- | :--- |
+| `experimentalServices` | Vercel 拒絕：「no longer available for new projects」 |
+| `services` + `bindings` | 建置成功，但沒有任何路由生效——連首頁都 404，錯誤為 `Build output contains no "functions" or "static" directory` |
+| **沒有 `vercel.json`** | ✅ `/` 200、`/q/dev` 200、`/api/internal/pricing/compute` 401 |
+
+`services` 這條路另外踩到兩個限制：它沒有 `mount` 屬性（服務位址改由 `bindings`
+以環境變數注入，不是路徑前綴路由），且雙向 `bindings` 會被判定為
+`circular service binding: web -> agent -> web`。改成單向綁定後建置會過，但
+Next.js 的建置產物沒有被掛到根路徑，等於整站失效。
+
+**因此本 repo 不放 `vercel.json`**，正式站維持純 Next.js 部署。
+
+## 這對正式站沒有影響
+
+`AGENT_LOOP_ENABLED` 預設關閉，且 `AGENT_SERVICE_URL` 未設定時
+`callAgentService` 直接回 `not_configured`，orchestrator fallback 到既有的
+`resolveAfterParse`——**正式站行為與導入 agent 之前完全相同**（不變式 I-3）。
+Python 服務目前的角色是本機開發與離線 eval，不在使用者請求路徑上。
+
+## 要上線時怎麼做：拆成第二個 Vercel project
+
+這原本就是設計文件記載的退路，現在升格為唯一可行路徑：
+
+1. 於 Vercel 新建 project，Root Directory 指向 `agent-service`
+2. 該 project 設定 `INTERNAL_SERVICE_SECRET`（與 web 同值）、`SUPABASE_URL`、
+   `SUPABASE_SERVICE_ROLE_KEY`、`GEMINI_API_KEY`、`WEB_SERVICE_URL`
+3. 把 web project 的 `AGENT_SERVICE_URL` 改為新 project 的網域
+4. 兩個 project 的環境變數都要**同時勾選 Production 與 Preview**——只勾一個，
+   另一個環境會在合併後才發現缺變數
+
+**程式碼一行都不用改。** 這是把服務位址放在環境變數而非寫死的理由。
+
+代價：preview deployment 的兩個服務版本不再自動對應，需自行確認前端 preview
+打到的是哪一版 agent-service。
+
+### 上線後的冒煙測試
+
+```bash
+# 1. 探活（公開，應回 200）
+curl -s https://<agent 網域>/health
+
+# 期望：{"success":true,"data":{"status":"ok","service":"agent-service",...},"error":null}
+
+# 2. 未帶 secret（應回 401——部署在公開網域上，shared secret 是唯一防線）
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -X POST https://<agent 網域>/agent/echo \
+  -H 'content-type: application/json' -d '{"message":"hi"}'
+
+# 期望：401
+
+# 3. 帶 secret（應回 200 並回音）
+curl -s -X POST https://<agent 網域>/agent/echo \
+  -H 'content-type: application/json' \
+  -H "x-internal-secret: $INTERNAL_SERVICE_SECRET" \
+  -d '{"message":"來自部署驗證"}'
+
+# 期望：{"success":true,"data":{"echo":"來自部署驗證",...},"error":null}
+```
+
+**第 2 項必須是 401。** 若回 200，代表認證沒生效，任何人都能呼叫你的 AI 層並
+消耗 Gemini 額度——**立即停止部署並排查**。
+
+> Bundle 控制：新 project 需在其 `vercel.json` 以 `functions.excludeFiles`
+> 排除 `eval/`、`tests/`、`.venv/`。Python 無自動 tree-shaking，離線分析用的
+> 相依若被打包會白吃 500 MB 額度。
+
+## 失效行為（不變式 I-3）
+
+agent-service 未部署、未設定、或整個掛掉時，系統**不會壞**：
+`callAgentService` 回傳 `not_configured` / `unreachable` / `timeout`，
+orchestrator 據此 fallback 到既有的 `resolveAfterParse`，產出與 agent 化之前
+完全一致的結果。
+
+> 這是刻意的設計：**agent 是加值層，不是必經路徑。**
+> 部署 agent-service 失敗不應該讓報價流程停擺。

@@ -1,0 +1,66 @@
+[project]
+name = "bizmate-agent-service"
+version = "0.1.0"
+description = "BizMate 的 AI 層：tool-calling agent、parser、clarification 與 eval"
+requires-python = ">=3.12"
+
+# 執行期相依，會被打包進 Vercel Function bundle。
+# Python 無自動 tree-shaking，此處只列服務真正需要的套件。
+#
+# eval 的統計層（A5）刻意不引入 pandas/scipy：Wilson 區間是封閉解、McNemar
+# 精確檢定就是 p=0.5 的二項檢定、常態分位數用 statistics.NormalDist——標準庫
+# 全部做得到。設計文件風險表的「bundle 誤含 eval 相依」因此不成立。
+dependencies = [
+    "fastapi>=0.117.1",
+    "google-genai>=1.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "supabase>=2.10",
+]
+
+# Vercel 以此定位 ASGI app；本專案入口為 app/main.py 的頂層變數 app。
+# 檔名與變數名雖已符合 Vercel 預設慣例，仍明確宣告，避免日後搬檔時默默失效。
+[tool.vercel]
+entrypoint = "app.main:app"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28",          # TestClient 需要
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/F 基礎、I import 排序、B bugbear、UP 現代語法、S 安全性
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+# 測試中的 assert 是正常用法（S101）；固定的測試用 secret 字面值是必要的
+# fixture，不是外洩的憑證（S105/S106）。兩者都只在測試檔放行。
+"tests/**" = ["S101", "S105", "S106"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# 覆蓋率門檻對齊 .claude/rules/testing.md 的 80%。
+# eval 一併納入分母：指標公式寫錯不會拋錯，只會安靜地給出偏移的數字，
+# 正是最需要測試把關的那種程式碼。
+addopts = "--cov=app --cov=eval --cov-report=term-missing --cov-fail-under=80"
+# auto 模式：async def 測試不需逐個標 @pytest.mark.asyncio。
+# 本服務幾乎全部是 async（FastAPI + supabase-py），逐個標註只是噪音。
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+omit = ["tests/*"]

@@ -1,6 +1,9 @@
 name: CI
 
-# 三道靜態閘門：ESLint、TypeScript 型別檢查、單元測試 + 覆蓋率門檻。
+# 兩條平行 job，各自守一個語言的靜態閘門：
+#   quality        — TypeScript：ESLint、tsc、vitest + 覆蓋率
+#   python-quality — Python：ruff、mypy --strict、pytest + 覆蓋率
+#
 # 刻意不含 verify:* 與 pnpm eval——那兩者需要真實 Supabase / Gemini 金鑰，
 # 屬於 WBS 8.5 的「真實依賴閘門」，需先在 repo 設定 Secrets 才能接上。
 on:
@@ -41,3 +44,48 @@ jobs:
       # 覆蓋率門檻（80%）寫在 vitest.config.ts，未達標會讓這一步失敗。
       - name: Unit tests + coverage
         run: pnpm test:coverage
+
+      # golden set 與欄位契約的唯一事實來源在 TypeScript，Python 側讀匯出的
+      # JSON。改了這邊卻忘了重新匯出，A6 的兩側就會跑在不同的資料上——
+      # 那種差異在指標上看起來像能力差異，極難察覺。
+      - name: Shared contracts are in sync
+        run: pnpm export:contracts --check
+
+  python-quality:
+    name: Python Lint / Types / Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: agent-service
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 明確釘住 3.12，與 Vercel Python runtime 一致。
+      # pyproject 的 requires-python 是 ">=3.12"，那是相容範圍不是版本指定——
+      # 不釘的話 uv 會裝它找得到的最新版，CI 就在一個與正式環境不同的直譯器上
+      # 驗證，綠燈與否都不代表線上會怎樣。
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Type check
+        run: uv run mypy app eval scripts
+
+      # 覆蓋率門檻（80%）寫在 pyproject.toml 的 addopts，未達標會讓這一步失敗。
+      # 刻意不在此注入任何環境變數：測試用的假設定全部由 tests/conftest.py
+      # 提供，這裡再給一份只會與它打架（曾因此讓所有認證測試變成 401）。
+      - name: Unit tests + coverage
+        run: uv run pytest
