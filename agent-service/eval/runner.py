@@ -1,8 +1,9 @@
 """Eval Runner：對真實 agent 跑整份 golden set。
 
-    uv run python -m eval.runner              跑全部 36 則
-    uv run python -m eval.runner --limit 3    先跑 3 則驗證腳本本身
-    uv run python -m eval.runner --delay 0    付費層可關掉節流
+    uv run python -m eval.runner                      跑全部 36 則
+    uv run python -m eval.runner --limit 3            先跑 3 則驗證腳本本身
+    uv run python -m eval.runner --delay 0            付費層可關掉節流
+    uv run python -m eval.runner --out agent.json     落檔供 eval.compare 比對
 
 需要 pnpm dev（或已部署的 WEB_SERVICE_URL）——compute_quote 與兩側計價都經
 TypeScript 的內部計價 API（不變式 I-1）。
@@ -22,6 +23,7 @@ import argparse
 import asyncio
 import sys
 import time
+from pathlib import Path
 
 from app.agent.fields import CaseCategory, FieldExtraction, find_missing_fields
 from app.agent.loop import LoopResult, run_agent_loop
@@ -32,6 +34,7 @@ from app.db.repositories.agent_steps import TABLE_NAME as AGENT_STEPS_TABLE
 from app.db.repositories.cost_logs import TABLE_NAME as COST_LOGS_TABLE
 from app.db.repositories.extracted_fields import extracted_fields_repository
 from app.pricing_client import PricingUnavailableError, compute_pricing
+from eval.artifact import artifact_from_run, write_artifact
 from eval.comparison import compare_fields, to_pricing_fields
 from eval.dataset import GoldenCase, expected_tool_sequence, load_golden_set
 from eval.metrics import compute_metrics
@@ -267,6 +270,12 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="只跑指定 id（逗號分隔），例如只重跑上次失敗的幾則",
     )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=None,
+        help="把結果寫成 JSON，供 `python -m eval.compare` 配對比較",
+    )
     return parser.parse_args()
 
 
@@ -284,6 +293,14 @@ async def main() -> int:
 
     print(format_report(result))
     print(f"\n總耗時 {elapsed / 60:.1f} 分鐘")
+
+    # 先落檔再印清理提示：這份結果花了十分鐘與真金白銀的 API 額度換來，
+    # 寫檔失敗要立刻看得見，而不是等使用者關掉終端機才發現沒存到。
+    if args.out is not None:
+        write_artifact(args.out, artifact_from_run(result, variant="agent"))
+        print(f"已寫入 {args.out}")
+        print(f"比對：uv run python -m eval.compare <baseline.json> {args.out}")
+
     print(f"測試資料以 {EVAL_CONTACT_EMAIL} 標記，清理：pnpm eval:clean --confirm")
     return 0
 

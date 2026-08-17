@@ -21,6 +21,10 @@ const eslintConfig = defineConfig([
     // Python 服務由 ruff 把關；其 .venv 內含第三方 JS 資產（如 coverage
     // 的 HTML 報告腳本），不該進 TypeScript 的 lint 範圍
     "agent-service/**",
+    // `vercel build` 的本機產物（已 gitignore）。裡面是 Next.js 打包過的
+    // launcher 與 bundle，會噴出數十個關於編譯輸出的錯誤——那些不是我們的
+    // 程式碼，卻足以讓本機 `pnpm lint` 完全無法使用。
+    ".vercel/**",
   ]),
   {
     // 底線前綴代表「刻意不使用」——測試中的假函式常需符合真實簽名

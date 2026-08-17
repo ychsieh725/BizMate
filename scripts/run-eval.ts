@@ -6,13 +6,18 @@
  *   pnpm eval --dry-run        跑完只印結果，不寫資料庫
  *   pnpm eval --limit=3        只跑前 3 則（驗證腳本本身，省 token）
  *   pnpm eval --delay=0        關閉節流（付費層才適用，免費層會撞 429）
+ *   pnpm eval --out=x.json     另存逐案例結果，供 A6 與 agent 側配對比較
  *
  * 取代 7.1 的 verify-golden-set.ts：兩者都要跑 golden set 並算指標，
  * 邏輯重複；合併為一支，用 --dry-run 區分「正式評估」與「快速檢查」。
  *
  * 會為每則案例建立測試 session（cost_logs 的 FK 需要），驗收後可自行清除。
  */
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+
 import { runEval, DEFAULT_DELAY_MS } from "@/domains/eval/evalRunner.ts";
+import { toRunArtifact } from "@/domains/eval/runArtifact.ts";
 import { toMetricRows, METRIC_NAMES } from "@/domains/eval/metricRows.ts";
 import { evalRunsRepository } from "@/domains/eval/repositories/evalRunsRepository.ts";
 import { GOLDEN_CASES } from "@/domains/eval/goldenSet.ts";
@@ -28,6 +33,12 @@ function numericArg(flag: string, fallback: number): number {
   if (arg == null) return fallback;
   const parsed = Number.parseInt(arg.split("=")[1] ?? "", 10);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function stringArg(flag: string): string | null {
+  const arg = process.argv.find((value) => value.startsWith(`${flag}=`));
+  const value = arg?.split("=")[1];
+  return value == null || value === "" ? null : value;
 }
 
 /** 百分比顯示；null 表示該指標無從計算，明確印 n/a 而非 0。 */
@@ -97,6 +108,19 @@ async function main(): Promise<void> {
   });
 
   printMetrics(result.metrics);
+
+  // 先落檔再處理資料庫：這份結果花了數分鐘與 API 額度換來，寫檔失敗要立刻看見，
+  // 而不是等 eval_runs 寫入拋錯之後連帶把逐案例資料一起丟掉。
+  const outPath = stringArg("--out");
+  if (outPath != null) {
+    await mkdir(dirname(outPath), { recursive: true });
+    await writeFile(outPath, `${JSON.stringify(toRunArtifact(result), null, 2)}\n`, "utf8");
+    // 印絕對路徑：比對指令要從 agent-service/ 裡執行，相對路徑貼過去會找不到檔案
+    console.log(`\n已寫入 ${resolve(outPath)}`);
+    console.log(
+      `比對：cd agent-service && uv run python -m eval.compare ${resolve(outPath)} <agent.json>`,
+    );
+  }
 
   console.log(`\nrun_id：${result.runId}`);
   console.log(`dataset_version：${result.datasetVersion}`);
