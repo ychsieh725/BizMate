@@ -3,17 +3,13 @@
   "fluid": true,
   "experimentalServices": {
     "web": {
-      "src": ".",
-      "path": "/"
+      "root": ".",
+      "mount": "/"
     },
     "agent": {
-      "src": "agent-service",
-      "path": "/agent-service"
-    }
-  },
-  "functions": {
-    "agent-service/app/main.py": {
-      "excludeFiles": "{agent-service/eval/**,agent-service/tests/**,agent-service/scripts/**,agent-service/**/test_*.py,agent-service/.venv/**}"
+      "root": "agent-service",
+      "mount": "/agent-service",
+      "excludeFiles": "{eval/**,tests/**,scripts/**,**/test_*.py,.venv/**}"
     }
   }
 }
