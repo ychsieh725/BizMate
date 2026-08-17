@@ -1,0 +1,1894 @@
+{
+  "schema_version": 1,
+  "variant": "baseline",
+  "generated_at": "2026-08-17T09:03:20.647Z",
+  "dataset_version": "v1.0.0",
+  "model_version": "gemini-3.1-flash-lite",
+  "outcomes": [
+    {
+      "id": "graphic-001",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 10400,
+      "actual_amount": 10400,
+      "out_of_scope": false,
+      "latency_ms": 1142,
+      "cost_usd": 0.000417,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-002",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "海報文宣",
+          "actual": "海報文宣",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "7",
+          "actual": "7",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15000,
+      "actual_amount": 15000,
+      "out_of_scope": false,
+      "latency_ms": 1203,
+      "cost_usd": 0.000415,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-003",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "品牌識別CI-VI",
+          "actual": "品牌識別CI-VI",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": null,
+          "correct": false
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "獨家買斷",
+          "actual": "獨家買斷",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity"
+      ],
+      "expected_missing": [],
+      "expected_amount": 60000,
+      "actual_amount": 60000,
+      "out_of_scope": false,
+      "latency_ms": 1274,
+      "cost_usd": 0.000428,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-004",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "名片文具",
+          "actual": "名片文具",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "2",
+          "actual": "2",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 7800,
+      "actual_amount": 7800,
+      "out_of_scope": false,
+      "latency_ms": 1422,
+      "cost_usd": 0.000415,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-005",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "社群圖像",
+          "actual": "社群圖像",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 9750,
+      "actual_amount": 9750,
+      "out_of_scope": false,
+      "latency_ms": 1361,
+      "cost_usd": 0.000414,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-006",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "includes_pitch_rounds",
+        "license_scope"
+      ],
+      "expected_missing": [
+        "includes_pitch_rounds",
+        "license_scope"
+      ],
+      "expected_amount": 8000,
+      "actual_amount": 8000,
+      "out_of_scope": false,
+      "latency_ms": 1290,
+      "cost_usd": 0.000392,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-007",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "海報文宣",
+          "actual": "海報文宣",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": 5000,
+      "actual_amount": 5000,
+      "out_of_scope": false,
+      "latency_ms": 1226,
+      "cost_usd": 0.000383,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-008",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "社群圖像",
+          "actual": "社群圖像",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity"
+      ],
+      "expected_missing": [
+        "quantity"
+      ],
+      "expected_amount": 1950,
+      "actual_amount": 1950,
+      "out_of_scope": false,
+      "latency_ms": 1205,
+      "cost_usd": 0.000405,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-009",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "名片文具",
+          "actual": "名片文具",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "2",
+          "actual": "2",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "includes_pitch_rounds",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "includes_pitch_rounds",
+        "deadline_days"
+      ],
+      "expected_amount": 6000,
+      "actual_amount": 6000,
+      "out_of_scope": false,
+      "latency_ms": 1221,
+      "cost_usd": 0.000398,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-010",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 10400,
+      "actual_amount": 10400,
+      "out_of_scope": false,
+      "latency_ms": 1274,
+      "cost_usd": 0.000415,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-011",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 2093,
+      "cost_usd": 0.000372,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "graphic-012",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 10400,
+      "actual_amount": 10400,
+      "out_of_scope": false,
+      "latency_ms": 1313,
+      "cost_usd": 0.000411,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-001",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "角色設計",
+          "actual": "角色設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 7800,
+      "actual_amount": 7800,
+      "out_of_scope": false,
+      "latency_ms": 1188,
+      "cost_usd": 0.000418,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-002",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "單張插畫",
+          "actual": "單張插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "簡易上色",
+          "actual": "簡易上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 4000,
+      "actual_amount": 4000,
+      "out_of_scope": false,
+      "latency_ms": 1409,
+      "cost_usd": 0.00042,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-003",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "貼圖表情包",
+          "actual": "貼圖表情包",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "8",
+          "correct": false
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15600,
+      "actual_amount": 124800,
+      "out_of_scope": false,
+      "latency_ms": 1243,
+      "cost_usd": 0.000419,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-004",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "系列插畫",
+          "actual": "系列插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "線稿",
+          "actual": "線稿",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "獨家買斷",
+          "actual": "獨家買斷",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 35000,
+      "actual_amount": 35000,
+      "out_of_scope": false,
+      "latency_ms": 1467,
+      "cost_usd": 0.000426,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-005",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "角色設計",
+          "actual": "角色設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "2",
+          "actual": "2",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 15600,
+      "actual_amount": 15600,
+      "out_of_scope": false,
+      "latency_ms": 2113,
+      "cost_usd": 0.000403,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-006",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "單張插畫",
+          "actual": "單張插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "7",
+          "actual": "7",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "coloring_complexity",
+        "license_scope"
+      ],
+      "expected_missing": [
+        "coloring_complexity",
+        "license_scope"
+      ],
+      "expected_amount": 4000,
+      "actual_amount": 4000,
+      "out_of_scope": false,
+      "latency_ms": 1338,
+      "cost_usd": 0.000395,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-007",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 1179,
+      "cost_usd": 0.000368,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-008",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "貼圖表情包",
+          "actual": "貼圖表情包",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "簡易上色",
+          "actual": "簡易上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 12000,
+      "actual_amount": 12000,
+      "out_of_scope": false,
+      "latency_ms": 1346,
+      "cost_usd": 0.000412,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-009",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "系列插畫",
+          "actual": "系列插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity",
+        "coloring_complexity"
+      ],
+      "expected_missing": [
+        "quantity",
+        "coloring_complexity"
+      ],
+      "expected_amount": 4550,
+      "actual_amount": 4550,
+      "out_of_scope": false,
+      "latency_ms": 1290,
+      "cost_usd": 0.000396,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-010",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "單張插畫",
+          "actual": "單張插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "簡易上色",
+          "actual": "簡易上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 4000,
+      "actual_amount": 4000,
+      "out_of_scope": false,
+      "latency_ms": 1417,
+      "cost_usd": 0.000423,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-011",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 1346,
+      "cost_usd": 0.000367,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "illu-012",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "貼圖表情包",
+          "actual": "貼圖表情包",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "15",
+          "actual": "15",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15600,
+      "actual_amount": 15600,
+      "out_of_scope": false,
+      "latency_ms": 1357,
+      "cost_usd": 0.000424,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-001",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 19500,
+      "actual_amount": 19500,
+      "out_of_scope": false,
+      "latency_ms": 1552,
+      "cost_usd": 0.000545,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-002",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "多頁式網站",
+          "actual": "多頁式網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "8",
+          "actual": "8",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "會員系統、多語系",
+          "actual": "會員系統, 多語系",
+          "correct": false
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 83200,
+      "actual_amount": 83200,
+      "out_of_scope": false,
+      "latency_ms": 1647,
+      "cost_usd": 0.000568,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-003",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "電商網站",
+          "actual": "電商網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "金流",
+          "actual": "金流串接",
+          "correct": false
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "獨家買斷",
+          "actual": "獨家買斷",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "60",
+          "actual": "60",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 3200000,
+      "actual_amount": 3200000,
+      "out_of_scope": false,
+      "latency_ms": 1637,
+      "cost_usd": 0.000556,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-004",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "UI-UX設計稿",
+          "actual": "UI-UX設計稿",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "7",
+          "actual": "7",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15000,
+      "actual_amount": 15000,
+      "out_of_scope": false,
+      "latency_ms": 1538,
+      "cost_usd": 0.000554,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-005",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 19500,
+      "actual_amount": 19500,
+      "out_of_scope": false,
+      "latency_ms": 1532,
+      "cost_usd": 0.000523,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-006",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "多頁式網站",
+          "actual": "多頁式網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms"
+      ],
+      "expected_missing": [
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms"
+      ],
+      "expected_amount": 104000,
+      "actual_amount": 104000,
+      "out_of_scope": false,
+      "latency_ms": 1446,
+      "cost_usd": 0.000516,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-007",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 1382,
+      "cost_usd": 0.000477,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-008",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "電商網站",
+          "actual": "電商網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "金流、會員系統",
+          "actual": "金流,會員",
+          "correct": false
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "45",
+          "actual": "45",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "page_count"
+      ],
+      "expected_missing": [
+        "page_count"
+      ],
+      "expected_amount": 104000,
+      "actual_amount": 104000,
+      "out_of_scope": false,
+      "latency_ms": 1572,
+      "cost_usd": 0.000539,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-009",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "UI-UX設計稿",
+          "actual": "UI-UX設計稿",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "feature_modules",
+        "includes_cms",
+        "license_scope"
+      ],
+      "expected_missing": [
+        "feature_modules",
+        "includes_cms",
+        "license_scope"
+      ],
+      "expected_amount": 25000,
+      "actual_amount": 25000,
+      "out_of_scope": false,
+      "latency_ms": 1446,
+      "cost_usd": 0.000514,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-010",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 19500,
+      "actual_amount": 19500,
+      "out_of_scope": false,
+      "latency_ms": 1382,
+      "cost_usd": 0.00054,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-011",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 1419,
+      "cost_usd": 0.000476,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    },
+    {
+      "id": "web-012",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "12",
+          "actual": "12",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 19500,
+      "actual_amount": 19500,
+      "out_of_scope": false,
+      "latency_ms": 1525,
+      "cost_usd": 0.00055,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": null
+    }
+  ],
+  "metrics": {
+    "field_extraction_accuracy": 0.9754901960784313,
+    "field_extraction_f1": 0.9700996677740864,
+    "clarification_precision": 0.9814814814814815,
+    "clarification_recall": 1,
+    "hallucination_rate": 0,
+    "quote_deviation_avg": 0.22580645161290322,
+    "quote_deviation_max": 7,
+    "end_to_end_success_rate": 1,
+    "latency_avg_ms": 1410.9722222222222,
+    "latency_p95_ms": 2093,
+    "cost_per_case_usd": 0.0004470555555555557
+  }
+}

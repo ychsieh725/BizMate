@@ -456,15 +456,22 @@ Migration 由 TypeScript 端管理（沿用既有 `supabase/migrations/` 與手�
 
 現行基準線（欄位準確率 97.5%、每案 $0.000442、P95 1717ms）是在單步 parser 上量的，agent 化後必然變動。需在同一份 golden set 上重跑：
 
+**A6 已於 2026-08-17 實測完成**，下表填入實際值（完整分析見 [`docs/agent-eval-a6-comparison.md`](../../agent-eval-a6-comparison.md)）：
+
 | 指標 | 單步 baseline | agent loop | 判定 |
 | :--- | ---: | ---: | :--- |
-| 欄位抽取準確率 | 97.5% | ? | 不得顯著低於 baseline（McNemar p ≥ 0.05） |
-| 幻覺率 | 0% | ? | **必須維持 0%** |
-| 每案成本 | $0.000442 | ? | 可接受上升，需記錄倍數 |
-| P95 延遲 | 1717ms | ? | **不得超過 10,000ms**（含跨服務往返）——依使用者耐心設定，非平台上限 |
-| 客戶平均被問題數 | （**待補量**） | ? | 期望**下降** |
+| 欄位抽取準確率 | 97.5% | 96.1% | ✅ 未顯著低於 baseline（McNemar p = 0.25） |
+| 幻覺率 | 0% | **0%** | ✅ 維持 0%（0/53，95% CI [0%, 6.8%]） |
+| 每案成本 | $0.000447 | $0.001259 | ⚠️ **2.8×** |
+| P95 延遲 | 2093ms | 3279ms | ✅ 遠低於 10,000ms 上限 |
+| **客戶平均被問題數** | **1.50** | **1.58** | ❌ **上升**，與期望相反 |
 
-「客戶平均被問題數」是本次改動的**產品價值指標**，目前沒量過，需在 baseline 側補測，否則無法證明體驗改善。
+最後一列是本次改動的**產品價值指標**，也是唯一的產品面理由。實測結果是
+agent 問得**更多**——這個理由沒有成立。硬門檻雖然全數通過（故 A7 解除封鎖），
+但**不建議於 A8 開啟 flag**，理由與後續建議見 A6 對照報告。
+
+回歸的根因單一且明確：agent 漏抽以「一款」「一組」寫成的數量（三則，baseline
+皆抽對）。金額不受影響（計價層缺值時以 1 計算），代價是多問客戶一題。
 
 ---
 
@@ -572,7 +579,7 @@ jobs:
 | **A3** | 4 個 tool + registry；`/api/internal/pricing/compute`（TS 側） | 各 tool 測試綠；`record_fields` 拒絕自創欄位 |
 | **A4** | `agent/loop.py` + budget + fallback；TS 端 fallback 路徑（flag 預設**關**） | 6 種終止條件測試綠；**服務停機下 E2E 仍綠** |
 | **A5** | Golden set 移植 + trajectory 標註 + 4 項指標 + `analysis.py` 統計層 | `python -m eval.runner` 產出 15 項指標 + 信賴區間 |
-| **A6** | Baseline 對照：flag 關/開各跑一次 | 對照表附 p 值；幻覺率 0%、`fallback_rate` 0% 才可進 A7 |
+| **A6** ✅ | Baseline 對照：flag 關/開各跑一次 | ✅ **2026-08-17 完成**：對照表附 McNemar p 值；幻覺率 0%、`fallback_rate` 0% → A7 解除封鎖。但**不建議開 flag**（見對照報告） |
 | **A7** | 商家後台軌跡 UI（TS） | E2E 綠 |
 | **A8** | 開 flag + 案例研究文件 | `docs/agent-trajectory-case-study.md` |
 | **A9**（選配） | LangGraph 平行實作 + 對照分析 | 同一 golden set 的雙實作對照表 |
@@ -586,7 +593,7 @@ jobs:
 
 1. ~~Python 服務託管平台~~ → ~~v3 定案：單一 Vercel project + Services~~ → **v4 實測推翻，改走退路**：agent-service 暫不部署（本機 + 離線 eval 專用），要上線時拆成第二個 Vercel project。**正式站行為不受影響**（flag 預設關 + fallback）
 2. ~~`MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 60_000` 為估計值~~ → **A4 實測完成，維持不變**（實測見下方〈A4 實測〉）
-3. 「客戶平均被問題數」的 baseline 尚未量測，需在 **A6** 補測 flag 關閉側（A5 已備妥兩側可比的指標管道）
+3. ~~「客戶平均被問題數」的 baseline 尚未量測~~ → **A6 已量測：baseline 1.50、agent 1.58（標註 1.47）**。agent 問得更多，本次改動的產品價值理由未成立
 4. ~~`tool_sequence_match_rate` 的比對規則~~ → **A5 定案：忽略查詢類 tool 的連續重複，其餘嚴格比對順序**（理由見下方〈A5 決策〉）
 5. 套件管理器：`uv`（快、新，Vercel 明確支援 `uv.lock`）vs `poetry`（穩、普及）——A0 定案
 6. `describe/route.ts` 的 `maxDuration` 實際要設多少（180s 為提案值，須權衡「安全網」與「壞掉時使用者要等多久才看到錯誤」）——A0 定案
