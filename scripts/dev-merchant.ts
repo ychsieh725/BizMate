@@ -3,13 +3,25 @@
  * 多租戶後所有整合驗證都需要一個 tenant context——統一用 slug=dev 的本機商家。
  */
 import { getSupabaseClient } from "@/lib/supabase/client.ts";
+import { requireEnv } from "@/lib/env.ts";
 
+/**
+ * ── 密碼為何不寫在這裡 ──
+ * 這個帳號是 Supabase 裡的**真實** auth user，而本專案的開發與 production
+ * 共用同一個 Supabase 專案（見 docs/deployment.md）。把密碼寫死在原始碼，
+ * 等於 repo 一旦公開，任何人都能登入這個商家的後台。
+ * 帳號 email 是識別碼、可以公開；密碼一律從環境變數取。
+ */
 export const DEV_MERCHANT = {
   email: "dev@bizmate.local",
-  password: "dev-only-local-password",
   displayName: "Dev 商家",
   slug: "dev",
 } as const;
+
+/** 取 dev 商家密碼；未設定時明確報錯而非退回預設值。 */
+function devMerchantPassword(): string {
+  return requireEnv("DEV_MERCHANT_PASSWORD");
+}
 
 /** 找既有 dev auth user 或新建一個；回傳 user id。 */
 async function ensureDevAuthUser(): Promise<string> {
@@ -17,7 +29,7 @@ async function ensureDevAuthUser(): Promise<string> {
 
   const { data: created, error } = await client.auth.admin.createUser({
     email: DEV_MERCHANT.email,
-    password: DEV_MERCHANT.password,
+    password: devMerchantPassword(),
     email_confirm: true,
   });
   if (!error) {

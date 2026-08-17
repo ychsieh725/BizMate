@@ -30,6 +30,9 @@ const envSchema = z.object({
   GEMINI_API_KEY: optional(z.string().min(1)),
   RESEND_API_KEY: optional(z.string().min(1)),
   EMAIL_FROM: optional(z.string().min(1)),
+  // 本機 dev 商家的密碼。只有 seed / verify 腳本會用到，正式流程不需要，
+  // 故為 optional——但它是真實 auth 帳號的密碼，絕不可寫死在原始碼裡。
+  DEV_MERCHANT_PASSWORD: optional(z.string().min(12, "至少 12 字元")),
 });
 
 type Env = z.infer<typeof envSchema>;
