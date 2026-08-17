@@ -23,13 +23,21 @@ function devMerchantPassword(): string {
   return requireEnv("DEV_MERCHANT_PASSWORD");
 }
 
-/** 找既有 dev auth user 或新建一個；回傳 user id。 */
+/**
+ * 找既有 dev auth user 或新建一個；回傳 user id。
+ *
+ * 帳號已存在時**一併把密碼同步成環境變數的值**。原本只找回 id 不動密碼，
+ * 「冪等」就只保證帳號存在、不保證密碼是對的——輪換密碼時得另外進 Supabase
+ * 後台處理，而後台只提供寄送重設信，寄到 dev@bizmate.local 這種保留網域
+ * 根本收不到。同步之後，改 .env.local 再跑一次腳本就等於完成輪換。
+ */
 async function ensureDevAuthUser(): Promise<string> {
   const client = getSupabaseClient();
+  const password = devMerchantPassword();
 
   const { data: created, error } = await client.auth.admin.createUser({
     email: DEV_MERCHANT.email,
-    password: devMerchantPassword(),
+    password,
     email_confirm: true,
   });
   if (!error) {
@@ -47,6 +55,13 @@ async function ensureDevAuthUser(): Promise<string> {
   const existing = list.users.find((user) => user.email === DEV_MERCHANT.email);
   if (!existing) {
     throw new Error("dev auth user 已存在但查不到，請至 Supabase Studio 檢查");
+  }
+
+  const { error: updateError } = await client.auth.admin.updateUserById(existing.id, {
+    password,
+  });
+  if (updateError) {
+    throw new Error(`同步 dev 商家密碼失敗：${updateError.message}`);
   }
   return existing.id;
 }
