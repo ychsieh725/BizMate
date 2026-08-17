@@ -1,7 +1,8 @@
 """Trajectory Eval（A5）。
 
-**離線執行，不進 Vercel function bundle**（`vercel.json` 的 `excludeFiles` 排除
-整個 eval/）。這裡的程式碼只在人手動或 CI 跑 eval 時載入，服務執行期碰不到。
+**離線執行。** 這裡的程式碼只在人手動跑 eval 時載入，服務執行期碰不到——
+本套件永遠不該被 app/ 匯入。日後部署本服務時，需以 `functions.excludeFiles`
+把整個 eval/ 排除於 function bundle 之外（Python 無自動 tree-shaking）。
 
 分層與 TypeScript 端一致，讓兩個 runner 的輸出可以直接對照（A6 的前提）：
 

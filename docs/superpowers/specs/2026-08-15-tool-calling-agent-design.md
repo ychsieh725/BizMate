@@ -8,7 +8,8 @@
 > **修訂記錄**
 > v1（同日）：全 TypeScript 方案。
 > v2（同日）：AI 層改以獨立 Python 服務實作。變更動機見〈為什麼拆成 Python 服務〉。
-> **v3（本版）**：修正 v2 的部署評估錯誤。v2 誤判 Vercel 無法承載 Python 服務而規劃第三方平台（Railway/Render/Fly.io），並據此把冷啟動列為 CRITICAL 風險、以 Vercel Hobby 60s 上限推導延遲預算。**兩項前提皆與官方文件不符**：Vercel 原生支援 FastAPI，且提供 Services 機制讓 Python 與 Next.js 共存於同一 project；Hobby 方案在 Fluid compute 下的執行上限為 300s。本版據此改寫部署架構、延遲預算、風險表與 A0。查證來源見文末。
+> v3（同日）：修正 v2 的部署評估錯誤。v2 誤判 Vercel 無法承載 Python 服務而規劃第三方平台（Railway/Render/Fly.io），並據此把冷啟動列為 CRITICAL 風險、以 Vercel Hobby 60s 上限推導延遲預算。**兩項前提皆與官方文件不符**：Vercel 原生支援 FastAPI，且提供 Services 機制讓 Python 與 Next.js 共存於同一 project；Hobby 方案在 Fluid compute 下的執行上限為 300s。本版據此改寫部署架構、延遲預算、風險表與 A0。查證來源見文末。
+> **v4（2026-08-17，本版）**：**v3 的「單一 Vercel project + Services」假設經實測不成立**，改寫〈部署架構〉與 A0 驗收。`experimentalServices` 已被 Vercel 停用，`services` 建置雖過但整站路由失效。Python 服務降級為「本機開發與離線 eval 用」，正式站不部署它——因 flag 預設關閉，正式站行為不受影響。實測記錄見〈A0 部署實測〉。**本次修正只動部署層，不影響本文件其餘任何設計。**
 
 ---
 
@@ -114,9 +115,29 @@ Python 生態下 LangGraph 是必須認真評估的選項（v1 的「不用框�
 
 ---
 
-## 部署架構（v3 改寫）
+## 部署架構（v4 改寫）
 
-### 平台決策：單一 Vercel project + Services
+> ### ⚠️ v4 修正：本節的 v3 決策經實測推翻
+>
+> 下方「單一 Vercel project + Services」的方案**沒有成立**。2026-08-17 實測：
+>
+> | 設定 | 結果 |
+> | :--- | :--- |
+> | `experimentalServices` | Vercel 拒絕：「no longer available for new projects」 |
+> | `services` + `bindings` | 建置成功但所有路由 404（`Build output contains no "functions" or "static" directory`）；另外 `services` 沒有 `mount` 屬性，且雙向 `bindings` 被判定為循環相依 |
+> | 沒有 `vercel.json` | ✅ 全站正常 |
+>
+> **現況**：repo 不含 `vercel.json`，正式站維持純 Next.js 部署，**agent-service
+> 不上線**。因 `AGENT_LOOP_ENABLED` 預設關閉、`AGENT_SERVICE_URL` 未設定時
+> `callAgentService` 回 `not_configured` 並 fallback，正式站行為與導入 agent
+> 之前完全相同（不變式 I-3 在此發揮的正是它被設計出來的作用）。
+>
+> **要上線時走 v3 已記載的退路**：拆成第二個 Vercel project，改一個環境變數即可，
+> 程式碼零改動。步驟見 [`docs/deployment.md`](../../deployment.md)。
+>
+> 以下 v3 內容保留作為決策脈絡，**「已採用」的標記皆不再成立**。
+
+### 平台決策（v3 提案，已推翻）：單一 Vercel project + Services
 
 Vercel 原生支援 Python runtime，FastAPI 為零設定部署（整個 app 成為一個 Vercel Function）。官方提供 **Services** 機制讓 Python 後端與前端共存於同一 project：各自獨立 build、共用 domain、依 URL 路徑前綴自動路由，並**依 service 名稱自動注入環境變數**。
 
@@ -227,7 +248,9 @@ agent-service/
 
 **Vercel 慣例對應**：entrypoint 檔名須為 `app.py` / `index.py` / `server.py` / `main.py` / `wsgi.py` / `asgi.py` 之一（可置於 `app/` 或 `src/` 下），且頂層變數命名為 `app`；本結構的 `app/main.py` 直接符合，無需額外設定。若之後調整路徑，改以 `pyproject.toml` 的 `[tool.vercel] entrypoint = "module:variable"` 指定。
 
-**Bundle 控制**：Python 無自動 tree-shaking，預設打包所有 build 時可達的檔案。`eval/`（含 golden set、pandas/scipy 分析層）**僅離線執行、不應進 function bundle**，須於 `vercel.json` 的 `functions.excludeFiles` 排除。這也是把統計分析相依（pandas、scipy）與服務執行期相依分開宣告的理由。
+**Bundle 控制**：Python 無自動 tree-shaking，預設打包所有 build 時可達的檔案。`eval/`（含 golden set 與統計分析層）**僅離線執行、不應進 function bundle**，日後部署時須以 `functions.excludeFiles` 排除。
+
+> **v4 更新**：本段原本的主要動機是排除 pandas/scipy。A5 實作時發現 Wilson 區間有封閉解、McNemar 用精確二項檢定即可，**兩者都用標準函式庫寫得出來**（`statistics.NormalDist` + `math.comb`），於是那兩個套件根本沒進相依。bundle 風險連同它們一起消失，本段降為預防性提醒。
 
 ### TypeScript 端改動
 
@@ -522,13 +545,13 @@ jobs:
 
 | 風險 | 嚴重度 | 緩解 |
 | :--- | :--- | :--- |
-| **`experimentalServices` 為實驗性 API**（v3 新增） | **HIGH** | 作品集需長期可用，Vercel 若變更 API 而未察覺，訪客會看到部署失敗。緩解：A0 將部署驗證寫成可重跑的檢查；`docs/deployment.md` 記錄「拆成兩個 project」的退路步驟（成本僅為改一個 URL 環境變數） |
+| ~~**`experimentalServices` 為實驗性 API**~~（v3 新增） | ~~HIGH~~ → **已發生** | **這個風險成真了**：Vercel 已對新專案停用該 API，`services` 替代方案也無法讓兩個 runtime 共存。緩解奏效——退路（拆 project、改一個環境變數）事前就寫在 `docs/deployment.md`，且因 flag 預設關閉，正式站零影響。**代價僅為 agent-service 暫不上線**（v4） |
 | **Fluid compute 未啟用**（v3 新增） | MEDIUM | 既有 project 可能未啟用，導致執行上限退回舊值。A0 於 dashboard 確認並記錄 |
 | 冷啟動 | LOW | Vercel 冷啟動約 0.8–1.5s，已含在逾時餘裕內。**（v2 誤列為 CRITICAL，前提是容器平台休眠；平台改為 Vercel 後此風險降級）** |
 | 使用者感知延遲（非平台限制） | **HIGH** | 平台容許 300s，但客戶在 wizard 等待超過 10s 體驗即劣化。真正的約束是 eval P95 門檻，不是平台上限 |
 | 跨語言型別漂移 | **HIGH** | OpenAPI 生成 TS 型別 + CI 契約測試擋 |
 | 部署設定（Python 建置 + 一條 CI job） | LOW | 單一 project + Services 下環境變數自動注入；A0 一次做完並寫進 `docs/deployment.md` |
-| Bundle 誤含 eval 相依（pandas/scipy） | MEDIUM | `vercel.json` 的 `excludeFiles` 排除 `eval/`；A0 驗證 bundle 大小 |
+| ~~Bundle 誤含 eval 相依（pandas/scipy）~~ | ~~MEDIUM~~ → **已消滅** | A5 把統計層改用純標準函式庫（`statistics.NormalDist` + `math.comb`）實作 Wilson 區間與 McNemar 檢定，**pandas/scipy 根本沒進相依**。bundle 風險連同它們一起消失（v4） |
 | agent 品質低於單步 baseline | MEDIUM | Feature flag 可即時關閉；A6 對照表是 go/no-go 依據 |
 | 幻覺率因多輪對話上升 | **HIGH** | eval 硬門檻：**幻覺率非 0 即不得開 flag** |
 | golden set 移植 + trajectory 標註 | LOW | 36 則，預估 2–3 小時 |
@@ -543,7 +566,7 @@ jobs:
 
 | # | 內容 | 驗收 |
 | :--- | :--- | :--- |
-| **A0** | Python 服務骨架：FastAPI + config + `/health` + `experimentalServices` 設定 + shared secret + TS 端 client 打通一條 echo 呼叫鏈 | 線上可呼叫；**Fluid compute 已啟用（dashboard 確認）**；Services 路由與環境變數注入正常；bundle 已排除 `eval/` 且在限額內；`describe/route.ts` 過期註解已更正；退路步驟寫入 `docs/deployment.md`；CI 兩條 job 綠 |
+| **A0** | Python 服務骨架：FastAPI + config + `/health` + shared secret + TS 端 client 打通一條 echo 呼叫鏈 | ~~線上可呼叫；Services 路由與環境變數注入正常~~ → **v4 調整為本機可呼叫**（Services 不可用，見〈部署架構〉）；`describe/route.ts` 過期註解已更正；退路步驟寫入 `docs/deployment.md`；CI 兩條 job 綠 |
 | **A1** | `agent_steps` migration + Python repository + trace 寫入 | 寫入失敗不中斷主流程 |
 | **A2** | `llm/gemini.py`：`generate_structured` 移植 + `generate_with_tools` | 單元測試綠；token 用量正確寫入 `cost_logs` |
 | **A3** | 4 個 tool + registry；`/api/internal/pricing/compute`（TS 側） | 各 tool 測試綠；`record_fields` 拒絕自創欄位 |
@@ -554,19 +577,50 @@ jobs:
 | **A8** | 開 flag + 案例研究文件 | `docs/agent-trajectory-case-study.md` |
 | **A9**（選配） | LangGraph 平行實作 + 對照分析 | 同一 golden set 的雙實作對照表 |
 
-**A0 是 v2 新增的前置關卡**。v3 收斂其風險範圍：平台已確定為 Vercel，A0 不再承擔「可能推翻平台選擇」的不確定性，改為驗證 Services 設定是否如文件所述運作。若 `experimentalServices` 不可用，退路是拆成兩個 Vercel project（改一個 URL 環境變數即可），**不影響本文件其餘任何設計**。
+**A0 是 v2 新增的前置關卡**。v3 收斂其風險範圍：平台已確定為 Vercel，A0 不再承擔「可能推翻平台選擇」的不確定性，改為驗證 Services 設定是否如文件所述運作。**v4：驗證結果是不可用**，遂啟用既定退路——agent-service 暫不上線，未來拆成第二個 Vercel project，**不影響本文件其餘任何設計**（見〈A0 部署實測〉）。
 **A6 是 go/no-go 關卡**：指標未達標就停在 flag 關閉狀態，不硬推。
 
 ---
 
 ## 待確認事項
 
-1. ~~Python 服務託管平台~~ → **v3 定案：單一 Vercel project + Services**，退路為兩個 Vercel project
+1. ~~Python 服務託管平台~~ → ~~v3 定案：單一 Vercel project + Services~~ → **v4 實測推翻，改走退路**：agent-service 暫不部署（本機 + 離線 eval 專用），要上線時拆成第二個 Vercel project。**正式站行為不受影響**（flag 預設關 + fallback）
 2. ~~`MAX_AGENT_STEPS = 8`、`MAX_AGENT_LATENCY_MS = 60_000` 為估計值~~ → **A4 實測完成，維持不變**（實測見下方〈A4 實測〉）
 3. 「客戶平均被問題數」的 baseline 尚未量測，需在 **A6** 補測 flag 關閉側（A5 已備妥兩側可比的指標管道）
 4. ~~`tool_sequence_match_rate` 的比對規則~~ → **A5 定案：忽略查詢類 tool 的連續重複，其餘嚴格比對順序**（理由見下方〈A5 決策〉）
 5. 套件管理器：`uv`（快、新，Vercel 明確支援 `uv.lock`）vs `poetry`（穩、普及）——A0 定案
 6. `describe/route.ts` 的 `maxDuration` 實際要設多少（180s 為提案值，須權衡「安全網」與「壞掉時使用者要等多久才看到錯誤」）——A0 定案
+
+---
+
+## A0 部署實測（2026-08-17）
+
+v3 的核心部署假設「單一 Vercel project 可同時承載 Next.js 與 Python」**經實測不成立**。三種設定各實際部署一次：
+
+| # | 設定 | 結果 |
+| :--- | :--- | :--- |
+| 1 | `experimentalServices`（v3 規劃的做法） | Vercel 建置階段直接拒絕：**「`experimentalServices` is no longer available for new projects」** |
+| 2 | `services` + `bindings`（現行替代 API） | 建置成功，但**所有路由 404**，含首頁。錯誤為 `Build output contains no "functions" or "static" directory` |
+| 3 | **沒有 `vercel.json`** | ✅ `/` 200、`/q/dev` 200、`/api/internal/pricing/compute` 401 |
+
+第 2 項另外揭露兩個與 v3 描述不符之處：
+
+- **`services` 沒有 `mount` 屬性。** v3 假設的「依 URL 路徑前綴路由」不存在；服務位址改由 `bindings` 以環境變數注入到另一個服務。
+- **雙向 `bindings` 被拒。** web 需要 agent 的位址、agent 也需要 web 的位址（不變式 I-1 要求計價一律回打 TS 側），但這被判定為 `circular service binding: web -> agent -> web`。改為單向後建置會過，卻卡在上表的路由問題。
+
+**採用第 3 項。** repo 不含 `vercel.json`，正式站維持純 Next.js 部署。
+
+### 為什麼這不是阻礙
+
+`AGENT_LOOP_ENABLED` 預設關閉，`AGENT_SERVICE_URL` 未設定時 `callAgentService` 回 `not_configured`，orchestrator fallback 到 `resolveAfterParse`——**正式站行為與導入 agent 之前逐字元相同**。不變式 I-3 原本是為「服務掛掉」設計的，這裡它承接的是「服務還沒上線」，效果一樣。
+
+agent-service 目前的定位是**本機開發與離線 eval 的執行環境**，不在使用者請求路徑上。A6 的兩側對照本來就在本機跑（需要真實 Gemini 金鑰，本就不會放進 CI），不受此決定影響。
+
+### 學到什麼
+
+v2 誤判平台能力（以為 Vercel 不能跑 Python），v3 反向修正卻誤信了官方文件的另一段（Services 可混合 runtime）。**兩次都是把文件當成已驗證的事實。** 真正救回進度的不是判斷準確，而是 v3 事前把退路寫進 `docs/deployment.md` 並把服務位址放在環境變數——實測翻盤時，程式碼一行都不用改。
+
+> 平台能力隨時在變。涉及部署形式的假設，應在里程碑最前面用一次真實部署驗證，而不是引用文件。
 
 ---
 

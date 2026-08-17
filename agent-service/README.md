@@ -53,10 +53,14 @@ uv run pytest                # 測試 + 80% 覆蓋率門檻
 
 ## 部署
 
-不獨立部署。透過根目錄 [`vercel.json`](../vercel.json) 的 `experimentalServices`
-與 Next.js 共存於同一個 Vercel project，掛在 `/agent-service` 路徑前綴下。
+**目前不部署。** 本服務只在本機執行（開發、`scripts/verify_agent.py`、離線 eval）。
 
-`eval/`、`tests/` 已由 `functions.excludeFiles` 排除於 function bundle 之外——
-Python 無自動 tree-shaking，統計分析相依（pandas/scipy）若被打包會白吃額度。
+原規劃是與 Next.js 共存於同一個 Vercel project，但該機制已被 Vercel 停用，
+替代 API 也無法讓兩個 runtime 共存（實測記錄見設計文件〈A0 部署實測〉）。
 
-部署步驟與「拆成兩個 project」的退路見 [`docs/deployment.md`](../docs/deployment.md)。
+**這對正式站沒有影響**：`AGENT_LOOP_ENABLED` 預設關閉、`AGENT_SERVICE_URL`
+未設定時 `callAgentService` 回 `not_configured`，Next.js 端 fallback 到既有的
+單步流程（不變式 I-3）。
+
+要上線時的步驟（拆成第二個 Vercel project，程式碼零改動）見
+[`docs/deployment.md`](../docs/deployment.md)。
