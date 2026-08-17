@@ -4,11 +4,13 @@
   "experimentalServices": {
     "web": {
       "root": ".",
-      "mount": "/"
+      "mount": "/",
+      "framework": "nextjs"
     },
     "agent": {
       "root": "agent-service",
       "mount": "/agent-service",
+      "entrypoint": "app/main.py",
       "excludeFiles": "{eval/**,tests/**,scripts/**,**/test_*.py,.venv/**}"
     }
   }
