@@ -62,13 +62,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 明確釘住 3.12，與 Vercel Python runtime 一致。
+      # pyproject 的 requires-python 是 ">=3.12"，那是相容範圍不是版本指定——
+      # 不釘的話 uv 會裝它找得到的最新版，CI 就在一個與正式環境不同的直譯器上
+      # 驗證，綠燈與否都不代表線上會怎樣。
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          python-version: "3.12"
 
-      # Python 版本由 agent-service/pyproject.toml 的 requires-python 決定，
-      # 與 Vercel Python runtime 的預設（3.12）一致。
       - name: Install dependencies
         run: uv sync --locked
 
