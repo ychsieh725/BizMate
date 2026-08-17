@@ -85,8 +85,7 @@ jobs:
         run: uv run mypy app eval scripts
 
       # 覆蓋率門檻（80%）寫在 pyproject.toml 的 addopts，未達標會讓這一步失敗。
+      # 刻意不在此注入任何環境變數：測試用的假設定全部由 tests/conftest.py
+      # 提供，這裡再給一份只會與它打架（曾因此讓所有認證測試變成 401）。
       - name: Unit tests + coverage
         run: uv run pytest
-        env:
-          # CI 無真實金鑰；此值僅供設定載入通過，不對應任何實際服務。
-          INTERNAL_SERVICE_SECRET: ci-placeholder-secret-value
