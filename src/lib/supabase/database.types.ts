@@ -496,7 +496,46 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: Record<never, never>;
+    Views: {
+      /**
+       * 每張「商家已決定」的報價一列，含 AI 原始金額與人工調整差額（WBS 6.4）。
+       * 只讀，無 Insert/Update——view 是既有資料的衍生檢視，不是可寫的事實表。
+       */
+      quote_adjustment_facts: {
+        Row: {
+          quote_id: string;
+          merchant_id: string;
+          created_at: string;
+          status: QuoteStatus;
+          is_conservative: boolean;
+          category: CaseCategory;
+          final_amount: number;
+          adjustment_amount: number;
+          /** 總額扣掉手動調整差額，即 AI 原本算出的金額。 */
+          ai_amount: number;
+          /** 相對 AI 原始金額的調幅；AI 金額為 0 時為 null（算不出來，非無偏差）。 */
+          adjustment_ratio: number | null;
+          was_adjusted: boolean;
+        };
+        Relationships: [];
+      };
+      /** 按商家、類別、月份聚合的調價指標（WBS 6.4）。 */
+      quote_adjustment_monthly: {
+        Row: {
+          merchant_id: string;
+          category: CaseCategory;
+          month: string;
+          decided_quotes: number;
+          adjusted_quotes: number;
+          adjustment_rate: number;
+          /** 只平均「有調整」的報價；把未調整的 0 平均進去會得到無意義的數字。 */
+          avg_abs_adjustment_ratio: number | null;
+          /** 帶正負號，看得出 AI 是系統性低估還是高估。 */
+          avg_signed_adjustment_ratio: number | null;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       increment_rate_limit: {
         Args: {
