@@ -66,7 +66,7 @@ export async function handleDescribe(params: {
 
   // subtype 的合法值域取自該商家的 rate card（WBS 6.8）。由 orchestrator 查後傳入，
   // 讓 parserAgent 不必依賴 pricing domain——跨域組裝本就是 orchestrator 的職責。
-  const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+  const allowedServices = await rateCardRepository.findActiveServices(
     session.merchant_id,
     session.category,
   );
@@ -75,7 +75,7 @@ export async function handleDescribe(params: {
     sessionId,
     category: session.category,
     rawText,
-    allowedSubtypes,
+    allowedServices,
   });
 
   await extractedFieldsRepository.upsertMany(

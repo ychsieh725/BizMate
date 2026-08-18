@@ -19,6 +19,26 @@ class TestSystemInstruction:
     def test_forbids_inventing_fields(self):
         assert "不得自創欄位名稱" in SYSTEM_INSTRUCTION
 
+    def test_defines_quantity_as_pricing_units(self):
+        """數量的語意必須寫明是「幾個計價單位」。
+
+        A6 實測：模型把「一組貼圖，八款」抽成 8，而費率表按組計價，正確是 1。
+        規則本身不足以修好（單位隨商家而異，得靠 lookup_rate_card 帶回
+        pricing_units），但少了這條規則，模型不會知道要去看那份資料。
+        """
+        assert "幾個計價單位" in SYSTEM_INSTRUCTION
+        assert "pricing_units" in SYSTEM_INSTRUCTION
+
+    def test_requires_chinese_numeral_conversion(self):
+        """中文數量詞曾被抽成 null，導致多問一題。
+
+        「一款」與「一整套」是兩種不同的語言形式（數詞＋量詞、數詞＋修飾字＋
+        量詞），前者修好之後後者仍然失敗，故兩者都要在規則裡現身。
+        """
+        assert "中文數量詞一律換算" in SYSTEM_INSTRUCTION
+        assert "「一款」" in SYSTEM_INSTRUCTION
+        assert "「一整套」" in SYSTEM_INSTRUCTION
+
     def test_forbids_forcing_values_into_domain(self):
         """填錯選項會導致報價錯誤，填 null 只會多問一題。"""
         assert "不得勉強歸類" in SYSTEM_INSTRUCTION

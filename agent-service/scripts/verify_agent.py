@@ -308,7 +308,8 @@ async def main() -> int:
         return 1
     print(f"✓ 測試商家：{merchant_id}")
 
-    subtypes = await rate_card_repository.find_active_subtypes(merchant_id, CATEGORY)
+    services = await rate_card_repository.find_active_services(merchant_id, CATEGORY)
+    subtypes = [service.subtype for service in services]
     print(f"✓ 在售服務項目：{'、'.join(subtypes)}")
 
     scenarios = build_scenarios(subtypes[0])

@@ -64,7 +64,10 @@ describe("isFieldMissing", () => {
 });
 
 /** 測試用的 subtype 值域（模擬某商家 rate card 的在售項目）。 */
-const SUBTYPES = ["LOGO設計", "海報文宣"];
+const SERVICES = [
+  { subtype: "LOGO設計", unit: "每款" },
+  { subtype: "海報文宣", unit: "每張" },
+];
 
 describe("parseIntake", () => {
   it("欄位齊全 → missingRequiredFields 為空", async () => {
@@ -74,7 +77,7 @@ describe("parseIntake", () => {
       sessionId: "s1",
       category: "illustration",
       rawText: "幫我畫一個角色，商用，三天內",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
 
     expect(result.missingRequiredFields).toEqual([]);
@@ -91,7 +94,7 @@ describe("parseIntake", () => {
       sessionId: "s1",
       category: "illustration",
       rawText: "幫我畫一個角色",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
 
     expect(result.missingRequiredFields).toContain("deadline_days");
@@ -108,7 +111,7 @@ describe("parseIntake", () => {
       sessionId: "s1",
       category: "graphic_design",
       rawText: "想要一個 logo",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
 
     expect(result.missingRequiredFields).toContain("subtype");
@@ -122,7 +125,7 @@ describe("parseIntake", () => {
       sessionId: "s",
       category: "web_design",
       rawText: "x",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
     expect(web.missingRequiredFields).toContain("page_count");
     expect(web.missingRequiredFields).toContain("includes_cms");
@@ -131,7 +134,7 @@ describe("parseIntake", () => {
       sessionId: "s",
       category: "graphic_design",
       rawText: "x",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
     expect(graphic.missingRequiredFields).not.toContain("page_count");
     expect(graphic.missingRequiredFields).toContain("includes_pitch_rounds");
@@ -144,7 +147,7 @@ describe("parseIntake", () => {
       sessionId: "sess-42",
       category: "graphic_design",
       rawText: "設計一個海報",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
 
     expect(mockGenerate).toHaveBeenCalledTimes(1);
@@ -165,7 +168,7 @@ describe("parseIntake", () => {
       sessionId: "s1",
       category: "graphic_design",
       rawText: "想要一個 logo",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
 
     const prompt = mockGenerate.mock.calls[0][0].prompt;
@@ -180,10 +183,71 @@ describe("parseIntake", () => {
       sessionId: "s1",
       category: "graphic_design",
       rawText: "想要一個 logo",
-      allowedSubtypes: [],
+      allowedServices: [],
     });
 
     expect(mockGenerate.mock.calls[0][0].prompt).not.toContain("只能從以下服務項目");
+  });
+
+  /**
+   * A6 實測發現的缺陷：模型把「一組貼圖，八款」的數量抽成 8，而費率表是按組
+   * 計價（一組內含 8 款），正確答案是 1。金額因此差 8 倍。
+   *
+   * 根因不是 prompt 少寫規則，而是**計價單位從來沒有給模型**——它只拿到
+   * subtype 的名稱清單，無從判斷「1」代表什麼。單位隨商家而異（有人按組賣
+   * 貼圖、有人按款賣），故不能寫死在 prompt，必須從資料帶進去。
+   *
+   * 以下三則守住這條資訊通道。它斷掉時不會有任何執行期錯誤，只會讓報價
+   * 悄悄回到差好幾倍的狀態。
+   */
+  describe("計價單位（A6 數量抽取缺陷的修復）", () => {
+    it("prompt 帶出每個服務項目的計價單位", async () => {
+      mockReturns(fullFields("graphic_design"));
+
+      await parseIntake({
+        sessionId: "s1",
+        category: "graphic_design",
+        rawText: "想要一款 logo",
+        allowedServices: SERVICES,
+      });
+
+      const { prompt } = mockGenerate.mock.calls[0][0];
+      expect(prompt).toContain("LOGO設計（每款）");
+      expect(prompt).toContain("海報文宣（每張）");
+    });
+
+    it("系統指令說明數量是「幾個計價單位」而非描述裡的任何數字", async () => {
+      mockReturns(fullFields("graphic_design"));
+
+      await parseIntake({
+        sessionId: "s1",
+        category: "graphic_design",
+        rawText: "想要一個 logo",
+        allowedServices: SERVICES,
+      });
+
+      const { systemInstruction } = mockGenerate.mock.calls[0][0];
+      expect(systemInstruction).toContain("幾個計價單位");
+      // 中文數量詞換算：graphic-006「一款LOGO」與 graphic-003「一整套VI」
+      // 是兩種不同的語言形式，前者修好後後者仍失敗，故兩者都要在規則裡現身
+      expect(systemInstruction).toContain("中文數量詞一律換算");
+      expect(systemInstruction).toContain("「一整套」");
+    });
+
+    it("沒有在售項目時不輸出單位提示，也不留下空括號", async () => {
+      mockReturns(fullFields("graphic_design"));
+
+      await parseIntake({
+        sessionId: "s1",
+        category: "graphic_design",
+        rawText: "想要一個 logo",
+        allowedServices: [],
+      });
+
+      const { prompt } = mockGenerate.mock.calls[0][0];
+      expect(prompt).not.toContain("（）");
+      expect(prompt).not.toContain("計價單位");
+    });
   });
 
   it("system instruction 明確禁止勉強歸類，避免 enum 逼出錯配", async () => {
@@ -193,7 +257,7 @@ describe("parseIntake", () => {
       sessionId: "s1",
       category: "graphic_design",
       rawText: "x",
-      allowedSubtypes: SUBTYPES,
+      allowedServices: SERVICES,
     });
 
     expect(mockGenerate.mock.calls[0][0].systemInstruction).toContain(

@@ -44,7 +44,7 @@ export async function runEvalCase(
     merchant_id: merchantId,
     contact_email: EVAL_CONTACT_EMAIL,
   });
-  const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+  const allowedServices = await rateCardRepository.findActiveServices(
     merchantId,
     goldenCase.category,
   );
@@ -53,7 +53,7 @@ export async function runEvalCase(
     sessionId: session.id,
     category: goldenCase.category,
     rawText: goldenCase.rawText,
-    allowedSubtypes,
+    allowedServices,
   });
 
   const fields = compareFields(goldenCase.expected.fields, parsed.fields);

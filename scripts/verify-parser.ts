@@ -34,7 +34,7 @@ async function main(): Promise<void> {
   const merchantId = await ensureDevMerchant();
   for (const { category, rawText } of SAMPLES) {
     const session = await sessionsRepository.create({ category, merchant_id: merchantId });
-    const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+    const allowedServices = await rateCardRepository.findActiveServices(
       merchantId,
       category,
     );
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
       sessionId: session.id,
       category,
       rawText,
-      allowedSubtypes,
+      allowedServices,
     });
 
     console.log(`\n──────── ${category} ────────`);

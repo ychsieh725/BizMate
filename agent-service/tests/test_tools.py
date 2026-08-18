@@ -14,6 +14,7 @@ from app.agent.tools.base import ToolContext
 from app.agent.tools.compute_quote import ComputeQuoteTool
 from app.agent.tools.lookup_rate_card import LookupRateCardTool
 from app.agent.tools.record_fields import RecordFieldsTool
+from app.db.repositories.rate_card import RateCardService
 from app.pricing_client import PricingResult, PricingUnavailableError
 
 SESSION_ID = "11111111-1111-4111-8111-111111111111"
@@ -36,11 +37,26 @@ def extraction(value: str | None, confidence: float = 0.9) -> FieldExtraction:
 
 
 class FakeRateCard:
-    def __init__(self, subtypes: list[str] | None = None) -> None:
-        self.subtypes = SUBTYPES if subtypes is None else subtypes
+    """假費率表。
 
-    async def find_active_subtypes(self, merchant_id: str, category: str) -> list[str]:
-        return self.subtypes
+    unit 一律用「每款」除非另行指定——絕大多數測試不在意單位，但它是
+    RateCardService 的必要欄位；讓它有個合理預設，測試才不必為了無關的
+    欄位而寫得冗長。
+    """
+
+    def __init__(
+        self,
+        subtypes: list[str] | None = None,
+        units: dict[str, str] | None = None,
+    ) -> None:
+        self.subtypes = SUBTYPES if subtypes is None else subtypes
+        self.units = units or {}
+
+    async def find_active_services(self, merchant_id: str, category: str) -> list[RateCardService]:
+        return [
+            RateCardService(subtype=name, unit=self.units.get(name, "每款"))
+            for name in self.subtypes
+        ]
 
 
 class FakeStorage:
@@ -83,6 +99,37 @@ class TestLookupRateCard:
         outcome = await tool.execute({}, context())
 
         assert outcome.result["subtypes"] == SUBTYPES
+
+    async def test_returns_pricing_units(self):
+        """計價單位必須跟著服務項目一起回去。
+
+        A6 實測發現模型把「一組貼圖，八款」的數量抽成 8，而費率表是按組計價
+        （一組內含 8 款），正確答案是 1，金額因此差 8 倍。根因不是 prompt 少寫
+        規則，而是**計價單位從來沒有給模型**：這個 tool 原本只回 subtype 名稱。
+
+        這條守住那個資訊通道。它斷掉不會有任何執行期錯誤，只會讓報價悄悄回到
+        差好幾倍的狀態。
+        """
+        tool = LookupRateCardTool(
+            repository=FakeRateCard(
+                subtypes=["貼圖表情包", "單張插畫"],
+                units={"貼圖表情包": "每組", "單張插畫": "每張"},
+            )
+        )
+
+        outcome = await tool.execute({}, context())
+
+        assert outcome.result["pricing_units"] == {
+            "貼圖表情包": "每組",
+            "單張插畫": "每張",
+        }
+
+    async def test_pricing_units_empty_when_no_active_services(self):
+        tool = LookupRateCardTool(repository=FakeRateCard(subtypes=[]))
+
+        outcome = await tool.execute({}, context())
+
+        assert outcome.result["pricing_units"] == {}
 
     async def test_returns_field_domains(self):
         tool = LookupRateCardTool(repository=FakeRateCard())

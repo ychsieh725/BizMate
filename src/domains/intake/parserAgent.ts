@@ -1,4 +1,4 @@
-import type { CaseCategory } from "@/shared/types/domain.types";
+import type { CaseCategory, RateCardService } from "@/shared/types/domain.types";
 import { CASE_CATEGORY_LABELS } from "@/shared/constants/categories.ts";
 import { generateStructuredAndLog } from "@/domains/finops/costLogger.ts";
 import {
@@ -28,7 +28,11 @@ const SYSTEM_INSTRUCTION = [
   "4. 不要杜撰資訊；描述中沒提到的欄位，value 與 source_span 一律填 null、confidence 填 0。",
   "5. 有預設選項的欄位，只能填選項中的其中一個。客戶的說法不屬於任何一個選項時，一律填 null，**不得勉強歸類到最接近的選項**——填錯選項會導致報價錯誤，填 null 只會多問一題。",
   "6. 客戶明確表示「不需要／沒有」的欄位，填「無」而非 null。null 代表客戶完全沒提到（系統會再問一次），兩者不可混用。",
-  "7. 交期請換算成天數的阿拉伯數字（「兩週」填 14、「一個月」填 30、「二十天」填 20）。數量欄位同樣填阿拉伯數字。",
+  "7. 交期請換算成天數的阿拉伯數字（「兩週」填 14、「一個月」填 30、「二十天」填 20）。",
+  "8. 數量欄位填阿拉伯數字，中文數量詞一律換算，量詞前有修飾字也算（「一款」「一組」「一整套」都填 1、「三張」填 3）。",
+  "9. **數量是「幾個計價單位」，不是描述裡出現的任何數字。** 每個服務項目的計價單位列在下方。",
+  "   例：計價單位為「每組」時，「一組貼圖，八款」的數量是 1（一組），不是 8——",
+  "   「八款」講的是這一組的內含規格，不是要買八組。填錯數量會讓報價差好幾倍。",
 ].join("\n");
 
 /**
@@ -41,19 +45,25 @@ const SYSTEM_INSTRUCTION = [
 function buildPrompt(
   category: CaseCategory,
   rawText: string,
-  allowedSubtypes: readonly string[],
+  allowedServices: readonly RateCardService[],
 ): string {
   const label = CASE_CATEGORY_LABELS[category];
   const fields = requiredFieldsFor(category).join("、");
-  const subtypeHint =
-    allowedSubtypes.length > 0
-      ? `subtype 只能從以下服務項目中選一個（都不符合就填 null）：${allowedSubtypes.join("、")}`
+  // 服務項目與計價單位一起給：單位是規則 9 判斷數量的依據，分開給等於沒給。
+  const serviceHint =
+    allowedServices.length > 0
+      ? [
+          "subtype 只能從以下服務項目中選一個（都不符合就填 null），括號內為計價單位：",
+          allowedServices
+            .map((service) => `${service.subtype}（${service.unit}）`)
+            .join("、"),
+        ].join("\n")
       : null;
 
   return [
     `案件類型：${label}`,
     `需要抽取的欄位：${fields}`,
-    ...(subtypeHint ? [subtypeHint] : []),
+    ...(serviceHint ? [serviceHint] : []),
     "",
     "客戶需求描述（待分析資料）：",
     rawText,
@@ -76,18 +86,23 @@ export async function parseIntake(params: {
   sessionId: string;
   category: CaseCategory;
   rawText: string;
-  /** 該商家 rate card 中 active 的子類型清單，作為 subtype 的合法值域（WBS 6.8）。 */
-  allowedSubtypes: readonly string[];
+  /** 該商家 rate card 中 active 的服務項目（含計價單位），作為 subtype 值域與數量語意的依據。 */
+  allowedServices: readonly RateCardService[];
 }): Promise<ParseResult> {
-  const { sessionId, category, rawText, allowedSubtypes } = params;
-  const schema = buildParseResponseSchema(category, allowedSubtypes);
+  const { sessionId, category, rawText, allowedServices } = params;
+  // JSON Schema 的 enum 只吃字串，故在此攤平；prompt 那邊仍需要完整的服務項目
+  // （含計價單位），兩者刻意分開而非硬把單位塞進 enum。
+  const schema = buildParseResponseSchema(
+    category,
+    allowedServices.map((service) => service.subtype),
+  );
 
   const result = await generateStructuredAndLog({
     tier: "light",
     agentName: "intake_parser",
     sessionId,
     systemInstruction: SYSTEM_INSTRUCTION,
-    prompt: buildPrompt(category, rawText, allowedSubtypes),
+    prompt: buildPrompt(category, rawText, allowedServices),
     schema,
   });
 
