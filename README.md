@@ -131,6 +131,8 @@ A6 對兩側各執行 36 則真實對照，結果如下：
 
 這是本專案較少見的一種產出：一份說明「這個功能目前不該上線」的量測報告。若當初直接開啟 flag，這些退步不會有任何人發現。
 
+達成這個結論的三個關鍵事件（包括「168 個綠燈測試，而 agent 從未真正運作過」）記錄於 [案例研究：軌跡與統計檢定否決一次上線](docs/agent-trajectory-case-study.md)。
+
 ---
 
 ## AI 工程細節
@@ -259,6 +261,7 @@ uv run python -m eval.compare b.json a.json  # 與 baseline 配對比較
 | :------------------------------------------------------------- | :---------------------------------------------------------- |
 | [案例研究：Eval 驅動修復](docs/eval-driven-fix-case-study.md)   | 本專案核心的工程敘事                                        |
 | [A6 基準線對照](docs/agent-eval-a6-comparison.md)               | agent 與單步流程的配對統計檢定與 go/no-go 判定              |
+| [案例研究：軌跡與統計檢定否決一次上線](docs/agent-trajectory-case-study.md) | 三個事件：agent 從未運作過、護欄的自我修正、資料否決功能本身 |
 | [案例研究：後台效能修復](docs/dashboard-perf-fix-case-study.md) | 效能問題的定位與修復過程                                    |
 | [新手導讀](docs/guide/README.md)                                | 大局觀、程式碼地圖、追一筆報價、全域模式、開發流程，共 5 篇 |
 | [部署 Runbook](docs/deployment.md)                              | Vercel、Supabase、Resend 的上線手冊                         |
