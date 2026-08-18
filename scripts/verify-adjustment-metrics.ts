@@ -19,7 +19,7 @@
  *    故此處用 B 商家的真實 JWT 查 view，證明看不到 A 的資料。
  */
 import { createClient } from "@supabase/supabase-js";
-import { env, requireEnv } from "../src/lib/env.ts";
+import { env } from "../src/lib/env.ts";
 import type { Database } from "../src/lib/supabase/database.types.ts";
 
 function assert(condition: boolean, message: string): void {

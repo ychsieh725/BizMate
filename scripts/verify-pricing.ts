@@ -54,6 +54,49 @@ const SAMPLES: {
     category: "illustration",
     fields: { subtype: { value: "不存在的類型" } },
   },
+  // ── WBS 6.1 階段一：區間係數的確定性求值 ──
+  // 在此之前這些係數一律被跳過，實際後果是「三天內急件」與「一個月交件」
+  // 報價完全相同。以下四則證明它們在真實 rate card 資料上確實生效。
+  {
+    label: "插畫／急件 3 天（預期：基礎費 + 商業加成 + 急件加成）",
+    category: "illustration",
+    fields: {
+      subtype: { value: "角色設計" },
+      quantity: { value: "1" },
+      license_scope: { value: "商業使用" },
+      deadline_days: { value: "3" },
+    },
+  },
+  {
+    label: "插畫／交期 30 天（預期：與上一則相比少了急件加成）",
+    category: "illustration",
+    fields: {
+      subtype: { value: "角色設計" },
+      quantity: { value: "1" },
+      license_scope: { value: "商業使用" },
+      deadline_days: { value: "30" },
+    },
+  },
+  {
+    label: "插畫／精緻上色（預期：多一筆上色複雜度加成）",
+    category: "illustration",
+    fields: {
+      subtype: { value: "單張插畫" },
+      quantity: { value: "1" },
+      license_scope: { value: "個人使用" },
+      coloring_complexity: { value: "精緻上色" },
+    },
+  },
+  {
+    label: "網頁／3 個功能模組（預期：功能模組複雜度 × 3）",
+    category: "web_design",
+    fields: {
+      subtype: { value: "多頁式網站" },
+      page_count: { value: "1" },
+      license_scope: { value: "個人使用" },
+      feature_modules: { value: "會員系統、金流、多語系" },
+    },
+  },
 ];
 
 async function main(): Promise<void> {
