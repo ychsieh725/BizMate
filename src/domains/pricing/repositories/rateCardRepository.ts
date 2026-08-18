@@ -1,7 +1,7 @@
 import { getSupabaseClient } from "@/lib/supabase/client.ts";
 import { RepositoryError } from "@/lib/supabase/repository.ts";
 import type { Tables } from "@/lib/supabase/database.types.ts";
-import type { CaseCategory } from "@/shared/types/domain.types";
+import type { CaseCategory, RateCardService } from "@/shared/types/domain.types";
 
 /**
  * Rate card 查詢（3.5 基礎費率查表，FR-PR-1）。
@@ -33,27 +33,31 @@ export class RateCardRepository {
   }
 
   /**
-   * 取該商家該 category 目前在售（is_active）的子類型清單（WBS 6.8）。
+   * 取該商家該 category 目前在售（is_active）的服務項目（WBS 6.8）。
    * 供 Parser 作為 subtype 的合法值域——只回在售項目，停售的服務不該被抽出來報價。
+   *
+   * 一併取回 unit（計價單位）：它決定「數量 1」代表什麼。原本只取 subtype，
+   * 模型無從判斷「一組貼圖，八款」該填 1 還是 8，A6 實測即因此把該案例
+   * 算成 8 倍價。單位隨商家而異，只能從資料帶出來，不能寫死在 prompt。
    */
-  async findActiveSubtypes(
+  async findActiveServices(
     merchantId: string,
     category: CaseCategory,
-  ): Promise<string[]> {
+  ): Promise<RateCardService[]> {
     const { data, error } = await this.client
       .from("rate_card_base")
-      .select("subtype")
+      .select("subtype, unit")
       .eq("merchant_id", merchantId)
       .eq("category", category)
       .eq("is_active", true);
     if (error) {
       throw new RepositoryError(
         "rate_card_base",
-        "findActiveSubtypes",
+        "findActiveServices",
         error.message,
       );
     }
-    return (data ?? []).map((row) => row.subtype);
+    return (data ?? []).map((row) => ({ subtype: row.subtype, unit: row.unit }));
   }
 
   /** 取該商家該 category 適用的加成係數：專屬（category=給定）+ 共用（category IS NULL）。 */

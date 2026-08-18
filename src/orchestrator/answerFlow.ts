@@ -89,7 +89,7 @@ export async function handleAnswer(params: {
 
   // 與 describeFlow 同：subtype 值域取自該商家 rate card（WBS 6.8）。反問後的
   // 補答同樣需要值域約束——客戶回「海報」時仍須映射到「海報文宣」才查得到表。
-  const allowedSubtypes = await rateCardRepository.findActiveSubtypes(
+  const allowedServices = await rateCardRepository.findActiveServices(
     session.merchant_id,
     session.category,
   );
@@ -98,7 +98,7 @@ export async function handleAnswer(params: {
     sessionId,
     category: session.category,
     rawText: augmentedText,
-    allowedSubtypes,
+    allowedServices,
   });
 
   await extractedFieldsRepository.upsertMany(

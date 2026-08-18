@@ -48,6 +48,21 @@ export type AgentStepStatus =
   /** 預算用盡或偵測到迴圈，該步為退回既有路徑的標記。 */
   | "fallback";
 
+/**
+ * 商家在售的一項服務（供 Parser 作為 subtype 值域與數量語意的依據）。
+ *
+ * unit 是**計價單位**，決定了「數量 1」代表什麼。少了它，模型無法判斷
+ * 「一組貼圖，八款」的數量是 1 還是 8——A6 實測即因此把該案例算成 8 倍價。
+ * 單位隨商家而異（有人按組賣貼圖、有人按款賣），故不能寫死在 prompt 裡。
+ *
+ * 放在 shared 而非 pricing domain：intake 需要它，但 parserAgent 刻意不依賴
+ * pricing domain（跨域組裝是 orchestrator 的職責）。
+ */
+export type RateCardService = {
+  subtype: string;
+  unit: string;
+};
+
 /** 商家（tenant 根，1:1 對應 auth.users；public_slug 即專屬報價連結 /q/{slug}） */
 export type Merchant = {
   id: string;

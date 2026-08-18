@@ -13,7 +13,7 @@ from google.genai import types
 from app.agent.fields import domain_for, required_fields_for
 from app.agent.tools.base import ToolContext, ToolKind, ToolOutcome
 from app.db.repositories.rate_card import (
-    SupportsFindActiveSubtypes,
+    SupportsFindActiveServices,
     rate_card_repository,
 )
 
@@ -38,13 +38,14 @@ class LookupRateCardTool:
     kind: ToolKind = "query"
     declaration = DECLARATION
 
-    def __init__(self, repository: SupportsFindActiveSubtypes | None = None) -> None:
+    def __init__(self, repository: SupportsFindActiveServices | None = None) -> None:
         self._repository = repository or rate_card_repository
 
     async def execute(self, args: dict[str, object], context: ToolContext) -> ToolOutcome:
-        subtypes = await self._repository.find_active_subtypes(
+        services = await self._repository.find_active_services(
             context.merchant_id, context.category
         )
+        subtypes = [service.subtype for service in services]
 
         field_options: dict[str, object] = {}
         for name in required_fields_for(context.category):
@@ -55,6 +56,9 @@ class LookupRateCardTool:
             status="ok",
             result={
                 "subtypes": subtypes,
+                # 計價單位決定「數量 1」代表什麼。只給名稱時，模型無從判斷
+                # 「一組貼圖，八款」該填 1 還是 8（A6 實測即因此算成 8 倍價）。
+                "pricing_units": {service.subtype: service.unit for service in services},
                 "field_options": field_options,
                 "required_fields": required_fields_for(context.category),
             },

@@ -1,0 +1,4178 @@
+{
+  "schema_version": 1,
+  "variant": "agent",
+  "generated_at": "2026-08-18T08:27:56.421204+00:00",
+  "dataset_version": "v1.0.0",
+  "model_version": "gemini-3.1-flash-lite",
+  "outcomes": [
+    {
+      "id": "graphic-001",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 10400.0,
+      "actual_amount": 10400.0,
+      "out_of_scope": false,
+      "latency_ms": 5092,
+      "cost_usd": 0.00130475,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "LOGO設計",
+                  "confidence": 1,
+                  "source_span": "公司LOGO"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一款"
+                },
+                "deadline_days": {
+                  "value": "14",
+                  "confidence": 1,
+                  "source_span": "兩週內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業用途"
+                },
+                "includes_pitch_rounds": {
+                  "value": "是",
+                  "confidence": 0.8,
+                  "source_span": "希望能先看到初稿提案再決定"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-002",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "海報文宣",
+          "actual": "海報文宣",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "7",
+          "actual": "7",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15000.0,
+      "actual_amount": 15000.0,
+      "out_of_scope": false,
+      "latency_ms": 4199,
+      "cost_usd": 0.0012959999999999998,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "海報文宣",
+                  "confidence": 1,
+                  "source_span": "活動海報"
+                },
+                "quantity": {
+                  "value": "3",
+                  "confidence": 1,
+                  "source_span": "三張"
+                },
+                "deadline_days": {
+                  "value": "7",
+                  "confidence": 1,
+                  "source_span": "七天內"
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "個人使用"
+                },
+                "includes_pitch_rounds": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不用提案"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-003",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "品牌識別CI-VI",
+          "actual": "品牌識別CI-VI",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "獨家買斷",
+          "actual": "獨家買斷",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 60000.0,
+      "actual_amount": 60000.0,
+      "out_of_scope": false,
+      "latency_ms": 4986,
+      "cost_usd": 0.001322,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "品牌識別CI-VI",
+                  "confidence": 1,
+                  "source_span": "品牌識別系統，一整套VI"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一整套"
+                },
+                "deadline_days": {
+                  "value": "30",
+                  "confidence": 1,
+                  "source_span": "一個月"
+                },
+                "license_scope": {
+                  "value": "獨家買斷",
+                  "confidence": 1,
+                  "source_span": "版權我們要買斷"
+                },
+                "includes_pitch_rounds": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "希望有提案討論"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-004",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "名片文具",
+          "actual": "名片文具",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "2",
+          "actual": "2",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 7800.0,
+      "actual_amount": 7800.0,
+      "out_of_scope": false,
+      "latency_ms": 13223,
+      "cost_usd": 0.00129325,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "名片文具",
+                  "confidence": 1,
+                  "source_span": "名片設計"
+                },
+                "quantity": {
+                  "value": "2",
+                  "confidence": 1,
+                  "source_span": "兩組"
+                },
+                "deadline_days": {
+                  "value": "10",
+                  "confidence": 1,
+                  "source_span": "十天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業用途"
+                },
+                "includes_pitch_rounds": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不需要提案"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-005",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "社群圖像",
+          "actual": "社群圖像",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 9750.0,
+      "actual_amount": 9750.0,
+      "out_of_scope": false,
+      "latency_ms": 10735,
+      "cost_usd": 0.0013410000000000002,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "社群圖像",
+                  "confidence": 1,
+                  "source_span": "社群貼文圖"
+                },
+                "quantity": {
+                  "value": "5",
+                  "confidence": 1,
+                  "source_span": "五張"
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "includes_pitch_rounds": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "先看提案"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問這五張社群貼文圖，預計希望在幾天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-006",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "includes_pitch_rounds",
+        "license_scope"
+      ],
+      "expected_missing": [
+        "includes_pitch_rounds",
+        "license_scope"
+      ],
+      "expected_amount": 8000.0,
+      "actual_amount": 8000.0,
+      "out_of_scope": false,
+      "latency_ms": 17503,
+      "cost_usd": 0.0013662499999999998,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "LOGO設計",
+                  "confidence": 1,
+                  "source_span": "LOGO"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一款"
+                },
+                "deadline_days": {
+                  "value": "3",
+                  "confidence": 1,
+                  "source_span": "三天"
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_pitch_rounds": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問這款 LOGO 設計是否包含提案階段？（是/否）",
+                  "target_field": "includes_pitch_rounds"
+                },
+                {
+                  "question": "請問這款 LOGO 的授權範圍需求為何？（個人使用 / 商業使用 / 獨家買斷）",
+                  "target_field": "license_scope"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-007",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "海報文宣",
+          "actual": "海報文宣",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": 5000.0,
+      "actual_amount": 5000.0,
+      "out_of_scope": false,
+      "latency_ms": 17666,
+      "cost_usd": 0.0014149999999999998,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "海報文宣",
+                  "confidence": 1,
+                  "source_span": "海報"
+                },
+                "quantity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_pitch_rounds": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您需要製作幾張海報呢？",
+                  "target_field": "quantity"
+                },
+                {
+                  "question": "這份需求是否需要包含修改次數（提案輪次）呢？",
+                  "target_field": "includes_pitch_rounds"
+                },
+                {
+                  "question": "請問海報的使用授權範圍為何？（個人使用、商業使用、還是獨家買斷）",
+                  "target_field": "license_scope"
+                },
+                {
+                  "question": "請問您希望幾天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-008",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "社群圖像",
+          "actual": "社群圖像",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity"
+      ],
+      "expected_missing": [
+        "quantity"
+      ],
+      "expected_amount": 1950.0,
+      "actual_amount": 1950.0,
+      "out_of_scope": false,
+      "latency_ms": 6922,
+      "cost_usd": 0.00131525,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "社群圖像",
+                  "confidence": 1,
+                  "source_span": "社群圖像"
+                },
+                "quantity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": "5",
+                  "confidence": 1,
+                  "source_span": "五天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "includes_pitch_rounds": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要提案"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您需要製作幾張社群圖像呢？",
+                  "target_field": "quantity"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-009",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "名片文具",
+          "actual": "名片文具",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "2",
+          "actual": "2",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "includes_pitch_rounds",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "includes_pitch_rounds",
+        "deadline_days"
+      ],
+      "expected_amount": 6000.0,
+      "actual_amount": 6000.0,
+      "out_of_scope": false,
+      "latency_ms": 14058,
+      "cost_usd": 0.00137975,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "名片文具",
+                  "confidence": 1,
+                  "source_span": "名片設計"
+                },
+                "quantity": {
+                  "value": "2",
+                  "confidence": 1,
+                  "source_span": "兩組名片設計"
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "我自己個人用途的"
+                },
+                "includes_pitch_rounds": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "好的，請問這兩組名片設計，您需要包含提案修改次數嗎？（是/否）",
+                  "target_field": "includes_pitch_rounds"
+                },
+                {
+                  "question": "請問您希望預計在幾天內完成設計呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-010",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 10400.0,
+      "actual_amount": 10400.0,
+      "out_of_scope": false,
+      "latency_ms": 13335,
+      "cost_usd": 0.001294,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "LOGO設計",
+                  "confidence": 1,
+                  "source_span": "LOGO"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一款"
+                },
+                "deadline_days": {
+                  "value": "14",
+                  "confidence": 1,
+                  "source_span": "兩週"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "includes_pitch_rounds": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要提案"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-011",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "quantity",
+        "includes_pitch_rounds",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 7695,
+      "cost_usd": 0.0014954999999999999,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "quantity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_pitch_rounds": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您需要哪種類型的平面設計服務呢？（如：LOGO設計、海報文宣、品牌識別CI-VI、社群圖像、名片文具）",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問您需要的數量是多少？（請提供計價單位數量，例如「3 張」海報則填 3）",
+                  "target_field": "quantity"
+                },
+                {
+                  "question": "請問是否需要提案輪次？（請回答「是」或「否」）",
+                  "target_field": "includes_pitch_rounds"
+                },
+                {
+                  "question": "請問使用授權範圍為何？（個人使用、商業使用、獨家買斷）",
+                  "target_field": "license_scope"
+                },
+                {
+                  "question": "請問希望在幾天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "graphic-012",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "LOGO設計",
+          "actual": "LOGO設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "includes_pitch_rounds",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 10400.0,
+      "actual_amount": 10400.0,
+      "out_of_scope": false,
+      "latency_ms": 4636,
+      "cost_usd": 0.00129175,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "LOGO設計",
+                  "confidence": 1,
+                  "source_span": "LOGO"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一款"
+                },
+                "deadline_days": {
+                  "value": "20",
+                  "confidence": 1,
+                  "source_span": "二十天"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業用"
+                },
+                "includes_pitch_rounds": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要提案"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-001",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "角色設計",
+          "actual": "角色設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 7800.0,
+      "actual_amount": 7800.0,
+      "out_of_scope": false,
+      "latency_ms": 4314,
+      "cost_usd": 0.00129375,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "角色設計",
+                  "confidence": 0.8,
+                  "source_span": "原創角色"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一隻"
+                },
+                "deadline_days": {
+                  "value": "3",
+                  "confidence": 1,
+                  "source_span": "三天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業用途"
+                },
+                "coloring_complexity": {
+                  "value": "精緻上色",
+                  "confidence": 1,
+                  "source_span": "精緻上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-002",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "單張插畫",
+          "actual": "單張插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "簡易上色",
+          "actual": "簡易上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 4000.0,
+      "actual_amount": 4000.0,
+      "out_of_scope": false,
+      "latency_ms": 9326,
+      "cost_usd": 0.0012915000000000001,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "單張插畫",
+                  "confidence": 1,
+                  "source_span": "單張插畫"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一張"
+                },
+                "deadline_days": {
+                  "value": "30",
+                  "confidence": 1,
+                  "source_span": "一個月內"
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "個人使用"
+                },
+                "coloring_complexity": {
+                  "value": "簡易上色",
+                  "confidence": 1,
+                  "source_span": "簡易上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-003",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "貼圖表情包",
+          "actual": "貼圖表情包",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15600.0,
+      "actual_amount": 15600.0,
+      "out_of_scope": false,
+      "latency_ms": 5928,
+      "cost_usd": 0.0012947500000000001,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "貼圖表情包",
+                  "confidence": 1,
+                  "source_span": "貼圖"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一組"
+                },
+                "deadline_days": {
+                  "value": "14",
+                  "confidence": 1,
+                  "source_span": "十四天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "coloring_complexity": {
+                  "value": "精緻上色",
+                  "confidence": 1,
+                  "source_span": "精緻上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-004",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "系列插畫",
+          "actual": "系列插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "線稿",
+          "actual": "線稿",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "獨家買斷",
+          "actual": "獨家買斷",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 35000.0,
+      "actual_amount": 35000.0,
+      "out_of_scope": false,
+      "latency_ms": 3756,
+      "cost_usd": 0.00131175,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "系列插畫",
+                  "confidence": 1,
+                  "source_span": "系列插畫"
+                },
+                "quantity": {
+                  "value": "5",
+                  "confidence": 1,
+                  "source_span": "系列插畫五張"
+                },
+                "deadline_days": {
+                  "value": "20",
+                  "confidence": 1,
+                  "source_span": "二十天內完成"
+                },
+                "license_scope": {
+                  "value": "獨家買斷",
+                  "confidence": 1,
+                  "source_span": "版權我要獨家買斷"
+                },
+                "coloring_complexity": {
+                  "value": "線稿",
+                  "confidence": 1,
+                  "source_span": "線稿就好不用上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-005",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "角色設計",
+          "actual": "角色設計",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "2",
+          "actual": "2",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 15600.0,
+      "actual_amount": 15600.0,
+      "out_of_scope": false,
+      "latency_ms": 5951,
+      "cost_usd": 0.00128375,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "角色設計",
+                  "confidence": 1,
+                  "source_span": "角色設計"
+                },
+                "quantity": {
+                  "value": "2",
+                  "confidence": 1,
+                  "source_span": "兩個"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商用"
+                },
+                "coloring_complexity": {
+                  "value": "精緻上色",
+                  "confidence": 1,
+                  "source_span": "精緻上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您希望這兩位角色的設計案在幾天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-006",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "單張插畫",
+          "actual": "單張插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": null,
+          "correct": false
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "7",
+          "actual": null,
+          "correct": false
+        }
+      ],
+      "predicted_missing": [
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "coloring_complexity",
+        "license_scope"
+      ],
+      "expected_amount": 4000.0,
+      "actual_amount": 4000.0,
+      "out_of_scope": false,
+      "latency_ms": 8727,
+      "cost_usd": 0.0013844999999999999,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "單張插畫",
+                  "confidence": 1,
+                  "source_span": "單張插畫"
+                },
+                "quantity": {
+                  "value": 1,
+                  "confidence": 1,
+                  "source_span": "一張"
+                },
+                "deadline_days": {
+                  "value": 7,
+                  "confidence": 1,
+                  "source_span": "七天"
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "coloring_complexity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您這張插畫需要什麼樣的上色複雜度呢？（提供：精緻上色、簡易上色、線稿）",
+                  "target_field": "coloring_complexity"
+                },
+                {
+                  "question": "請問這張插畫的使用授權範圍為何？（提供：個人使用、商業使用、獨家買斷）",
+                  "target_field": "license_scope"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-007",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 5120,
+      "cost_usd": 0.00148575,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "quantity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 1,
+                  "source_span": "急件"
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "coloring_complexity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您需要的是哪種類型的插畫？（例如：角色設計、單張插畫、系列插畫或貼圖表情包）",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問您需要製作的數量是多少？",
+                  "target_field": "quantity"
+                },
+                {
+                  "question": "請問您需要的上色風格是哪一種？（例如：精緻上色、簡易上色或只需線稿）",
+                  "target_field": "coloring_complexity"
+                },
+                {
+                  "question": "請問這幅畫的使用授權範圍是什麼呢？（例如：個人使用、商業使用或獨家買斷）",
+                  "target_field": "license_scope"
+                },
+                {
+                  "question": "因為您提到是急件，請問您預計希望在幾天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-008",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "貼圖表情包",
+          "actual": "貼圖表情包",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "簡易上色",
+          "actual": "簡易上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 12000.0,
+      "actual_amount": 12000.0,
+      "out_of_scope": false,
+      "latency_ms": 16702,
+      "cost_usd": 0.0012975,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "貼圖表情包",
+                  "confidence": 1,
+                  "source_span": "貼圖表情包"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一組"
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "個人自用"
+                },
+                "coloring_complexity": {
+                  "value": "簡易上色",
+                  "confidence": 1,
+                  "source_span": "簡易上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "收到您的需求了！想請問這組貼圖大約希望在幾天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-009",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "系列插畫",
+          "actual": "系列插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "quantity",
+        "coloring_complexity"
+      ],
+      "expected_missing": [
+        "quantity",
+        "coloring_complexity"
+      ],
+      "expected_amount": 4550.0,
+      "actual_amount": 4550.0,
+      "out_of_scope": false,
+      "latency_ms": 9651,
+      "cost_usd": 0.00135475,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "系列插畫",
+                  "confidence": 1,
+                  "source_span": "系列插畫"
+                },
+                "quantity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": "10",
+                  "confidence": 0.9,
+                  "source_span": "十天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "coloring_complexity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您這次需要製作多少張系列插畫呢？",
+                  "target_field": "quantity"
+                },
+                {
+                  "question": "請問插畫的上色風格需要「精緻上色」、「簡易上色」還是只要「線稿」即可？",
+                  "target_field": "coloring_complexity"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-010",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "單張插畫",
+          "actual": "單張插畫",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "簡易上色",
+          "actual": "簡易上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 4000.0,
+      "actual_amount": 4000.0,
+      "out_of_scope": false,
+      "latency_ms": 21116,
+      "cost_usd": 0.0019585,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "單張插畫",
+                  "confidence": 1,
+                  "source_span": "單張插畫"
+                },
+                "quantity": {
+                  "value": 1,
+                  "confidence": 1,
+                  "source_span": "一張"
+                },
+                "deadline_days": {
+                  "value": 10,
+                  "confidence": 1,
+                  "source_span": "十天內"
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "個人使用"
+                },
+                "coloring_complexity": {
+                  "value": "簡易上色",
+                  "confidence": 1,
+                  "source_span": "簡易上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "單張插畫",
+                  "confidence": 1,
+                  "source_span": "單張插畫"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一張"
+                },
+                "deadline_days": {
+                  "value": "10",
+                  "confidence": 1,
+                  "source_span": "十天內"
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "個人使用"
+                },
+                "coloring_complexity": {
+                  "value": "簡易上色",
+                  "confidence": 1,
+                  "source_span": "簡易上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 4,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-011",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "quantity",
+        "coloring_complexity",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 13351,
+      "cost_usd": 0.001497,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "quantity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "coloring_complexity": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您需要的插畫類型是：角色設計、單張插畫、系列插畫，還是貼圖表情包呢？",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問需要製作的數量是多少呢？（例如：幾張、幾組或幾款）",
+                  "target_field": "quantity"
+                },
+                {
+                  "question": "請問這幅畫需要什麼程度的上色：線稿、簡易上色，還是精緻上色呢？",
+                  "target_field": "coloring_complexity"
+                },
+                {
+                  "question": "請問這份作品的使用授權範圍是個人使用、商業使用，還是需要獨家買斷呢？",
+                  "target_field": "license_scope"
+                },
+                {
+                  "question": "請問您預計何時需要完成呢？請告訴我距離現在的天數（例如：7 天、14 天）。",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "illu-012",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "貼圖表情包",
+          "actual": "貼圖表情包",
+          "correct": true
+        },
+        {
+          "name": "quantity",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "coloring_complexity",
+          "expected": "精緻上色",
+          "actual": "精緻上色",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "15",
+          "actual": "15",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15600.0,
+      "actual_amount": 15600.0,
+      "out_of_scope": false,
+      "latency_ms": 11612,
+      "cost_usd": 0.00129825,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "貼圖表情包",
+                  "confidence": 1,
+                  "source_span": "貼圖表情包"
+                },
+                "quantity": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一組"
+                },
+                "deadline_days": {
+                  "value": "15",
+                  "confidence": 1,
+                  "source_span": "十五天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "coloring_complexity": {
+                  "value": "精緻上色",
+                  "confidence": 1,
+                  "source_span": "精緻上色"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-001",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "14",
+          "actual": "14",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 19500.0,
+      "actual_amount": 19500.0,
+      "out_of_scope": false,
+      "latency_ms": 6146,
+      "cost_usd": 0.0013989999999999999,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "Landing Page",
+                  "confidence": 1,
+                  "source_span": "landing page"
+                },
+                "page_count": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "單頁"
+                },
+                "includes_cms": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不需要後台CMS"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要有RWD手機版"
+                },
+                "deadline_days": {
+                  "value": "14",
+                  "confidence": 1,
+                  "source_span": "十四天"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "feature_modules": {
+                  "value": "無",
+                  "confidence": 1,
+                  "source_span": "沒有其他功能模組"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-002",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "多頁式網站",
+          "actual": "多頁式網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "8",
+          "actual": "8",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "會員系統、多語系",
+          "actual": "會員系統,多語系",
+          "correct": false
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 83200.0,
+      "actual_amount": 83200.0,
+      "out_of_scope": false,
+      "latency_ms": 18851,
+      "cost_usd": 0.0014320000000000001,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "多頁式網站",
+                  "confidence": 0.8,
+                  "source_span": "公司形象官網"
+                },
+                "page_count": {
+                  "value": "8",
+                  "confidence": 1,
+                  "source_span": "八個頁面"
+                },
+                "includes_cms": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要後台讓我們自己改內容"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要RWD"
+                },
+                "deadline_days": {
+                  "value": "30",
+                  "confidence": 1,
+                  "source_span": "一個月內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "feature_modules": {
+                  "value": "會員系統,多語系",
+                  "confidence": 0.8,
+                  "source_span": "會員系統和多語系"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-003",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "電商網站",
+          "actual": "電商網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "金流",
+          "actual": "金流串接",
+          "correct": false
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "獨家買斷",
+          "actual": "獨家買斷",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "60",
+          "actual": "60",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 3200000.0,
+      "actual_amount": 3200000.0,
+      "out_of_scope": false,
+      "latency_ms": 5180,
+      "cost_usd": 0.00142225,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "電商網站",
+                  "confidence": 1,
+                  "source_span": "電商網站"
+                },
+                "page_count": {
+                  "value": "20",
+                  "confidence": 1,
+                  "source_span": "商品頁大概二十頁"
+                },
+                "includes_cms": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要後台管理"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要RWD"
+                },
+                "deadline_days": {
+                  "value": "60",
+                  "confidence": 1,
+                  "source_span": "六十天內"
+                },
+                "license_scope": {
+                  "value": "獨家買斷",
+                  "confidence": 1,
+                  "source_span": "版權買斷"
+                },
+                "feature_modules": {
+                  "value": "金流串接",
+                  "confidence": 1,
+                  "source_span": "金流串接"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-004",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "UI-UX設計稿",
+          "actual": "UI-UX設計稿",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "3",
+          "actual": "3",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "個人使用",
+          "actual": "個人使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "7",
+          "actual": "7",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 15000.0,
+      "actual_amount": 15000.0,
+      "out_of_scope": false,
+      "latency_ms": 10224,
+      "cost_usd": 0.0014104999999999999,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "UI-UX設計稿",
+                  "confidence": 1,
+                  "source_span": "UI設計稿"
+                },
+                "page_count": {
+                  "value": "3",
+                  "confidence": 1,
+                  "source_span": "三個頁面"
+                },
+                "includes_cms": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "沒有後台"
+                },
+                "includes_rwd": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不用RWD只要桌機版"
+                },
+                "deadline_days": {
+                  "value": "7",
+                  "confidence": 1,
+                  "source_span": "七天內"
+                },
+                "license_scope": {
+                  "value": "個人使用",
+                  "confidence": 1,
+                  "source_span": "個人專案使用"
+                },
+                "feature_modules": {
+                  "value": "無",
+                  "confidence": 1,
+                  "source_span": "沒有其他模組"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-005",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "deadline_days"
+      ],
+      "expected_amount": 19500.0,
+      "actual_amount": 19500.0,
+      "out_of_scope": false,
+      "latency_ms": 6921,
+      "cost_usd": 0.0014260000000000002,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "Landing Page",
+                  "confidence": 1,
+                  "source_span": "landing page單頁"
+                },
+                "page_count": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "單頁"
+                },
+                "includes_cms": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不用CMS"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要RWD"
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "feature_modules": {
+                  "value": "無",
+                  "confidence": 1,
+                  "source_span": "沒有特殊功能"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "好的，沒問題！請問您預計希望在幾天內完成這個 Landing Page 呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-006",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "多頁式網站",
+          "actual": "多頁式網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "30",
+          "actual": "30",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms"
+      ],
+      "expected_missing": [
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms"
+      ],
+      "expected_amount": 104000.0,
+      "actual_amount": 104000.0,
+      "out_of_scope": false,
+      "latency_ms": 3954,
+      "cost_usd": 0.0014465,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "多頁式網站",
+                  "confidence": 1,
+                  "source_span": "多頁式網站"
+                },
+                "page_count": {
+                  "value": "10",
+                  "confidence": 1,
+                  "source_span": "十頁"
+                },
+                "deadline_days": {
+                  "value": "30",
+                  "confidence": 1,
+                  "source_span": "三十天"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問這個網站是否需要包含 RWD 響應式設計（手機/平板/電腦自動適配）？",
+                  "target_field": "includes_rwd"
+                },
+                {
+                  "question": "網站是否需要架設 CMS 後台系統（方便您自行修改內容）？",
+                  "target_field": "includes_cms"
+                },
+                {
+                  "question": "請問網站需要哪些功能模組嗎？（例如：聯絡表單、會員系統、多語言切換等）如果暫不需要或不確定，請告訴我。",
+                  "target_field": "feature_modules"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-007",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 6155,
+      "cost_usd": 0.0023917499999999998,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "page_count": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_cms": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_rwd": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "feature_modules": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您想製作哪種類型的網站呢？（例如：Landing Page、多頁式網站、電商網站或 UI-UX設計稿）",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問預計需要製作幾個頁面？",
+                  "target_field": "page_count"
+                },
+                {
+                  "question": "請問網站是否需要包含後台管理系統（CMS）？",
+                  "target_field": "includes_cms"
+                },
+                {
+                  "question": "請問是否需要支援手機版響應式設計（RWD）？",
+                  "target_field": "includes_rwd"
+                },
+                {
+                  "question": "請問您的網站是否有特殊功能需求（例如：會員系統、金流串接、訂房系統等）？如果沒有請填「無」。",
+                  "target_field": "feature_modules"
+                },
+                {
+                  "question": "請問此網站的授權範圍為何？（例如：個人使用、商業使用、或獨家買斷）",
+                  "target_field": "license_scope"
+                },
+                {
+                  "question": "請問您預計何時需要完成？（請提供預計的天數）",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問您想製作哪種類型的網站呢？（例如：Landing Page、多頁式網站、電商網站或 UI-UX設計稿）",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問預計需要製作幾個頁面？",
+                  "target_field": "page_count"
+                },
+                {
+                  "question": "請問網站是否需要包含後台管理系統（CMS）？",
+                  "target_field": "includes_cms"
+                },
+                {
+                  "question": "請問是否需要支援手機版響應式設計（RWD）？",
+                  "target_field": "includes_rwd"
+                },
+                {
+                  "question": "請問此網站的授權範圍為何？（例如：個人使用、商業使用、或獨家買斷）",
+                  "target_field": "license_scope"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 4,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-008",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "電商網站",
+          "actual": "電商網站",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "金流、會員系統",
+          "actual": "金流、會員系統",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "45",
+          "actual": "45",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "page_count"
+      ],
+      "expected_missing": [
+        "page_count"
+      ],
+      "expected_amount": 104000.0,
+      "actual_amount": 104000.0,
+      "out_of_scope": false,
+      "latency_ms": 6738,
+      "cost_usd": 0.00145275,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "電商網站",
+                  "confidence": 1,
+                  "source_span": "電商網站"
+                },
+                "page_count": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_cms": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要後台"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要RWD"
+                },
+                "deadline_days": {
+                  "value": "45",
+                  "confidence": 1,
+                  "source_span": "四十五天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "feature_modules": {
+                  "value": "金流、會員系統",
+                  "confidence": 0.8,
+                  "source_span": "金流跟會員"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "了解，電商網站的部分，請問您預計大約需要多少個頁面呢？",
+                  "target_field": "page_count"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-009",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "UI-UX設計稿",
+          "actual": "UI-UX設計稿",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "5",
+          "actual": "5",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "20",
+          "actual": "20",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "feature_modules",
+        "includes_cms",
+        "license_scope"
+      ],
+      "expected_missing": [
+        "feature_modules",
+        "includes_cms",
+        "license_scope"
+      ],
+      "expected_amount": 25000.0,
+      "actual_amount": 25000.0,
+      "out_of_scope": false,
+      "latency_ms": 17762,
+      "cost_usd": 0.00147825,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "UI-UX設計稿",
+                  "confidence": 1,
+                  "source_span": "UI設計稿"
+                },
+                "page_count": {
+                  "value": "5",
+                  "confidence": 1,
+                  "source_span": "五頁"
+                },
+                "includes_cms": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "RWD版本"
+                },
+                "deadline_days": {
+                  "value": "20",
+                  "confidence": 1,
+                  "source_span": "二十天"
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "請問這個網頁設計專案是否需要包含 CMS 後台管理系統呢？",
+                  "target_field": "includes_cms"
+                },
+                {
+                  "question": "請問這個設計稿需要包含哪些功能模組（例如：會員系統、購物車、互動特效等）？",
+                  "target_field": "feature_modules"
+                },
+                {
+                  "question": "請問授權範圍是個人使用、商業使用，還是需要獨家買斷呢？",
+                  "target_field": "license_scope"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-010",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "10",
+          "actual": "10",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 19500.0,
+      "actual_amount": 19500.0,
+      "out_of_scope": false,
+      "latency_ms": 19502,
+      "cost_usd": 0.0014039999999999999,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "Landing Page",
+                  "confidence": 1,
+                  "source_span": "landing page"
+                },
+                "page_count": {
+                  "value": "1",
+                  "confidence": 1,
+                  "source_span": "一頁"
+                },
+                "includes_cms": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不用CMS"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要RWD"
+                },
+                "deadline_days": {
+                  "value": "10",
+                  "confidence": 1,
+                  "source_span": "十天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "feature_modules": {
+                  "value": "無",
+                  "confidence": 1,
+                  "source_span": "沒有其他模組"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-011",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": null,
+          "actual": null,
+          "correct": true
+        }
+      ],
+      "predicted_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_missing": [
+        "subtype",
+        "page_count",
+        "feature_modules",
+        "includes_rwd",
+        "includes_cms",
+        "license_scope",
+        "deadline_days"
+      ],
+      "expected_amount": null,
+      "actual_amount": null,
+      "out_of_scope": true,
+      "latency_ms": 17825,
+      "cost_usd": 0.002411,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "page_count": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_cms": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "includes_rwd": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "deadline_days": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "license_scope": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                },
+                "feature_modules": {
+                  "value": null,
+                  "confidence": 0,
+                  "source_span": null
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "您好！請問您需要設計哪種類型的網站呢？（例如：Landing Page、多頁式網站、電商網站或 UI-UX 設計稿）",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問您預計網站需要多少頁面呢？",
+                  "target_field": "page_count"
+                },
+                {
+                  "question": "請問網站需要包含哪些功能模組？（例如：會員系統、購物車、後台管理等）",
+                  "target_field": "feature_modules"
+                },
+                {
+                  "question": "是否需要響應式設計（RWD，即手機版適配）？",
+                  "target_field": "includes_rwd"
+                },
+                {
+                  "question": "是否需要整合內容管理系統（CMS，如 WordPress）讓您能自行更新內容？",
+                  "target_field": "includes_cms"
+                },
+                {
+                  "question": "請問這項設計的授權需求是什麼呢？（個人使用、商業使用、還是需要獨家買斷？）",
+                  "target_field": "license_scope"
+                },
+                {
+                  "question": "請問您預計希望在多少天內完成呢？",
+                  "target_field": "deadline_days"
+                }
+              ]
+            }
+          },
+          {
+            "tool_name": "ask_customer",
+            "args": {
+              "questions": [
+                {
+                  "question": "您好！請問您需要設計哪種類型的網站呢？（選項：Landing Page、多頁式網站、電商網站、UI-UX設計稿）",
+                  "target_field": "subtype"
+                },
+                {
+                  "question": "請問您預計需要規劃多少頁面？",
+                  "target_field": "page_count"
+                },
+                {
+                  "question": "請問網站需要包含哪些功能模組？（例如：會員系統、購物車、後台管理等）",
+                  "target_field": "feature_modules"
+                },
+                {
+                  "question": "是否需要響應式設計（RWD，適應手機版）？（是/否）",
+                  "target_field": "includes_rwd"
+                },
+                {
+                  "question": "是否需要內容管理系統（CMS）方便自行更新？（是/否）",
+                  "target_field": "includes_cms"
+                }
+              ]
+            }
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "ask_customer"
+        ],
+        "steps_taken": 4,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    },
+    {
+      "id": "web-012",
+      "fields": [
+        {
+          "name": "subtype",
+          "expected": "Landing Page",
+          "actual": "Landing Page",
+          "correct": true
+        },
+        {
+          "name": "page_count",
+          "expected": "1",
+          "actual": "1",
+          "correct": true
+        },
+        {
+          "name": "feature_modules",
+          "expected": "無",
+          "actual": "無",
+          "correct": true
+        },
+        {
+          "name": "includes_rwd",
+          "expected": "是",
+          "actual": "是",
+          "correct": true
+        },
+        {
+          "name": "includes_cms",
+          "expected": "否",
+          "actual": "否",
+          "correct": true
+        },
+        {
+          "name": "license_scope",
+          "expected": "商業使用",
+          "actual": "商業使用",
+          "correct": true
+        },
+        {
+          "name": "deadline_days",
+          "expected": "12",
+          "actual": "12",
+          "correct": true
+        }
+      ],
+      "predicted_missing": [],
+      "expected_missing": [],
+      "expected_amount": 19500.0,
+      "actual_amount": 19500.0,
+      "out_of_scope": false,
+      "latency_ms": 8002,
+      "cost_usd": 0.001414,
+      "model_version": "gemini-3.1-flash-lite",
+      "trajectory": {
+        "calls": [
+          {
+            "tool_name": "lookup_rate_card",
+            "args": {}
+          },
+          {
+            "tool_name": "record_fields",
+            "args": {
+              "fields": {
+                "subtype": {
+                  "value": "Landing Page",
+                  "confidence": 1,
+                  "source_span": "一頁式的 landing page"
+                },
+                "page_count": {
+                  "value": "1",
+                  "confidence": 0.8,
+                  "source_span": "一頁式"
+                },
+                "includes_cms": {
+                  "value": "否",
+                  "confidence": 1,
+                  "source_span": "不用後台"
+                },
+                "includes_rwd": {
+                  "value": "是",
+                  "confidence": 1,
+                  "source_span": "要RWD"
+                },
+                "deadline_days": {
+                  "value": "12",
+                  "confidence": 1,
+                  "source_span": "十二天內"
+                },
+                "license_scope": {
+                  "value": "商業使用",
+                  "confidence": 1,
+                  "source_span": "商業使用"
+                },
+                "feature_modules": {
+                  "value": "無",
+                  "confidence": 0.8,
+                  "source_span": "沒別的模組"
+                }
+              }
+            }
+          },
+          {
+            "tool_name": "compute_quote",
+            "args": {}
+          }
+        ],
+        "expected_sequence": [
+          "lookup_rate_card",
+          "record_fields",
+          "compute_quote"
+        ],
+        "steps_taken": 3,
+        "outcome": "completed",
+        "fallback_reason": null
+      }
+    }
+  ],
+  "metrics": {
+    "field_extraction_accuracy": 0.9803921568627451,
+    "field_extraction_f1": 0.98,
+    "clarification_precision": 0.9636363636363636,
+    "clarification_recall": 1.0,
+    "hallucination_rate": 0.0,
+    "quote_deviation_avg": 0.0,
+    "quote_deviation_max": 0.0,
+    "end_to_end_success_rate": 1.0,
+    "latency_avg_ms": 10079.555555555555,
+    "latency_p95_ms": 19502.0,
+    "cost_per_case_usd": 0.0014431736111111112
+  },
+  "trajectory_metrics": {
+    "tool_sequence_match_rate": 0.9444444444444444,
+    "avg_steps_per_case": 3.0833333333333335,
+    "redundant_call_rate": 0.0,
+    "fallback_rate": 0.0
+  }
+}

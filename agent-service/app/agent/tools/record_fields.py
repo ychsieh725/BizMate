@@ -25,7 +25,7 @@ from app.db.repositories.extracted_fields import (
     extracted_fields_repository,
 )
 from app.db.repositories.rate_card import (
-    SupportsFindActiveSubtypes,
+    SupportsFindActiveServices,
     rate_card_repository,
 )
 
@@ -72,7 +72,7 @@ class RecordFieldsTool:
     def __init__(
         self,
         storage: SupportsFieldStorage | None = None,
-        rate_card: SupportsFindActiveSubtypes | None = None,
+        rate_card: SupportsFindActiveServices | None = None,
     ) -> None:
         self._storage = storage or extracted_fields_repository
         self._rate_card = rate_card or rate_card_repository
@@ -83,7 +83,8 @@ class RecordFieldsTool:
             return rejected("fields 必須是欄位名稱對應抽取結果的物件")
 
         allowed_names = set(required_fields_for(context.category))
-        subtypes = await self._rate_card.find_active_subtypes(context.merchant_id, context.category)
+        services = await self._rate_card.find_active_services(context.merchant_id, context.category)
+        subtypes = [service.subtype for service in services]
 
         accepted: dict[str, FieldExtraction] = {}
         rejections: list[dict[str, str]] = []
