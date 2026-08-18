@@ -33,7 +33,8 @@
     "eval": "tsx --env-file=.env.local scripts/run-eval.ts",
     "eval:clean": "tsx --env-file=.env.local scripts/clean-eval-data.ts",
     "seed:rate-card": "tsx --env-file=.env.local scripts/seed-rate-card.ts",
-    "export:contracts": "tsx scripts/export-shared-contracts.ts"
+    "export:contracts": "tsx scripts/export-shared-contracts.ts",
+    "verify:adjustment-metrics": "tsx --env-file=.env.local scripts/verify-adjustment-metrics.ts"
   },
   "dependencies": {
     "@google/genai": "^2.10.0",
