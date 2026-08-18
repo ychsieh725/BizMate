@@ -31,6 +31,23 @@ export type QuoteStatus =
    *  單一 p_to_status 參數能同時 cast 成兩種 enum（見 migration 0008）。 */
   | "abandoned";
 
+/**
+ * agent loop 中單一 step 的結局（對應 migration 0009 的 agent_step_status enum，
+ * 以及 Python 端 `app/db/repositories/agent_steps.py` 的同名 Literal）。
+ *
+ * 三份定義必須一致：Python 寫入、PostgreSQL 約束、TypeScript 讀取。
+ * 任一邊多出或少掉一個值，症狀都是後台軌跡顯示不出來而非查詢報錯。
+ */
+export type AgentStepStatus =
+  /** tool 正常執行完成。 */
+  | "ok"
+  /** 參數不合 schema 或欄位不在白名單，已回錯誤讓 agent 重試（不終止 loop）。 */
+  | "rejected"
+  /** tool 執行時拋錯，含 LLM 呼叫失敗。 */
+  | "error"
+  /** 預算用盡或偵測到迴圈，該步為退回既有路徑的標記。 */
+  | "fallback";
+
 /** 商家（tenant 根，1:1 對應 auth.users；public_slug 即專屬報價連結 /q/{slug}） */
 export type Merchant = {
   id: string;

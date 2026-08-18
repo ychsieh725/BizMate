@@ -13,6 +13,7 @@ import {
   getRateCardBasePrice,
   getRateCardRows,
   provisionConfirmedUser,
+  seedAgentTrajectory,
   type ProvisionedUser,
 } from "./support/testData";
 
@@ -102,22 +103,40 @@ test.describe("關鍵旅程：註冊→onboarding→改價→匿名報價→後�
     });
 
     let quoteId = "";
+    let sessionId = "";
     await test.step("後台：確認匿名客戶送來的待審報價", async () => {
       const quote = await getLatestQuote(activeMerchant.userId);
       expect(quote, "DB 應有一筆報價").not.toBeNull();
       expect(quote!.status, "新報價應為 awaiting_review").toBe("awaiting_review");
       expect(quote!.quote_code, "DB 報價編號應與客戶端顯示一致").toBe(uiQuoteCode);
       quoteId = quote!.id;
+      sessionId = quote!.session_id;
 
       const quotes = new QuotesPage(page);
       await quotes.gotoList();
       await quotes.expectQuoteVisibleInList(uiQuoteCode);
 
       await quotes.gotoDetail(quoteId);
+
+      // AGENT_LOOP_ENABLED 關閉，這筆報價走的是單步流程，軌跡必然是空的。
+      // 空狀態要說清楚「沒跑 agent」而不是留白，否則商家會以為系統壞了。
+      await quotes.expectNoTrajectory();
+
       await quotes.confirm(quoteId);
 
       const confirmed = await getQuoteById(quoteId);
       expect(confirmed!.status, "確認後狀態應為 confirmed").toBe("confirmed");
+    });
+
+    await test.step("軌跡 UI：有 agent 步驟時正確分趟呈現", async () => {
+      // flag 關閉時真實流程不產生軌跡，故此處直接寫入一段代表性的軌跡。
+      // 形狀取自 A6 實際觀察到的 web-007：模型一次問太多題被 tool 擋下、
+      // 下一步自行修正——那正是最需要 UI 正確呈現的情境。
+      await seedAgentTrajectory(sessionId);
+
+      const quotes = new QuotesPage(page);
+      await quotes.gotoDetail(quoteId);
+      await quotes.expectTrajectoryWithTwoRuns();
     });
 
     await test.step("寄信：寄送最終報價單（真實 Resend）", async () => {

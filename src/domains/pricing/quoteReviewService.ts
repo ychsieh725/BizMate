@@ -88,13 +88,14 @@ export async function getQuoteDetail(
 
   // ── 歸屬檢查已通過，此後才准使用 quote.session_id 查子表 ──
   const sessionId = quote.session_id;
-  const [session, lineItems, extractedFields, clarifications, rawInputs] =
+  const [session, lineItems, extractedFields, clarifications, rawInputs, agentSteps] =
     await Promise.all([
       quoteReviewRepository.findSessionById(sessionId),
       quoteReviewRepository.findLineItems(sessionId),
       quoteReviewRepository.findExtractedFields(sessionId),
       quoteReviewRepository.findClarifications(sessionId),
       quoteReviewRepository.findRawInputs(sessionId),
+      quoteReviewRepository.findAgentSteps(sessionId),
     ]);
 
   // quotes.session_id 與 quotes.merchant_id 是兩個獨立 FK，DB 沒有 composite FK
@@ -104,5 +105,13 @@ export async function getQuoteDetail(
     return null;
   }
 
-  return { quote, session, lineItems, extractedFields, clarifications, rawInputs };
+  return {
+    quote,
+    session,
+    lineItems,
+    extractedFields,
+    clarifications,
+    rawInputs,
+    agentSteps,
+  };
 }

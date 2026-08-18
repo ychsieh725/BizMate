@@ -1,11 +1,15 @@
 /**
- * Supabase 資料庫型別（手寫，對應 supabase/migrations/0001_init.sql）。
+ * Supabase 資料庫型別（手寫，對應 supabase/migrations/ 下的全部 migration）。
  * 形狀符合 @supabase/supabase-js 的 Database 泛型，讓 client.from() 得到型別安全查詢。
  * enum 從 shared/types 複用，避免重複定義（DRY）。
  *
- * schema 變更時，這裡與 0001_init.sql 必須同步更新。
+ * **新增或修改資料表時，這裡必須同步更新。** 這份檔案是手寫而非 `supabase gen`
+ * 產出，漏改不會有任何工具提醒：新表在此缺席時，`client.from("新表")` 會被
+ * TypeScript 判為未知資料表而編譯失敗，症狀離根因很遠。agent_steps 就曾因
+ * migration 0009 加了表卻沒同步此處，直到 A7 要讀它時才發現。
  */
 import type {
+  AgentStepStatus,
   CaseCategory,
   QuoteStatus,
   SessionStatus,
@@ -420,6 +424,54 @@ export type Database = {
           input_tokens?: number;
           output_tokens?: number;
           cost_usd?: number;
+          latency_ms?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_steps: {
+        Row: {
+          id: string;
+          session_id: string;
+          /** 同一次 agent loop 的所有 step 共用；一個 session 可跑多次 loop。 */
+          run_id: string;
+          step_index: number;
+          tool_name: string;
+          /** tool 的原始參數與回傳，供事後重建當時的決策情境。 */
+          tool_args: Json | null;
+          tool_result: Json | null;
+          status: AgentStepStatus;
+          error_detail: string | null;
+          /** 純 DB 查詢與確定性計價不呼叫 LLM，故無對應 cost_logs 紀錄。 */
+          cost_log_id: string | null;
+          latency_ms: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          session_id: string;
+          run_id: string;
+          step_index: number;
+          tool_name: string;
+          tool_args?: Json | null;
+          tool_result?: Json | null;
+          status: AgentStepStatus;
+          error_detail?: string | null;
+          cost_log_id?: string | null;
+          latency_ms?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          session_id?: string;
+          run_id?: string;
+          step_index?: number;
+          tool_name?: string;
+          tool_args?: Json | null;
+          tool_result?: Json | null;
+          status?: AgentStepStatus;
+          error_detail?: string | null;
+          cost_log_id?: string | null;
           latency_ms?: number | null;
           created_at?: string;
         };

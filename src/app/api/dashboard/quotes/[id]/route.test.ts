@@ -57,6 +57,7 @@ const DETAIL: QuoteDetail = {
   extractedFields: [],
   clarifications: [],
   rawInputs: [],
+  agentSteps: [],
 };
 
 function getRequest(): Request {

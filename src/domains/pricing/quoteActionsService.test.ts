@@ -388,6 +388,7 @@ describe("sendQuoteEmail", () => {
     extractedFields: [],
     clarifications: [],
     rawInputs: [],
+    agentSteps: [],
   };
 
   const RENDERED = { subject: "s", html: "<p>h</p>", text: "t" };

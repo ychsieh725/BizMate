@@ -25,4 +25,6 @@ export type QuoteDetail = {
   extractedFields: Tables<"extracted_fields">[];
   clarifications: Tables<"clarification_turns">[];
   rawInputs: Tables<"raw_inputs">[];
+  /** agent 決策軌跡。flag 關閉時為空陣列，非 null——「沒跑過」不是錯誤狀態。 */
+  agentSteps: Tables<"agent_steps">[];
 };
