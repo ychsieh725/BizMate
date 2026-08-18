@@ -17,6 +17,8 @@ export type ProvisionedUser = {
 
 export type QuoteRow = {
   id: string;
+  /** 軌跡等子表都掛在 session 下，A7 的 E2E 需要它來 seed。 */
+  session_id: string;
   quote_code: string;
   status: string;
   final_amount: number | null;
@@ -99,7 +101,7 @@ export async function getRateCardRows(userId: string): Promise<RateCardRow[]> {
 export async function getLatestQuote(userId: string): Promise<QuoteRow | null> {
   const { data, error } = await admin
     .from("quotes")
-    .select("id, quote_code, status, final_amount, sent_at")
+    .select("id, session_id, quote_code, status, final_amount, sent_at")
     .eq("merchant_id", userId)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -113,7 +115,7 @@ export async function getLatestQuote(userId: string): Promise<QuoteRow | null> {
 export async function getQuoteById(quoteId: string): Promise<QuoteRow | null> {
   const { data, error } = await admin
     .from("quotes")
-    .select("id, quote_code, status, final_amount, sent_at")
+    .select("id, session_id, quote_code, status, final_amount, sent_at")
     .eq("id", quoteId)
     .maybeSingle();
   if (error) {
@@ -142,6 +144,73 @@ export async function getRateCardBasePrice(rowId: string): Promise<number | null
  * rate_card_base/modifiers）。分兩段是為了避開 price_line_items.rule_id →
  * rate_card_base 的 NO ACTION 外鍵在同一次 merchant cascade 中的刪除順序風險。
  */
+/**
+ * 為指定 session 寫入一段 agent 決策軌跡（A7）。
+ *
+ * 為什麼要 seed 而不是跑真的 agent：`AGENT_LOOP_ENABLED` 預設關閉（A6 的量測
+ * 結論是暫不開啟），真實流程不會產生任何 agent_steps。但軌跡 UI 仍必須在有
+ * 資料時正確呈現，否則它會在 flag 開啟的那一天才被發現壞掉。
+ *
+ * 刻意寫兩趟 loop 且第一趟含一個 rejected 步：這正是 A6 的 web-007 實際發生
+ * 的形狀（模型一次問太多題被 tool 擋下、下一步自行修正），是最需要被 UI 正確
+ * 呈現的情境——若把 rejected 顯示成失敗，護欄生效會看起來像故障。
+ */
+export async function seedAgentTrajectory(sessionId: string): Promise<void> {
+  const firstRun = crypto.randomUUID();
+  const secondRun = crypto.randomUUID();
+
+  const { error } = await admin.from("agent_steps").insert([
+    {
+      session_id: sessionId,
+      run_id: firstRun,
+      step_index: 0,
+      tool_name: "lookup_rate_card",
+      status: "ok",
+      tool_result: { subtypes: ["角色設計"] },
+      latency_ms: 120,
+    },
+    {
+      session_id: sessionId,
+      run_id: firstRun,
+      step_index: 1,
+      tool_name: "ask_customer",
+      status: "rejected",
+      error_detail: "單輪最多 5 題，請只問最關鍵的欄位",
+      latency_ms: 890,
+    },
+    {
+      session_id: sessionId,
+      run_id: firstRun,
+      step_index: 2,
+      tool_name: "ask_customer",
+      status: "ok",
+      tool_args: { questions: [{ target_field: "quantity", question: "需要幾張？" }] },
+      latency_ms: 760,
+    },
+    {
+      session_id: sessionId,
+      run_id: secondRun,
+      step_index: 0,
+      tool_name: "record_fields",
+      status: "ok",
+      latency_ms: 640,
+    },
+    {
+      session_id: sessionId,
+      run_id: secondRun,
+      step_index: 1,
+      tool_name: "compute_quote",
+      status: "ok",
+      tool_result: { final_amount: 4321 },
+      latency_ms: 210,
+    },
+  ]);
+
+  if (error) {
+    throw new Error(`seed agent_steps 失敗：${error.message}`);
+  }
+}
+
 export async function cleanupUser(userId: string | null): Promise<void> {
   if (userId === null) return;
   await admin.from("sessions").delete().eq("merchant_id", userId);

@@ -9,6 +9,7 @@ import { formatAmount, formatDateTime } from "../formatters.ts";
 import { StatusPill } from "../../StatusPill.tsx";
 import { QuoteActions } from "./QuoteActions.tsx";
 import { SendQuoteButton } from "./SendQuoteButton.tsx";
+import { AgentTrajectory } from "./AgentTrajectory.tsx";
 
 export default async function QuoteDetailPage({
   params,
@@ -31,8 +32,15 @@ export default async function QuoteDetailPage({
     notFound();
   }
 
-  const { quote, session, lineItems, extractedFields, clarifications, rawInputs } =
-    detail;
+  const {
+    quote,
+    session,
+    lineItems,
+    extractedFields,
+    clarifications,
+    rawInputs,
+    agentSteps,
+  } = detail;
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4">
@@ -140,6 +148,9 @@ export default async function QuoteDetailPage({
           </table>
         )}
       </section>
+
+      {/* 抽取欄位顯示「抽到什麼」，軌跡顯示「怎麼決定的」，故緊接其後 */}
+      <AgentTrajectory steps={agentSteps} />
 
       <section className="flex flex-col gap-2 rounded-2xl border border-surface-line bg-surface shadow-card p-5 text-xs">
         <h2 className="text-ink-soft font-medium">澄清歷程</h2>

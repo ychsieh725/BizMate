@@ -134,6 +134,27 @@ export class QuoteReviewRepository extends BaseRepository<"quotes"> {
     return data ?? [];
   }
 
+  /**
+   * agent 決策軌跡，依 (run_id, step_index) 取序。
+   *
+   * 一個 session 可能跑多趟 loop，故排序必須帶上 run_id，否則不同趟的步驟會
+   * 交錯（兩趟都有 step_index 0）。分組交給 agentTrajectory.ts 處理。
+   *
+   * flag 關閉時此表為空，回空陣列是正常狀態而非異常。
+   */
+  async findAgentSteps(sessionId: string): Promise<Tables<"agent_steps">[]> {
+    const { data, error } = await this.client
+      .from("agent_steps")
+      .select("*")
+      .eq("session_id", sessionId)
+      .order("run_id", { ascending: true })
+      .order("step_index", { ascending: true });
+    if (error) {
+      throw new RepositoryError("agent_steps", "findAgentSteps", error.message);
+    }
+    return data ?? [];
+  }
+
   /** 客戶的原始描述——全部列出（非只有最新一筆），後台需看到說過的每一句。 */
   async findRawInputs(sessionId: string): Promise<Tables<"raw_inputs">[]> {
     const { data, error } = await this.client

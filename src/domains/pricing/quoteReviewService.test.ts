@@ -11,6 +11,7 @@ vi.mock("./repositories/quoteReviewRepository.ts", () => ({
     findExtractedFields: vi.fn(),
     findClarifications: vi.fn(),
     findRawInputs: vi.fn(),
+    findAgentSteps: vi.fn(),
   },
 }));
 
@@ -48,12 +49,19 @@ const SESSION_A: Tables<"sessions"> = {
   updated_at: "2026-07-11T02:00:00.000Z",
 };
 
-/** 四張子表：沒有 merchant_id，歸屬檢查失敗時一次都不該被呼叫。 */
+/**
+ * 五張子表：沒有 merchant_id，歸屬檢查失敗時一次都不該被呼叫。
+ *
+ * agent_steps（A7）刻意加入這份清單而非另開一組斷言。它與其他四張同屬
+ * 「隔離只靠 session_id 外鍵」的類別，漏掉它就等於在既有的防線上開一個洞，
+ * 而那個洞不會有任何測試會紅。
+ */
 const subTableQueries = [
   () => repo.findLineItems,
   () => repo.findExtractedFields,
   () => repo.findClarifications,
   () => repo.findRawInputs,
+  () => repo.findAgentSteps,
 ];
 
 beforeEach(() => {
@@ -111,7 +119,7 @@ describe("getQuoteDetail", () => {
     }
   });
 
-  it("跨租戶：B 商家取 A 的報價 → null，且四張子表一次都沒被查（安全不變式）", async () => {
+  it("跨租戶：B 商家取 A 的報價 → null，且五張子表一次都沒被查（安全不變式）", async () => {
     repo.findById.mockResolvedValue(QUOTE_A);
 
     const detail = await getQuoteDetail(QUOTE_ID, MERCHANT_B);
@@ -123,13 +131,14 @@ describe("getQuoteDetail", () => {
     }
   });
 
-  it("歸屬正確 → 聚合四張子表，且子表只以 quote.session_id 查詢", async () => {
+  it("歸屬正確 → 聚合五張子表，且子表只以 quote.session_id 查詢", async () => {
     repo.findById.mockResolvedValue(QUOTE_A);
     repo.findSessionById.mockResolvedValue(SESSION_A);
     repo.findLineItems.mockResolvedValue([]);
     repo.findExtractedFields.mockResolvedValue([]);
     repo.findClarifications.mockResolvedValue([]);
     repo.findRawInputs.mockResolvedValue([]);
+    repo.findAgentSteps.mockResolvedValue([]);
 
     const detail = await getQuoteDetail(QUOTE_ID, MERCHANT_A);
 
@@ -140,6 +149,7 @@ describe("getQuoteDetail", () => {
       extractedFields: [],
       clarifications: [],
       rawInputs: [],
+      agentSteps: [],
     });
     for (const query of subTableQueries) {
       expect(query()).toHaveBeenCalledWith(SESSION_ID);
@@ -156,6 +166,7 @@ describe("getQuoteDetail", () => {
     repo.findExtractedFields.mockResolvedValue([]);
     repo.findClarifications.mockResolvedValue([]);
     repo.findRawInputs.mockResolvedValue([]);
+    repo.findAgentSteps.mockResolvedValue([]);
 
     const detail = await getQuoteDetail(QUOTE_ID, MERCHANT_A);
 
@@ -169,6 +180,7 @@ describe("getQuoteDetail", () => {
     repo.findExtractedFields.mockResolvedValue([]);
     repo.findClarifications.mockResolvedValue([]);
     repo.findRawInputs.mockResolvedValue([]);
+    repo.findAgentSteps.mockResolvedValue([]);
 
     const detail = await getQuoteDetail(QUOTE_ID, MERCHANT_A);
 
