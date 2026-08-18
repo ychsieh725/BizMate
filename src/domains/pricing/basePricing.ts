@@ -1,7 +1,8 @@
 import type { CaseCategory } from "@/shared/types/domain.types";
-import type { Tables } from "@/lib/supabase/database.types.ts";
+
 import { rateCardRepository } from "@/domains/pricing/repositories/rateCardRepository.ts";
 import { normalizeLicenseScope } from "@/domains/pricing/licenseScope.ts";
+import { evaluateModifier } from "@/domains/pricing/modifierEvaluators.ts";
 import type {
   ExtractedValues,
   LineItem,
@@ -29,25 +30,15 @@ function parseQuantity(category: CaseCategory, fields: ExtractedValues): number 
 export { normalizeLicenseScope };
 
 /**
- * 判斷固定倍率 modifier 是否觸發。
- * P0 只處理「授權範圍=X」型觸發條件（seed 的固定 modifier 皆屬此類）；
- * 其他型別的觸發條件無法 deterministic 判斷，保守跳過，留給 4.3 Pricing Agent。
- */
-function isModifierTriggered(
-  modifier: Tables<"rate_card_modifiers">,
-  fields: ExtractedValues,
-): boolean {
-  const match = modifier.trigger_condition.match(/^授權範圍=(.+)$/);
-  if (!match) return false;
-  const required = match[1].trim();
-  return normalizeLicenseScope(fields.license_scope?.value ?? null) === required;
-}
-
-/**
  * deterministic 基礎計價（3.5，FR-PR-1、FR-PR-4）。
  *
- * = 基礎費（base_price × 數量）+ 固定倍率加成（modifier min==max 且觸發）。
- * 區間 modifier（min≠max）不在此判斷，留給 4.3 Pricing Reasoning Agent。
+ * = 基礎費（base_price × 數量）+ 所有觸發的加成係數。
+ *
+ * **WBS 6.1 階段一起，區間係數也在此判斷。** 在此之前只處理固定倍率
+ * （min === max）且只認得「授權範圍=X」一種觸發條件，實際後果是「三天內急件」
+ * 與「一個月交件」報價完全相同。求值規則見 modifierEvaluators.ts；能確定性
+ * 判斷的一律在此算完，不交給 LLM。
+ *
  * 查無子類型 → outOfScope（FR-PR-3）。每個項目帶 ruleId/modifierId 可回溯。
  */
 export async function computeBasePricing(
@@ -78,14 +69,18 @@ export async function computeBasePricing(
 
   const modifiers = await rateCardRepository.findModifiers(merchantId, category);
   for (const modifier of modifiers) {
-    const { range_min, range_max } = modifier;
-    if (range_min == null || range_max == null) continue;
-    if (range_min !== range_max) continue; // 區間交給 4.3
-    if (!isModifierTriggered(modifier, fields)) continue;
+    const evaluation = evaluateModifier(modifier, fields);
+    if (evaluation === null) continue;
 
+    // applications 與 ratio 分開相乘：區間驗證的對象是單次套用的倍率，
+    // 「每加一個模組」套用 3 次不代表倍率越界（見 modifierEvaluators.ts）。
+    const amount = Math.round(baseAmount * evaluation.ratio * evaluation.applications);
     lineItems.push({
-      itemName: modifier.modifier_name,
-      amount: Math.round(baseAmount * range_min),
+      itemName:
+        evaluation.applications > 1
+          ? `${modifier.modifier_name} × ${evaluation.applications}`
+          : modifier.modifier_name,
+      amount,
       ruleId: null,
       modifierId: modifier.id,
       agentReasoning: null,
