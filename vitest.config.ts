@@ -34,6 +34,11 @@ export default defineConfig({
         "src/app/wizard/lib/wizardApi.ts",
         "src/domains/pricing/basePricing.ts",
         "src/domains/pricing/quoteFormatter.ts",
+        // 8.5 CI 閘門：判定邏輯錯了不會有人發現——誤放行看起來就跟沒有回歸一樣
+        "src/domains/eval/gate.ts",
+        "src/domains/eval/baseline.ts",
+        "src/domains/eval/runArtifact.ts",
+        "src/shared/testData/**/*.ts",
       ],
       exclude: ["src/**/*.{test,spec}.ts", "src/**/*.types.ts"],
       thresholds: {
