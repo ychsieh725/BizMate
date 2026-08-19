@@ -168,6 +168,32 @@ tsx --env-file=.env.production.local scripts/seed-rate-card.ts
 
 ---
 
+## GitHub Actions Secrets（CI 真實依賴閘門，WBS 8.5）
+
+`ci.yml` 的 `real-dependencies` job 與 `eval.yml` 對真實 Supabase / Gemini 執行，
+需在 repo 的 Settings → Secrets and variables → Actions 設定六項：
+
+| Secret | 用途 | 值的來源 |
+| :--- | :--- | :--- |
+| `SUPABASE_URL` | verify 腳本與 eval | `.env.local` 同名變數 |
+| `SUPABASE_SERVICE_ROLE_KEY` | 同上 | 同上 |
+| `NEXT_PUBLIC_SUPABASE_URL` | RLS 驗證需以 anon 身分連線 | 同上 |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 同上 | 同上 |
+| `DEV_MERCHANT_PASSWORD` | eval 需 dev 商家 | 同上 |
+| `GEMINI_API_KEY` | 只有 `eval.yml` 需要 | 同上 |
+
+設定前需要知道的三件事：
+
+1. **這些 job 會寫入正式 Supabase 專案。** dev 與 production 共用同一個專案
+   （免費層 2 專案上限的取捨，見上方決策）。寫入的都是可辨識的測試資料：
+   verify 用 `@bizmate-test.local` 帳號、eval 用 `eval@bizmate.local` session，
+   各有 `pnpm verify:clean` 與 `pnpm eval:clean` 對應。
+2. **fork 來的 PR 拿不到 secrets**，兩個 job 都會顯示 skipped。這是刻意的：
+   改用 `pull_request_target` 能讓 fork 也拿到，但那等於把 service_role key
+   交給任何開 PR 的人。
+3. **`eval.yml` 有 paths 篩選**，未觸及模型相關路徑時完全不會執行。因此它
+   不可被設為 branch protection 的必要檢查——不相關的 PR 會永遠卡在等待中。
+
 ## 回滾（Rollback）
 
 | 情境 | 動作 |

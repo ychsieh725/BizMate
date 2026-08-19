@@ -51,3 +51,6 @@ __pycache__/
 
 # TaskMaster session 時間戳（每次 session 都會變動，不應追蹤）
 .claude/taskmaster-data/.session-start
+
+# CI 的 eval 落檔（每次執行覆寫，不進版控；已進版控的是基準線用的歷史落檔）
+eval-artifacts/ci-run.json

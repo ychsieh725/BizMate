@@ -12,7 +12,11 @@ import { describe, expect, it } from "vitest";
 
 import type { CaseOutcome, EvalMetrics } from "./evalTypes.ts";
 import type { EvalRunResult } from "./evalRunner.ts";
-import { ARTIFACT_SCHEMA_VERSION, toRunArtifact } from "./runArtifact.ts";
+import {
+  ARTIFACT_SCHEMA_VERSION,
+  parseRunArtifact,
+  toRunArtifact,
+} from "./runArtifact.ts";
 
 const METRICS: EvalMetrics = {
   fieldExtractionAccuracy: 0.9,
@@ -142,5 +146,58 @@ describe("toRunArtifact", () => {
     const parsed: unknown = JSON.parse(JSON.stringify(artifact));
 
     expect(parsed).toEqual(artifact);
+  });
+});
+
+/**
+ * 讀回（WBS 8.5）。
+ *
+ * CI 閘門讀的是磁碟上的 JSON，不是記憶體裡的物件。寫出與讀回是兩份各自維護的
+ * 形狀，只要有一邊漏改，閘門就會拿著錯位的數字做判定——而錯位不會拋錯，只會
+ * 讓報告說謊。故此處的核心測試是**來回一致**，不是「能不能解析」。
+ */
+describe("parseRunArtifact", () => {
+  const SERIALIZED = JSON.parse(JSON.stringify(toRunArtifact(RESULT))) as unknown;
+
+  it("讀回的指標與寫出前完全相同 —— 來回一致是這一層唯一要保證的事", () => {
+    expect(parseRunArtifact(SERIALIZED).metrics).toEqual(METRICS);
+  });
+
+  it("帶出案例數 —— 報告要能說出這批數字建立在幾則之上", () => {
+    expect(parseRunArtifact(SERIALIZED).caseCount).toBe(1);
+  });
+
+  it("保留資料集與模型版本 —— 門檻只對特定組合成立", () => {
+    const parsed = parseRunArtifact(SERIALIZED);
+
+    expect(parsed.datasetVersion).toBe("2026-08-15");
+    expect(parsed.modelVersion).toBe("gemini-flash-lite-latest");
+  });
+
+  it("null 指標原樣讀回，不被當成 0", () => {
+    const artifact = toRunArtifact({ ...RESULT, metrics: { ...METRICS, hallucinationRate: null } });
+
+    expect(parseRunArtifact(JSON.parse(JSON.stringify(artifact))).metrics.hallucinationRate).toBe(
+      null,
+    );
+  });
+
+  it("缺少指標欄位即拒絕 —— 寧可跑不動，也不要拿不完整的資料放行", () => {
+    const broken = JSON.parse(JSON.stringify(toRunArtifact(RESULT))) as {
+      metrics: Record<string, unknown>;
+    };
+    delete broken.metrics.hallucination_rate;
+
+    expect(() => parseRunArtifact(broken)).toThrow();
+  });
+
+  it("schema 版本不符即拒絕 —— 舊檔案的欄位語意可能已經不同", () => {
+    const stale = { ...toRunArtifact(RESULT), schema_version: ARTIFACT_SCHEMA_VERSION + 1 };
+
+    expect(() => parseRunArtifact(JSON.parse(JSON.stringify(stale)))).toThrow(/schema/i);
+  });
+
+  it("完全不是 artifact 的東西即拒絕", () => {
+    expect(() => parseRunArtifact({ hello: "world" })).toThrow();
   });
 });

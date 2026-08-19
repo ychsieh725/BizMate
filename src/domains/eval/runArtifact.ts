@@ -25,6 +25,8 @@
  *   fallback 率、平均步數在對照表上看起來像「baseline 表現完美」，那是拿不
  *   存在的東西當基準
  */
+import { z } from "zod";
+
 import type { CaseOutcome, EvalMetrics, FieldComparison } from "./evalTypes.ts";
 import type { EvalRunResult } from "./evalRunner.ts";
 
@@ -111,5 +113,85 @@ export function toRunArtifact(result: EvalRunResult): RunArtifact {
     model_version: result.modelVersion,
     outcomes: result.outcomes.map(toSerializedOutcome),
     metrics: toSerializedMetrics(result.metrics),
+  };
+}
+
+/**
+ * ── 讀回（WBS 8.5）──
+ *
+ * CI 閘門讀的是磁碟上的 JSON。這裡的 schema 與上面的序列化是兩份各自維護的
+ * 形狀，任一邊漏改，閘門就會拿著錯位的數字做判定——而錯位不會拋錯，只會讓報
+ * 告說謊。`runArtifact.test.ts` 用來回一致把這件事釘住。
+ *
+ * `.strict()` 是刻意的：多出未知欄位代表寫出端已經改過而這裡沒跟上，那時候
+ * 應該當場停下來，而不是安靜地忽略新欄位繼續判定。
+ */
+const metricsSchema = z
+  .object({
+    field_extraction_accuracy: z.number().nullable(),
+    field_extraction_f1: z.number().nullable(),
+    clarification_precision: z.number().nullable(),
+    clarification_recall: z.number().nullable(),
+    hallucination_rate: z.number().nullable(),
+    quote_deviation_avg: z.number().nullable(),
+    quote_deviation_max: z.number().nullable(),
+    end_to_end_success_rate: z.number().nullable(),
+    latency_avg_ms: z.number().nullable(),
+    latency_p95_ms: z.number().nullable(),
+    cost_per_case_usd: z.number().nullable(),
+  })
+  .strict();
+
+const artifactSchema = z.object({
+  schema_version: z.number(),
+  variant: z.string(),
+  generated_at: z.string(),
+  dataset_version: z.string(),
+  model_version: z.string(),
+  // 逐案例的完整形狀不在此重複驗證——閘門只用得到則數，而案例形狀的正確性
+  // 由寫出端的測試負責。在這裡再寫一份等於多一處會漂移的地方。
+  outcomes: z.array(z.unknown()),
+  metrics: metricsSchema,
+});
+
+export interface ParsedRunArtifact {
+  readonly variant: string;
+  readonly generatedAt: string;
+  readonly datasetVersion: string;
+  readonly modelVersion: string;
+  readonly caseCount: number;
+  readonly metrics: EvalMetrics;
+}
+
+/** 把磁碟上的 artifact 讀回成程式內的形狀；格式不符一律拋錯。 */
+export function parseRunArtifact(raw: unknown): ParsedRunArtifact {
+  const artifact = artifactSchema.parse(raw);
+
+  if (artifact.schema_version !== ARTIFACT_SCHEMA_VERSION) {
+    throw new Error(
+      `artifact schema 版本不符：檔案為 ${artifact.schema_version}，本程式支援 ${ARTIFACT_SCHEMA_VERSION}`,
+    );
+  }
+
+  const m = artifact.metrics;
+  return {
+    variant: artifact.variant,
+    generatedAt: artifact.generated_at,
+    datasetVersion: artifact.dataset_version,
+    modelVersion: artifact.model_version,
+    caseCount: artifact.outcomes.length,
+    metrics: {
+      fieldExtractionAccuracy: m.field_extraction_accuracy,
+      fieldExtractionF1: m.field_extraction_f1,
+      clarificationPrecision: m.clarification_precision,
+      clarificationRecall: m.clarification_recall,
+      hallucinationRate: m.hallucination_rate,
+      quoteDeviationAvg: m.quote_deviation_avg,
+      quoteDeviationMax: m.quote_deviation_max,
+      endToEndSuccessRate: m.end_to_end_success_rate,
+      latencyAvgMs: m.latency_avg_ms,
+      latencyP95Ms: m.latency_p95_ms,
+      costPerCaseUsd: m.cost_per_case_usd,
+    },
   };
 }

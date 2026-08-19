@@ -1,0 +1,116 @@
+name: Eval
+
+# LLM 輸出品質的閘門（WBS 8.5）。
+#
+# ── 為何獨立成一支 workflow ──
+# 它需要 Gemini 額度，且跑一次約 5 分鐘。放進 ci.yml 會讓「改 README」也
+# 要等、也要燒額度。故用 paths 篩選：只有動到會影響模型輸出的東西才跑。
+#
+# ── paths 篩選的代價（重要）──
+# 未觸發時這支 workflow **完全不會出現**在 PR 的檢查清單裡。若把它設為
+# branch protection 的必要檢查，不相關的 PR 會永遠卡在等待中。要嘛不設為
+# 必要檢查，要嘛改用 GitHub 的 required workflow 機制。目前採前者。
+#
+# ── 為何跑全量 36 則 ──
+# 抽樣子集算出來的準確率與 36 則的基準線不是同一個量：12 則的 Wilson 區間
+# 寬達 ±12%，門檻等於形同虛設，同時歷史數字也不再可比。
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/domains/eval/**"
+      - "src/domains/intake/**"
+      - "src/domains/pricing/**"
+      - "src/orchestrator/**"
+      - "src/lib/gemini/**"
+      - "src/shared/constants/fieldDomains.ts"
+      - "agent-service/app/**"
+      - "eval-artifacts/**"
+      - ".github/workflows/eval.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/domains/eval/**"
+      - "src/domains/intake/**"
+      - "src/domains/pricing/**"
+      - "src/orchestrator/**"
+      - "src/lib/gemini/**"
+      - "src/shared/constants/fieldDomains.ts"
+      - "agent-service/app/**"
+  # 模型是外部服務，供應商在我們沒改任何一行的情況下換掉權重是常態。
+  # 每晚跑一次，讓「什麼都沒改但指標掉了」也能被看見。
+  schedule:
+    - cron: "0 18 * * *" # 02:00 台北時間
+  workflow_dispatch:
+
+jobs:
+  baseline-gate:
+    name: 基準線閘門（golden set 36 則）
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    # fork 的 PR 拿不到 secrets。同 ci.yml 的判斷，理由亦同。
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+
+    # 免費層 15 RPM。兩份 eval 同時跑必撞 429，且會讓兩邊的指標都失真。
+    concurrency:
+      group: bizmate-eval
+      cancel-in-progress: false
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      DEV_MERCHANT_PASSWORD: ${{ secrets.DEV_MERCHANT_PASSWORD }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # PR 上加 --dry-run：eval_runs 是基準線的時間序列，不該混入未合併的
+      # 實驗。main 與排程跑的才寫入——那些才代表「線上的品質是什麼」。
+      #
+      # --out 一律落檔，且與閘門分開執行：這份資料花了額度與 5 分鐘換來，
+      # 閘門紅燈時最需要的就是它，不能因為紅燈就沒了。
+      - name: 跑 golden set
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm eval --dry-run --out=eval-artifacts/ci-run.json
+          else
+            pnpm eval --out=eval-artifacts/ci-run.json
+          fi
+
+      - name: 保留本次落檔
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-run-${{ github.run_id }}
+          path: eval-artifacts/ci-run.json
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: 對基準線判定
+        run: pnpm eval:gate eval-artifacts/ci-run.json
+
+      # 每跑一次會建 36 筆測試 session（cost_logs 的 FK 需要）。閘門紅燈時
+      # 也要清——否則「常常紅燈」會直接變成「資料庫裡塞滿測試資料」。
+      # cost_logs 是 SET NULL，成本紀錄保留：額度確實用掉了，FinOps 的統計
+      # 不該因為清理測試資料而失真。
+      - name: 清理 eval 測試 session
+        if: always()
+        run: pnpm eval:clean --confirm
