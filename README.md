@@ -3,11 +3,15 @@
 BizMate 讓接案者將專屬連結提供給客戶，客戶以口語描述需求，系統以 LLM 解析為結構化欄位、由確定性計價引擎算出金額，接案者於後台審核後寄出正式報價單。
 
 [![CI](https://github.com/ychsieh725/BizMate/actions/workflows/ci.yml/badge.svg)](https://github.com/ychsieh725/BizMate/actions/workflows/ci.yml)
-![tests](<https://img.shields.io/badge/tests-904%20passing-brightgreen>)
-![coverage](<https://img.shields.io/badge/coverage-96.3%25%20%2F%2090.6%25-brightgreen>)
+![tests](<https://img.shields.io/badge/tests-1001%20passing-brightgreen>)
+![coverage](<https://img.shields.io/badge/coverage-96.4%25%20%2F%2090.6%25-brightgreen>)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6)
 ![Python](<https://img.shields.io/badge/Python-3.12%20mypy--strict-3776AB>)
+
+<img src="docs/assets/business-flow.png" alt="業務流程圖：客戶以自然語言描述需求送入 BizMate，系統解析文字中的關鍵需求、判斷遺漏資訊、製作並寄送報價單；遺漏資訊時回頭追問客戶，完成後提交報價單給接案者確認，接案者可同意、婉拒或調整報價" width="880">
+
+客戶只需要用一段話說明需求。系統負責把話變成欄位、把欄位變成金額、把金額變成一張可以寄出的報價單。接案者只在最後一步介入。
 
 <img src="docs/assets/screenshot-landing.png" alt="BizMate 首頁：左側為產品訴求與行動呼籲，右側示意口語輸入、AI 抽取欄位、確定性計價的流程" width="880">
 
