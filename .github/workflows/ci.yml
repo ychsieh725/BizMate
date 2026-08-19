@@ -1,11 +1,16 @@
 name: CI
 
-# 兩條平行 job，各自守一個語言的靜態閘門：
-#   quality        — TypeScript：ESLint、tsc、vitest + 覆蓋率
-#   python-quality — Python：ruff、mypy --strict、pytest + 覆蓋率
+# 三條 job：
+#   quality          — TypeScript：ESLint、tsc、vitest + 覆蓋率
+#   python-quality   — Python：ruff、mypy --strict、pytest + 覆蓋率
+#   real-dependencies — 對真實 dev Supabase 跑租戶隔離與不變式的 verify 腳本
 #
-# 刻意不含 verify:* 與 pnpm eval——那兩者需要真實 Supabase / Gemini 金鑰，
-# 屬於 WBS 8.5 的「真實依賴閘門」，需先在 repo 設定 Secrets 才能接上。
+# 前兩條是靜態閘門，第三條（WBS 8.5）補的是它們結構上看不見的東西：
+# repository 層若刪掉 merchant_id 過濾，單元測試全綠——因為 mock 不會有別的
+# 租戶的資料。跨租戶隔離只有對真實 DB 跑才驗得出來。
+#
+# LLM 輸出品質的閘門在另一支 workflow（eval.yml）——它需要 Gemini 額度，
+# 只在觸及模型相關路徑時跑，不該拖慢每一個 PR。
 on:
   push:
     branches: [main]
@@ -89,3 +94,89 @@ jobs:
       # 提供，這裡再給一份只會與它打架（曾因此讓所有認證測試變成 401）。
       - name: Unit tests + coverage
         run: uv run pytest
+
+  real-dependencies:
+    name: Verify（真實 Supabase）
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # fork 來的 PR 拿不到 secrets，這個 job 會直接失敗而非跳過——顯式判斷
+    # 才能讓它顯示為 skipped。代價是外部貢獻者的 PR 不受此閘門保護；
+    # 用 pull_request_target 換取覆蓋率則等於把 service_role key 交給任何
+    # 開 PR 的人，那個交換不划算。
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+
+    # 這些腳本會在共用的 dev/prod Supabase 專案上建立測試商家。併行執行會
+    # 互相踩到彼此的 fixture，症狀是隨機的外鍵錯誤——那種失敗從 log 幾乎
+    # 追不出來。全域序列化，不取消進行中的執行（中途砍掉會留下孤兒資料）。
+    concurrency:
+      group: bizmate-real-dependencies
+      cancel-in-progress: false
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      DEV_MERCHANT_PASSWORD: ${{ secrets.DEV_MERCHANT_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 先掃掉上一次執行留下的殘骸。每支腳本都用 try/finally 自清，但 job 被
+      # 取消或逾時時 finally 不會跑。預設保護期 2 小時，不會動到本次的 fixture。
+      #
+      # continue-on-error 是刻意的：刪 auth 使用者可能被 NO ACTION 外鍵擋下
+      # （verify:services 正是在證明那條保護存在）。若視為致命錯誤，一個刪不掉
+      # 的殘留帳號就會讓 CI 永久紅燈，而它擋掉的是所有真正該跑的驗證。腳本本身
+      # 會列出失敗的帳號，資訊不會消失。
+      - name: 清理過往殘留的測試帳號
+        continue-on-error: true
+        run: pnpm verify:clean --confirm
+
+      - name: Schema 與 service_role 授權就緒
+        run: pnpm db:verify
+
+      - name: Repository 層 CRUD
+        run: pnpm verify:repo
+
+      - name: RLS owner policy（跨租戶直查被擋）
+        run: pnpm verify:auth
+
+      - name: RPC EXECUTE 權限（未登入與已登入皆被擋）
+        run: pnpm verify:security
+
+      - name: 服務項目軟刪除（FK 保護成立）
+        run: pnpm verify:services
+
+      # 這一支正是 5.6 code review 指出的窗口：listQuotes 與 getQuoteDetail
+      # 的 merchant_id 過濾若被拿掉，只有這裡會紅。
+      - name: 後台報價查詢的租戶隔離
+        run: pnpm verify:quotes
+
+      - name: 報價動作 RPC 的原子性與金額不變式
+        run: pnpm verify:quote-actions
+
+      - name: 商家設定與 slug 唯一性
+        run: pnpm verify:settings
+
+      - name: 調價指標 view（含跨租戶不可見）
+        run: pnpm verify:adjustment-metrics
+
+      # verify:email 刻意不在此：它會真的寄信，且 Resend 網域未驗證前只能
+      # 寄給帳號持有人（見 8.4）。需 Gemini 的 6 支也不在此——那些驗的是
+      # 「真實模型呼叫走得通」，eval.yml 每次跑 36 則已經涵蓋，重複燒額度。
